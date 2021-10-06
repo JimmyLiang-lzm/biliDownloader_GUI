@@ -15,6 +15,9 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(502, 349)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
         Form.setStyleSheet("*{\n"
 "    font:9pt \"微软雅黑\";\n"
 "}\n"

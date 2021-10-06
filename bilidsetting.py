@@ -15,6 +15,9 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(497, 259)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
         Form.setStyleSheet("*{\n"
 "    font:9pt \"微软雅黑\";\n"
 "}\n"
@@ -221,3 +224,4 @@ class Ui_Form(object):
         self.btn_editcookie.setText(_translate("Form", "修改Cookie"))
         self.btn_wherecookie.setText(_translate("Form", "Cookie在哪？"))
         self.btn_cleanplain.setText(_translate("Form", "清空"))
+import images_dl_rc

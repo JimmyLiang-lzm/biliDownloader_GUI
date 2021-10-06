@@ -15,6 +15,9 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(924, 676)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet("*{\n"
 "    font:9pt \"微软雅黑\";\n"
 "}\n"

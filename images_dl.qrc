@@ -2,6 +2,9 @@
   <qresource prefix="title">
     <file>images/title.png</file>
   </qresource>
+  <qresource prefix="Icon">
+    <file>images/bilidownloader.ico</file>
+  </qresource>
   <qresource prefix="combo">
     <file>images/dd1.png</file>
     <file>images/dd2.png</file>

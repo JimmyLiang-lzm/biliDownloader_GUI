@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>关于程序</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images_dl.qrc">
+    <normaloff>:/Icon/images/bilidownloader.ico</normaloff>:/Icon/images/bilidownloader.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">*{
 	font:9pt &quot;微软雅黑&quot;;

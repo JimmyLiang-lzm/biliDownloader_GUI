@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>修改Cookie</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="images_dl.qrc">
+    <normaloff>:/Icon/images/bilidownloader.ico</normaloff>:/Icon/images/bilidownloader.ico</iconset>
+  </property>
   <property name="styleSheet">
    <string notr="true">*{
 	font:9pt &quot;微软雅黑&quot;;
@@ -303,7 +307,9 @@ QFrame#title{
    </widget>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="images_dl.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btnclose</sender>
