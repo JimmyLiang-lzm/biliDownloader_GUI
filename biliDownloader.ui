@@ -1,0 +1,604 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>924</width>
+    <height>676</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Bili Downloader</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">*{
+	font:9pt &quot;微软雅黑&quot;;
+}
+/* 主体颜色
+.QWidget#centralwidget{
+	background-color: rgb(156, 156, 156);
+	border-radius:20px;
+} */
+.QWidget#mainwidget{
+	background-color: rgb(255, 255, 255);
+	border-radius:20px;
+}
+
+/* 编辑框样式 */
+QLineEdit{
+	border-radius: 15px;
+	border: 2px solid rgb(255, 153, 153);
+	padding-left: 5px;
+	padding-right: 27px;
+}
+QLineEdit:hover{
+	background-color: rgb(255, 238, 238);
+}
+
+/* 按钮样式 */
+QPushButton[flat=&quot;false&quot;]{
+	background-color: rgb(255, 153, 153);
+	color: rgb(255, 255, 255);
+	border-radius: 15px;
+	font: 75 9pt &quot;微软雅黑&quot;;
+}
+QPushButton:hover{
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 153, 153, 255), stop:1 rgba(255, 136, 136, 255));
+}
+QPushButton:pressed{
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(190, 115, 115, 255), stop:1 rgba(255, 153, 153, 255));
+}
+QPushButton#btnclose{
+	background-color: rgb(255, 102, 102);
+	border-radius:8px;
+}
+QPushButton#btnclose:pressed{
+	background-color: rgb(200, 80, 80);
+}
+QPushButton#btnmax{
+	background-color: rgb(255, 255, 102);
+	border-radius:8px;
+}
+QPushButton#btnmax:pressed{
+	background-color: rgb(195, 195, 78);
+}
+QPushButton#btnmin{
+	background-color: rgb(153, 204, 102);
+	border-radius:8px;
+}
+QPushButton#btnmin:pressed{
+	background-color: rgb(126, 168, 83);
+}
+
+/* 进度条样式 */
+QProgressBar{
+	border: 2px solid rgb(255, 153, 153);
+	height: 10px;
+	background-color: rgb(255, 255, 255);
+	font: 75 10pt &quot;微软雅黑&quot;;
+	border-radius:6px;
+	color: rgb(0, 0, 0);
+}
+QProgressBar::chunk{
+	background-color: rgb(255, 204, 153);
+	border-radius:6px;
+}
+
+/* 选择表样式 */
+QListWidget{
+	border: 2px solid rgb(255, 153, 153);
+	border-radius:15px;
+	padding: 5px;
+}
+QListWidget::item{
+	border: 1px dashed rgb(255, 204, 153);
+	border-radius: 5px
+}
+QListWidget::item:hover{
+	background-color: rgb(255, 204, 153);
+}
+QListWidget::item:focus{
+	color: rgb(0, 0, 0);
+}
+
+/* 选择框样式 */
+QComboBox{
+	border-radius: 15px;
+	border: 2px solid rgb(255, 153, 153);
+	padding-left: 5px;
+	padding-right: 5px;
+}
+QComboBox:hover{
+	background: rgb(255, 238, 238)
+}
+QComboBox QAbstractItemView{
+	border: 2px solid rgb(255, 153, 153);
+	selection-background-color: rgb(255, 204, 153)
+}
+QComboBox::drop-down {
+     subcontrol-origin: padding;
+     subcontrol- position :  top  left;
+     width :  28px ;
+     border: none;
+}
+QComboBox::down-arrow{
+	image: url(:/combo/images/dd.png);
+}
+QComboBox::down-arrow:hover{
+	image: url(:/combo/images/dd1.png);
+}
+QComboBox::down-arrow:pressed{
+	image: url(:/combo/images/dd2.png);
+}
+
+/* 文本框样式 */
+QPlainTextEdit{
+	border-radius: 15px;
+	border: 2px solid rgb(255, 153, 153);
+	padding: 5px;
+}
+
+/* Title Frame样式 */
+QFrame#title{
+	background-image: url(:/title/images/title.png);
+}
+
+/* 分组框样式 */
+QGroupBox{
+	border: 2px solid rgb(255, 153, 153);
+	border-radius: 15px;
+	margin-top: 2ex;
+}
+QGroupBox::title{
+	subcontrol-origin: margin;
+	subcontrol-position: top center;
+	padding: 0 3px;
+}
+
+/* 组合框样式 */
+/*QCheckBox{}*/</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QWidget" name="mainwidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>881</width>
+      <height>631</height>
+     </rect>
+    </property>
+    <widget class="QLineEdit" name="source_search">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>100</y>
+       <width>691</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>请填入视频页面HTTP/HTTPS地址</string>
+     </property>
+    </widget>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>580</y>
+       <width>801</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="maximum">
+      <number>1000000</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_search">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>100</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>资源探查</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnclose">
+     <property name="geometry">
+      <rect>
+       <x>840</x>
+       <y>20</y>
+       <width>16</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnmax">
+     <property name="geometry">
+      <rect>
+       <x>810</x>
+       <y>20</y>
+       <width>16</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btnmin">
+     <property name="geometry">
+      <rect>
+       <x>780</x>
+       <y>20</y>
+       <width>16</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="plainTextEdit">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>380</y>
+       <width>801</width>
+       <height>191</height>
+      </rect>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="plainText">
+      <string>欢迎使用Bili Downloader V1.0 
+Release at 2021/10/10 ......</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>140</y>
+       <width>801</width>
+       <height>231</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>操作框</string>
+     </property>
+     <widget class="QPushButton" name="btn_download">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>180</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>下载资源</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_sym">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>30</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>FFMPEG合成</string>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="combo_vq">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>30</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="currentText">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="combo_aq">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>80</y>
+        <width>151</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="currentText">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>30</y>
+        <width>51</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>清晰度</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="media_list">
+      <property name="geometry">
+       <rect>
+        <x>460</x>
+        <y>61</y>
+        <width>321</width>
+        <height>151</height>
+       </rect>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+      </property>
+      <property name="tabKeyNavigation">
+       <bool>false</bool>
+      </property>
+      <property name="dragEnabled">
+       <bool>false</bool>
+      </property>
+      <property name="movement">
+       <enum>QListView::Static</enum>
+      </property>
+      <property name="viewMode">
+       <enum>QListView::ListMode</enum>
+      </property>
+      <property name="selectionRectVisible">
+       <bool>false</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>80</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>音频清晰度</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>470</x>
+        <y>20</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>媒体下载选择</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineEdit_dir">
+      <property name="geometry">
+       <rect>
+        <x>110</x>
+        <y>130</y>
+        <width>281</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>130</y>
+        <width>81</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>下载目录</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_dir">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>130</y>
+        <width>71</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>浏览</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_pause">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>180</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>暂停下载</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_stop">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>180</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>停止下载</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_selectALL">
+      <property name="geometry">
+       <rect>
+        <x>710</x>
+        <y>20</y>
+        <width>71</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>全选</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="checkBox_usecookie">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>60</y>
+        <width>141</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>使用VIP Cookie</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btn_changecookie">
+      <property name="geometry">
+       <rect>
+        <x>300</x>
+        <y>90</y>
+        <width>131</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>修改Cookie</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="title">
+     <property name="geometry">
+      <rect>
+       <x>40</x>
+       <y>20</y>
+       <width>371</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_about">
+     <property name="geometry">
+      <rect>
+       <x>700</x>
+       <y>60</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>关于</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_help">
+     <property name="geometry">
+      <rect>
+       <x>780</x>
+       <y>60</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>帮助</string>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <resources>
+  <include location="images_dl.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>btnclose</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>847</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>470</x>
+     <y>349</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
