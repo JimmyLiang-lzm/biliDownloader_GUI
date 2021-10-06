@@ -378,10 +378,10 @@ class AboutWindow(QWidget, Objective_about):
         self.cl.start()
 
     def accessRelease(self):
-        webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader/releases")
+        webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownload_GUI/releases")
 
     def callBUG(self):
-        webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader/issues")
+        webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownload_GUI/issues")
 
     ###### 槽函数 ######
     def verShow(self, inum):
