@@ -159,7 +159,10 @@ QGroupBox::title{
 }
 
 /* 组合框样式 */
-/*QCheckBox{}*/</string>
+/*QCheckBox{}*/
+QFrame#title{
+	border: none
+}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="mainwidget" native="true">
