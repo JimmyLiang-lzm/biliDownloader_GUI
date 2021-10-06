@@ -846,6 +846,8 @@ class biliWorker(QThread):
                     self.progr_bar.emit({"finish":1})
                     self.business_info.emit("下载已终止")
                 self.is_finished.emit(2)
+            else:
+                self.is_finished.emit(2)
 
 
 
