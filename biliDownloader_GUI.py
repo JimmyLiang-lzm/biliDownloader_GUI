@@ -701,13 +701,16 @@ class biliWorker(QThread):
             # if subprocess.call(ffcommand, shell=True):
             #     raise Exception("{} 执行失败。".format(ffcommand))
             self.subpON = True
-            self.subp_GUIFollow(ffcommand)
+            temp = self.subp_GUIFollow(ffcommand)
+            if temp:
+                raise Exception(temp)
             self.subpON = False
             self.business_info.emit("视频合并完成！")
             os.remove(input_v)
             os.remove(input_a)
         except Exception as e:
             self.business_info.emit("视频合成失败：", e)
+            self.subpON = False
 
     def subp_GUIFollow(self, ffcommand):
         proc = {"Max": 100, "Now": 0, "finish": 2}
@@ -717,7 +720,13 @@ class biliWorker(QThread):
             if status != None:
                 if status != 0:
                     self.business_info.emit("FFMPEG运行出错，代码：{}".format(status))
-                break
+                    proc["finish"] = 1
+                    self.progr_bar.emit(proc)
+                    return status
+                else:
+                    proc["finish"] = 1
+                    self.progr_bar.emit(proc)
+                    return 0
             if self.killprocess:
                 subp.stdin.write('q')
             line = os.read(subp.stderr.fileno(), 1024)
@@ -737,8 +746,6 @@ class biliWorker(QThread):
                     #print("当前进度", cnum)
                     proc["Now"] = cnum
                 self.progr_bar.emit(proc)
-        proc["finish"] = 1
-        self.progr_bar.emit(proc)
 
 
     # For Download Single Video
