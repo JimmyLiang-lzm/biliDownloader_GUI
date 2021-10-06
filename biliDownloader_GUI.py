@@ -107,6 +107,7 @@ class MainWindow(QMainWindow,Objective):
         directory = QFileDialog.getExistingDirectory(None,"选择文件夹",indict["Output"])
         if directory != "":
             self.lineEdit_dir.setText(directory)
+        QApplication.processEvents()
 
     def useCookie(self):
         if self.checkBox_usecookie.isChecked():
@@ -690,7 +691,7 @@ class biliWorker(QThread):
         ffcommand = ""
         if self.systemd == "windows":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + '/ffmpeg.exe -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+            ffcommand = ffpath + '/ffmpeg.exe -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "ubuntu":
             ffcommand = 'ffmpeg -i' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
         else:
@@ -712,7 +713,10 @@ class biliWorker(QThread):
         proc = {"Max": 100, "Now": 0, "finish": 2}
         subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
         while True:
-            if subp.poll() != None:
+            status = subp.poll()
+            if status != None:
+                if status != 0:
+                    self.business_info.emit("FFMPEG运行出错，代码：{}".format(status))
                 break
             if self.killprocess:
                 subp.stdin.write('q')
