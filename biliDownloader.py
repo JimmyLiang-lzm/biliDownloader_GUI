@@ -160,7 +160,10 @@ class Ui_MainWindow(object):
 "}\n"
 "\n"
 "/* 组合框样式 */\n"
-"/*QCheckBox{}*/")
+"/*QCheckBox{}*/\n"
+"QFrame#title{\n"
+"    border: none\n"
+"}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.mainwidget = QtWidgets.QWidget(self.centralwidget)

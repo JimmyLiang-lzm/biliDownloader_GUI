@@ -160,7 +160,10 @@ class Ui_Form(object):
 "}\n"
 "\n"
 "/* 组合框样式 */\n"
-"/*QCheckBox{}*/")
+"/*QCheckBox{}*/\n"
+"QFrame#title{\n"
+"    border: none\n"
+"}")
         self.mainwidget = QtWidgets.QWidget(Form)
         self.mainwidget.setGeometry(QtCore.QRect(20, 20, 461, 311))
         self.mainwidget.setObjectName("mainwidget")
