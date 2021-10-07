@@ -181,7 +181,7 @@ class MainWindow(QMainWindow,Objective):
             self.setting_win.show()
 
     def forHELP(self):
-        webbrowser.open("https://zmtechn.gitee.io/2021/10/05/Get_bilibili_cookie/")
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/05/bilid_GUI_help/")
 
     def openAbout(self):
         self.about_win = AboutWindow()
@@ -370,7 +370,7 @@ class AboutWindow(QWidget, Objective_about):
 
     ####################### BS Part #######################
     def accessWeb(self):
-        webbrowser.open("https://zmtechn.gitee.io/")
+        webbrowser.open("https://jimmyliang-lzm.github.io/")
 
     def checkLatest(self):
         self.cl = checkLatest(self.lab_version.text())
