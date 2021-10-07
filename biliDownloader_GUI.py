@@ -181,7 +181,7 @@ class MainWindow(QMainWindow,Objective):
             self.setting_win.show()
 
     def forHELP(self):
-        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/05/bilid_GUI_help/")
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/")
 
     def openAbout(self):
         self.about_win = AboutWindow()
