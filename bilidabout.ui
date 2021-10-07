@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>502</width>
-    <height>349</height>
+    <width>585</width>
+    <height>418</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -171,8 +171,8 @@ QFrame#title{
   <widget class="QWidget" name="mainwidget" native="true">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>20</y>
+     <x>70</x>
+     <y>50</y>
      <width>461</width>
      <height>311</height>
     </rect>

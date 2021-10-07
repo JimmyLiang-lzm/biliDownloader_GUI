@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(497, 259)
+        Form.resize(604, 349)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Form.setWindowIcon(icon)
@@ -168,7 +168,7 @@ class Ui_Form(object):
 "    border: none\n"
 "}")
         self.mainwidget = QtWidgets.QWidget(Form)
-        self.mainwidget.setGeometry(QtCore.QRect(10, 10, 471, 231))
+        self.mainwidget.setGeometry(QtCore.QRect(70, 50, 471, 231))
         self.mainwidget.setObjectName("mainwidget")
         self.btnmax = QtWidgets.QPushButton(self.mainwidget)
         self.btnmax.setGeometry(QtCore.QRect(400, 20, 16, 16))
