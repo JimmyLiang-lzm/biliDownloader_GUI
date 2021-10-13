@@ -354,7 +354,7 @@ QFrame#title{
      <item row="0" column="1">
       <widget class="QLabel" name="lab_version">
        <property name="text">
-        <string>V1.2.20211005</string>
+        <string>V1.2.20211013</string>
        </property>
       </widget>
      </item>

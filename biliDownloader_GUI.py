@@ -394,7 +394,6 @@ class AboutWindow(QWidget, Objective_about):
         elif inum == 1:
             self.btn_latest.setEnabled(True)
             self.btn_latest.setText("可更新")
-            self.btn_latest.clicked.connect(self.accessRelease)
         elif inum == 2:
             self.btn_latest.setText("网络出错")
 
@@ -415,7 +414,7 @@ class checkLatest(QThread):
                 self._feedback.emit(-1)
             else:
                 self._feedback.emit(1)
-                webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader/releases")
+                webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases")
                 sleep(2)
         except Exception as e:
             print(e)
