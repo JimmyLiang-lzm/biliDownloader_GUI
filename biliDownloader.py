@@ -290,8 +290,8 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Bili Downloader"))
         self.source_search.setPlaceholderText(_translate("MainWindow", "请填入视频页面HTTP/HTTPS地址"))
         self.btn_search.setText(_translate("MainWindow", "资源探查"))
-        self.plainTextEdit.setPlainText(_translate("MainWindow", "欢迎使用Bili Downloader V1.0 \n"
-"Release at 2021/10/10 ......"))
+        self.plainTextEdit.setPlainText(_translate("MainWindow", "欢迎使用Bili Downloader V1.2.20211014\n"
+"Release at 2021/10/14 ......"))
         self.groupBox.setTitle(_translate("MainWindow", "操作框"))
         self.btn_download.setText(_translate("MainWindow", "下载资源"))
         self.checkBox_sym.setText(_translate("MainWindow", "FFMPEG合成"))

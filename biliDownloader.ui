@@ -296,8 +296,8 @@ QFrame#title{
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>欢迎使用Bili Downloader V1.0 
-Release at 2021/10/10 ......</string>
+      <string>欢迎使用Bili Downloader V1.2.20211014
+Release at 2021/10/14 ......</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox">

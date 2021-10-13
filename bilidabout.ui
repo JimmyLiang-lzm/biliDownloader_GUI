@@ -354,7 +354,7 @@ QFrame#title{
      <item row="0" column="1">
       <widget class="QLabel" name="lab_version">
        <property name="text">
-        <string>V1.2.20211013</string>
+        <string>V1.2.20211014</string>
        </property>
       </widget>
      </item>
@@ -375,7 +375,7 @@ QFrame#title{
      <item row="3" column="0">
       <widget class="QLabel" name="label_8">
        <property name="text">
-        <string>Contract E-mail:</string>
+        <string>Contact E-mail:</string>
        </property>
       </widget>
      </item>
