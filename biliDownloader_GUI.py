@@ -651,6 +651,7 @@ class biliWorker(QThread):
 
     # Download Stream fuction
     def d_processor(self,url_list,output_dir,dest):
+        proc = {"Max":0,"Now":0,"finish":0}
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
@@ -660,21 +661,18 @@ class biliWorker(QThread):
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
                 self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
                 # Get the full video stream
-                self.second_headers['range'] = 'bytes=0' + '-' + vc_range
+                self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
                 m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10)
-                #pbar = tqdm(total=int(vc_range), initial=0, unit='b', leave=True, desc='正在'+dest, unit_scale=True)
-                proc = {"Max":int(vc_range),"Now":0,"finish":0}
+                proc["Max"] = int(vc_range)
                 self.progr_bar.emit(proc)
                 with open(output_dir, 'ab') as f:
-                    c = 0
                     for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
                         while self.pauseprocess:
-                            sleep(1)
+                            sleep(1.5)
                         if chunks:
                             f.write(chunks)
                             proc["Now"] += self.chunk_size
                             self.progr_bar.emit(proc)
-                            #pbar.update(self.chunk_size)
                         if self.killprocess == True:
                             return -1
                 proc["finish"] = 1
@@ -684,7 +682,9 @@ class biliWorker(QThread):
             except Exception as e:
                 print(e)
                 self.business_info.emit("{}出错：{}".format(dest,e))
+                print(proc)
                 os.remove(output_dir)
+        return 1
 
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
         ffcommand = ""
@@ -697,8 +697,6 @@ class biliWorker(QThread):
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
             return -2
         try:
-            # if subprocess.call(ffcommand, shell=True):
-            #     raise Exception("{} 执行失败。".format(ffcommand))
             self.subpON = True
             temp = self.subp_GUIFollow(ffcommand)
             if temp:
@@ -767,23 +765,25 @@ class biliWorker(QThread):
                 if os.path.exists(audio_dir):
                     self.business_info.emit("文件：{}\n已存在。".format(audio_dir))
                     return -1
-                self.business_info.emit("需要下载的视频：{}".format(video_name))
+                # self.business_info.emit("需要下载的视频：{}".format(video_name))
                 # Perform video stream length sniffing
                 self.second_headers['referer'] = index
                 self.second_headers['range'] = down_dic["video"][self.VQuality][2]
                 # Switch between main line and backup line(video).
                 if self.killprocess:
-                    return -1
-                self.d_processor(down_dic["video"][self.VQuality][1], video_dir, "下载视频")
+                    return -2
+                a = self.d_processor(down_dic["video"][self.VQuality][1], video_dir, "下载视频")
                 # Perform audio stream length sniffing
                 self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
                 # Switch between main line and backup line(audio).
                 if self.killprocess:
                     return -2
-                self.d_processor(down_dic["audio"][self.AQuality][1], audio_dir, "下载音频")
+                b = self.d_processor(down_dic["audio"][self.AQuality][1], audio_dir, "下载音频")
+                if a or b:
+                    return -3
                 # Merge audio and video (USE FFMPEG)
                 if self.killprocess:
-                    return -3
+                    return -2
                 if self.synthesis:
                     self.business_info.emit('正在启动ffmpeg......')
                     # Synthesis processor
@@ -808,7 +808,6 @@ class biliWorker(QThread):
                     if self.killprocess:
                         break
                     self.Download_single(preIndex + "?p=" + str(p["page"]))
-                self.business_info.emit("列表视频下载完成！")
             else:
                 listLEN = len(all_list[1]["pages"])
                 for i in r_list:
@@ -818,14 +817,13 @@ class biliWorker(QThread):
                         self.Download_single(preIndex + "?p=" + str(i))
                     else:
                         continue
-                self.business_info.emit("列表视频下载完成！")
+            self.business_info.emit("列表视频下载进程结束！")
         elif all_list[0] == 2:
             if r_list[0] == 0:
                 for p in all_list[1]["pages"]:
                     if self.killprocess:
                         break
                     self.Download_single(p["link"])
-                self.business_info.emit("媒体视频下载完成！")
             else:
                 listLEN = len(all_list[1]["pages"])
                 for i in r_list:
@@ -835,7 +833,7 @@ class biliWorker(QThread):
                         self.Download_single(all_list[1]["pages"][i - 1]["link"])
                     else:
                         continue
-                self.business_info.emit("媒体视频下载完成！")
+            self.business_info.emit("媒体视频下载进程结束！")
         else:
             self.business_info.emit("未找到视频列表信息。")
 
@@ -853,8 +851,8 @@ class biliWorker(QThread):
                 # print(1)
                 self.Download_List()
                 if self.killprocess:
-                    self.progr_bar.emit({"finish":1})
                     self.business_info.emit("下载已终止")
+                self.progr_bar.emit({"finish": 1})
                 self.is_finished.emit(2)
             else:
                 self.is_finished.emit(2)
