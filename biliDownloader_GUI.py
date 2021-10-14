@@ -276,8 +276,8 @@ class MainWindow(QMainWindow,Objective):
             self.setWindowOPEN = False
         else:
             pass
-    ##########################################################
 
+############################################################################################
 # Cookie设置窗口类
 class SettingWindow(QWidget,Objective_setting):
     _signal = pyqtSignal(dict)
@@ -333,6 +333,7 @@ class SettingWindow(QWidget,Objective_setting):
     def forHelp(self):
         webbrowser.open("https://zmtechn.gitee.io/2021/10/05/Get_bilibili_cookie/")
 
+############################################################################################
 # 关于窗口类
 class AboutWindow(QWidget, Objective_about):
     def __init__(self, parent=None):
@@ -397,7 +398,8 @@ class AboutWindow(QWidget, Objective_about):
         elif inum == 2:
             self.btn_latest.setText("网络出错")
 
-# 检查更新线程
+############################################################################################
+# 检查更新防阻滞线程类
 class checkLatest(QThread):
     _feedback = pyqtSignal(int)
     def __init__(self, inVer):
@@ -407,8 +409,8 @@ class checkLatest(QThread):
     def run(self):
         try:
             des = requests.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json",timeout=5)
-            res = json.loads(des.content.decode('utf-8'))
-            if res["biliDownloader_GUI"] == self.lab_version:
+            res = json.loads(des.content.decode('utf-8'))["biliDownloader_GUI"]
+            if res == self.lab_version:
                 self._feedback.emit(0)
                 sleep(2)
                 self._feedback.emit(-1)
@@ -422,7 +424,8 @@ class checkLatest(QThread):
             sleep(2)
             self._feedback.emit(-1)
 
-# biliDownload下载主工作线程
+############################################################################################
+# biliDownloader下载主工作线程
 class biliWorker(QThread):
     # 信息槽发射
     business_info = pyqtSignal(str)
@@ -566,10 +569,9 @@ class biliWorker(QThread):
                         down_dic["audio"][i][1].append(dic["backupUrl"][a])
                     i += 1
                 # Get Video Length
-                #print(3)
                 length = re_GET["data"]["dash"]["duration"]
-                #print(4)
                 # Return Data
+                #print(down_dic)
                 return 1, video_name, length, down_dic
             except Exception as e:
                 print("PreInfo:",e)
@@ -577,6 +579,7 @@ class biliWorker(QThread):
         else:
             return 0, "", "", {}
 
+    # Search the list of Video download address.
     def search_videoList(self, index_url):
         try:
             res = requests.get(index_url, headers=self.index_headers, stream=False, timeout=10)
@@ -592,11 +595,13 @@ class biliWorker(QThread):
                     init_list["bvid"] = re_init["bvid"]
                     init_list["p"] = re_init["p"]
                     init_list["pages"] = re_init["videoData"]["pages"]
+                    #print(init_list)
                     return 1, init_list
                 elif "mediaInfo" in re_init:
                     init_list["bvid"] = re_init["mediaInfo"]["media_id"]
                     init_list["p"] = re_init["epInfo"]["i"]
                     init_list["pages"] = re_init["mediaInfo"]["episodes"]
+                    #print(init_list)
                     return 2, init_list
                 else:
                     return 0, {}
@@ -606,6 +611,7 @@ class biliWorker(QThread):
 
         else:
             return 0, {}
+
 
     # Show preDownload Detail
     def show_preDetail(self):
@@ -649,32 +655,43 @@ class biliWorker(QThread):
             print(e)
             return 0
 
+
     # Download Stream fuction
     def d_processor(self,url_list,output_dir,dest):
-        proc = {"Max":0,"Now":0,"finish":0}
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
                 # video stream length sniffing
-                video_bytes = requests.get(line, headers=self.second_headers, stream=False, timeout=10)
+                video_bytes = requests.get(line, headers=self.second_headers, stream=False, timeout=(5,10))
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
                 self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
                 # Get the full video stream
-                self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
-                m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10)
-                proc["Max"] = int(vc_range)
-                self.progr_bar.emit(proc)
-                with open(output_dir, 'ab') as f:
-                    for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
-                        while self.pauseprocess:
-                            sleep(1.5)
-                        if chunks:
-                            f.write(chunks)
-                            proc["Now"] += self.chunk_size
-                            self.progr_bar.emit(proc)
-                        if self.killprocess == True:
-                            return -1
+                proc = {"Max": 0, "Now": 0, "finish": 0}
+                err = 0
+                while(err <= 3):
+                    try:
+                        self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
+                        m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10)
+                        proc["Max"] = int(vc_range)
+                        self.progr_bar.emit(proc)
+                        with open(output_dir, 'ab') as f:
+                            for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
+                                while self.pauseprocess:
+                                    sleep(1.5)
+                                if chunks:
+                                    f.write(chunks)
+                                    proc["Now"] += self.chunk_size
+                                    self.progr_bar.emit(proc)
+                                if self.killprocess == True:
+                                    return -1
+                        break
+                    except Exception as e:
+                        if re.findall('10054',str(e),re.S) == []:
+                            err += 1
+                        print(e,err)
+                if err > 3:
+                    raise Exception('线路出错，切换线路。')
                 proc["finish"] = 1
                 self.progr_bar.emit(proc)
                 self.business_info.emit("{}成功！".format(dest))
@@ -686,6 +703,8 @@ class biliWorker(QThread):
                 os.remove(output_dir)
         return 1
 
+
+    # FFMPEG Synthesis fuction
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
         ffcommand = ""
         if self.systemd == "windows":
@@ -709,9 +728,12 @@ class biliWorker(QThread):
             self.business_info.emit("视频合成失败：", e)
             self.subpON = False
 
+
+    # Subprocess Progress of FFMPEG, RUN and Following Function
     def subp_GUIFollow(self, ffcommand):
         proc = {"Max": 100, "Now": 0, "finish": 2}
         subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        self.business_info.emit('FFMPEG正在执行合成指令')
         while True:
             status = subp.poll()
             if status != None:
@@ -857,8 +879,8 @@ class biliWorker(QThread):
             else:
                 self.is_finished.emit(2)
 
-
-
+######################################################################
+# 程序入口
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     MainWindow = MainWindow()
