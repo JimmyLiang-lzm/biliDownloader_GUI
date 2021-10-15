@@ -263,7 +263,7 @@ class Ui_Form(object):
         self.label_3.setText(_translate("Form", "Release Date:"))
         self.label_4.setText(_translate("Form", "Programmer: "))
         self.lab_version.setText(_translate("Form", "V1.3.20211016"))
-        self.label_6.setText(_translate("Form", "2021/10/10"))
+        self.label_6.setText(_translate("Form", "2021/10/16"))
         self.label_7.setText(_translate("Form", "二代死神"))
         self.label_8.setText(_translate("Form", "Contact E-mail:"))
         self.label_9.setText(_translate("Form", "mibemail@163.com"))
