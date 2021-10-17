@@ -1,5 +1,5 @@
 # -*- mode: python ; coding: utf-8 -*-
-
+# 注意：pathex=['biliDownloader_GUI的绝对路径']
 
 block_cipher = None
 

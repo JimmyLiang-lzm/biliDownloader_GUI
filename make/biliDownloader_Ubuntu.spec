@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(['biliDownloader_GUI.py'],
-             pathex=['/Users/lzm/PycharmProjects/biliDownloader_GUI'],
+             pathex=['/home/jimmy/PycharmProjects/biliDownloader_GUI'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -21,7 +21,7 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 
 exe = EXE(pyz,
-          a.scripts,
+          a.scripts, 
           [],
           exclude_binaries=True,
           name='biliDownloader_GUI',
@@ -33,16 +33,12 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon='images/bilidownloader.icns')
+          entitlements_file=None )
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,
-               a.datas,
+               a.datas, 
                strip=False,
                upx=True,
                upx_exclude=[],
                name='biliDownloader_GUI')
-app = BUNDLE(coll,
-             name='biliDownloader_GUI.app',
-             icon='images/bilidownloader.icns',
-             bundle_identifier=None)
