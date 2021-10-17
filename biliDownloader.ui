@@ -41,6 +41,8 @@ QLineEdit{
 QLineEdit:hover{
 	background-color: rgb(255, 238, 238);
 }
+QLineEdit:focus{
+}
 
 /* 按钮样式 */
 QPushButton[flat=&quot;false&quot;]{
@@ -148,6 +150,7 @@ QPlainTextEdit{
 /* Title Frame样式 */
 QFrame#title{
 	background-image: url(:/title/images/title.png);
+	border: none;
 }
 
 /* 分组框样式 */
@@ -161,12 +164,7 @@ QGroupBox::title{
 	subcontrol-position: top center;
 	padding: 0 3px;
 }
-
-/* 组合框样式 */
-/*QCheckBox{}*/
-QFrame#title{
-	border: none
-}</string>
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="mainwidget" native="true">

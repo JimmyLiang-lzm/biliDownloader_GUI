@@ -41,6 +41,8 @@ class Ui_MainWindow(object):
 "QLineEdit:hover{\n"
 "    background-color: rgb(255, 238, 238);\n"
 "}\n"
+"QLineEdit:focus{\n"
+"}\n"
 "\n"
 "/* 按钮样式 */\n"
 "QPushButton[flat=\"false\"]{\n"
@@ -148,6 +150,7 @@ class Ui_MainWindow(object):
 "/* Title Frame样式 */\n"
 "QFrame#title{\n"
 "    background-image: url(:/title/images/title.png);\n"
+"    border: none;\n"
 "}\n"
 "\n"
 "/* 分组框样式 */\n"
@@ -161,12 +164,7 @@ class Ui_MainWindow(object):
 "    subcontrol-position: top center;\n"
 "    padding: 0 3px;\n"
 "}\n"
-"\n"
-"/* 组合框样式 */\n"
-"/*QCheckBox{}*/\n"
-"QFrame#title{\n"
-"    border: none\n"
-"}")
+"")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.mainwidget = QtWidgets.QWidget(self.centralwidget)
