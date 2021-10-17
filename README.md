@@ -25,8 +25,8 @@
 * Windows: Windows 10 or above
 * Linux操作系统：Ubuntu 20.04 桌面版 或以上
 * Linux: Ubuntu 20.04 Desktop or above
-* Mac OS操作系统暂不支持
-* Mac OS operating system does not support temporarily
+* Mac OS：Mac OS X 10.15 Catalina 或以上
+* Mac OS: Mac OS X 10.15 Catalina or above
 
 ## 🎨软件界面 GUI
 
@@ -34,8 +34,10 @@
 
 ## ⚖声明 Declaration
 
-本项目受GPL-3.0许可协议保护，所有程序仅用于学习与交流，请勿用于任何商业用途！
+* 本项目受GPL-3.0许可协议保护，所有程序仅用于学习与交流，请勿用于任何商业用途！
+* This project is protected by the GPL-3.0 license agreement, all programs are only used for learning and communication, please do not use it for any commercial purposes!
 
 ## 🤝致谢 Gratitude
 
-💖💖如果您觉得此程序有用，请不吝留下一个**Star**或者**fork**呗，感激不尽！💖💖
+* 💖💖如果您觉得此程序有用，请不吝留下一个**Star**或者**fork**呗，感激不尽！💖💖
+* 💖💖If you find this program useful, please don’t hesitate to leave a **Star** or **fork**, thank you very much!💖💖
