@@ -10,7 +10,7 @@ Objective = biliDownloader.Ui_MainWindow
 Objective_setting = bilidsetting.Ui_Form
 Objective_about = bilidabout.Ui_Form
 DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
-indict = {"Address":"","DownList":[],"VideoQuality":0,"AudioQuality":0,"Output":"","Synthesis":1,"sys":"","cookie":"","sym":True,"useCookie":True}
+indict = {"Address":"","DownList":[],"VideoQuality":0,"AudioQuality":0,"Output":"","Synthesis":1,"sys":"","cookie":"","sym":True,"useCookie":False}
 
 # Mainwindow Class
 class MainWindow(QMainWindow,Objective):
@@ -48,22 +48,26 @@ class MainWindow(QMainWindow,Objective):
         # 默认目录
         self.lineEdit_dir.setText(DF_Path)
         indict["Output"] = DF_Path
-        with open(DF_Path + '/setting.conf', 'r', encoding='utf-8') as f:
-            tempr = json.loads(f.read())
-            indict["sys"] = tempr["sys"]
-            indict["cookie"] = tempr["cookie"]
-            if tempr["UseCookie"]:
-                indict["useCookie"] = True
-                self.checkBox_usecookie.setChecked(True)
-            else:
-                indict["useCookie"] = False
-                self.checkBox_usecookie.setChecked(False)
-            if tempr["synthesis"]:
-                self.checkBox_sym.setChecked(True)
-                indict["sym"] = True
-            else:
-                self.checkBox_sym.setChecked(False)
-                indict["sym"] = False
+        try:
+            with open(DF_Path + '/setting.conf', 'r', encoding='utf-8') as f:
+                tempr = json.loads(f.read())
+                indict["sys"] = tempr["sys"]
+                indict["cookie"] = tempr["cookie"]
+                if tempr["UseCookie"]:
+                    indict["useCookie"] = True
+                    self.checkBox_usecookie.setChecked(True)
+                else:
+                    indict["useCookie"] = False
+                    self.checkBox_usecookie.setChecked(False)
+                if tempr["synthesis"]:
+                    self.checkBox_sym.setChecked(True)
+                    indict["sym"] = True
+                else:
+                    self.checkBox_sym.setChecked(False)
+                    indict["sym"] = False
+        except:
+            indict["sys"] = sys.platform
+            self.checkBox_sym.setChecked(True)
 
     ####################### RW Part ##########################
     # 鼠标点击事件产生
@@ -707,10 +711,10 @@ class biliWorker(QThread):
     # FFMPEG Synthesis fuction
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
         ffcommand = ""
-        if self.systemd == "windows":
+        if self.systemd == "win32":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             ffcommand = ffpath + '/ffmpeg.exe -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
-        elif self.systemd == "ubuntu":
+        elif self.systemd == "linux":
             ffcommand = 'ffmpeg -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
         else:
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
