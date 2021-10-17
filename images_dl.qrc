@@ -2,9 +2,6 @@
   <qresource prefix="title">
     <file>images/title.png</file>
   </qresource>
-  <qresource prefix="Font">
-    <file>font/msyh.ttf</file>
-  </qresource>
   <qresource prefix="Icon">
     <file>images/bilidownloader.ico</file>
   </qresource>
