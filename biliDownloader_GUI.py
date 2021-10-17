@@ -48,7 +48,7 @@ class MainWindow(QMainWindow,Objective):
         DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.lineEdit_dir.setText(DF_Path)
         indict["Output"] = DF_Path
-        with open('setting.conf', 'r', encoding='utf-8') as f:
+        with open(indict["Output"] + '/setting.conf', 'r', encoding='utf-8') as f:
             tempr = json.loads(f.read())
             indict["sys"] = tempr["sys"]
             indict["cookie"] = tempr["cookie"]
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow,Objective):
 
     # 退出事件记录
     def closeEvent(self,QCloseEvent):
-        with open('setting.conf', 'w', encoding='utf-8') as f:
+        with open(indict["Output"] + '/setting.conf', 'w', encoding='utf-8') as f:
             temp_dict = {"UseCookie":indict["useCookie"],"synthesis":indict["sym"],"cookie":indict["cookie"],"sys":indict["sys"]}
             f.write(json.dumps(temp_dict,sort_keys=True,indent=4))
             f.close()
