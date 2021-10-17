@@ -882,6 +882,7 @@ class biliWorker(QThread):
 ######################################################################
 # 程序入口
 if __name__ == '__main__':
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     MainWindow = MainWindow()
     MainWindow.show()

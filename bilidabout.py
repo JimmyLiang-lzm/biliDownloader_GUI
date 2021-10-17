@@ -19,7 +19,7 @@ class Ui_Form(object):
         icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Form.setWindowIcon(icon)
         Form.setStyleSheet("*{\n"
-"    font: 9pt \"Microsoft YaHei\";\n"
+"    font: 14px \"Microsoft YaHei\";\n"
 "}\n"
 "/* 主体颜色\n"
 ".QWidget#centralwidget{\n"
@@ -47,7 +47,7 @@ class Ui_Form(object):
 "    background-color: rgb(255, 153, 153);\n"
 "    color: rgb(255, 255, 255);\n"
 "    border-radius: 15px;\n"
-"    font: 9pt \"Microsoft YaHei\";\n"
+"    font: 15px \"Microsoft YaHei\";\n"
 "}\n"
 "QPushButton:hover{\n"
 "    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 153, 153, 255), stop:1 rgba(255, 136, 136, 255));\n"
@@ -82,7 +82,7 @@ class Ui_Form(object):
 "    border: 2px solid rgb(255, 153, 153);\n"
 "    height: 10px;\n"
 "    background-color: rgb(255, 255, 255);\n"
-"    font: 10pt \"Microsoft YaHei\";\n"
+"    font: 16px \"Microsoft YaHei\";\n"
 "    border-radius:6px;\n"
 "    color: rgb(0, 0, 0);\n"
 "}\n"
@@ -189,13 +189,13 @@ class Ui_Form(object):
         self.label.setGeometry(QtCore.QRect(30, 10, 111, 41))
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
-        font.setPointSize(10)
+        font.setPointSize(-1)
         font.setBold(False)
         font.setItalic(False)
-        font.setWeight(9)
+        font.setWeight(50)
         self.label.setFont(font)
         self.label.setStyleSheet("*{\n"
-"    font: 75 10pt \"微软雅黑\";\n"
+"    font: 18px \"微软雅黑\";\n"
 "}\n"
 "")
         self.label.setObjectName("label")

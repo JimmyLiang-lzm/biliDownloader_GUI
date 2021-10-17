@@ -19,7 +19,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">*{
-	font: 9pt &quot;Microsoft YaHei&quot;;
+	font: 14px &quot;Microsoft YaHei&quot;;
 }
 /* 主体颜色
 .QWidget#centralwidget{
@@ -47,7 +47,7 @@ QPushButton[flat=&quot;false&quot;]{
 	background-color: rgb(255, 153, 153);
 	color: rgb(255, 255, 255);
 	border-radius: 15px;
-	font: 9pt &quot;Microsoft YaHei&quot;;
+	font: 15px &quot;Microsoft YaHei&quot;;
 }
 QPushButton:hover{
 	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 153, 153, 255), stop:1 rgba(255, 136, 136, 255));
@@ -82,7 +82,7 @@ QProgressBar{
 	border: 2px solid rgb(255, 153, 153);
 	height: 10px;
 	background-color: rgb(255, 255, 255);
-	font: 10pt &quot;Microsoft YaHei&quot;;
+	font: 16px &quot;Microsoft YaHei&quot;;
 	border-radius:6px;
 	color: rgb(0, 0, 0);
 }
@@ -237,15 +237,15 @@ QFrame#title{
     <property name="font">
      <font>
       <family>微软雅黑</family>
-      <pointsize>10</pointsize>
-      <weight>9</weight>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
      <string notr="true">*{
-	font: 75 10pt &quot;微软雅黑&quot;;
+	font: 18px &quot;微软雅黑&quot;;
 }
 </string>
     </property>

@@ -19,7 +19,7 @@ class Ui_MainWindow(object):
         icon.addPixmap(QtGui.QPixmap(":/Icon/images/bilidownloader.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
         MainWindow.setStyleSheet("*{\n"
-"    font: 9pt \"Microsoft YaHei\";\n"
+"    font: 14px \"Microsoft YaHei\";\n"
 "}\n"
 "/* 主体颜色\n"
 ".QWidget#centralwidget{\n"
@@ -47,7 +47,7 @@ class Ui_MainWindow(object):
 "    background-color: rgb(255, 153, 153);\n"
 "    color: rgb(255, 255, 255);\n"
 "    border-radius: 15px;\n"
-"    font: 9pt \"Microsoft YaHei\";\n"
+"    font: 15px \"Microsoft YaHei\";\n"
 "}\n"
 "QPushButton:hover{\n"
 "    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0 rgba(255, 153, 153, 255), stop:1 rgba(255, 136, 136, 255));\n"
@@ -82,7 +82,7 @@ class Ui_MainWindow(object):
 "    border: 2px solid rgb(255, 153, 153);\n"
 "    height: 10px;\n"
 "    background-color: rgb(255, 255, 255);\n"
-"    font: 10pt \"Microsoft YaHei\";\n"
+"    font: 16px \"Microsoft YaHei\";\n"
 "    border-radius:6px;\n"
 "    color: rgb(0, 0, 0);\n"
 "}\n"
