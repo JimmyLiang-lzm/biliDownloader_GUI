@@ -716,6 +716,9 @@ class biliWorker(QThread):
             ffcommand = ffpath + '/ffmpeg.exe -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "linux":
             ffcommand = 'ffmpeg -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+        elif self.systemd == "darwin":
+            ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
+            ffcommand = ffpath + '/ffmpeg -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
         else:
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
             return -2
