@@ -9,6 +9,7 @@ import biliDownloader, bilidabout, bilidsetting
 Objective = biliDownloader.Ui_MainWindow
 Objective_setting = bilidsetting.Ui_Form
 Objective_about = bilidabout.Ui_Form
+DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
 indict = {"Address":"","DownList":[],"VideoQuality":0,"AudioQuality":0,"Output":"","Synthesis":1,"sys":"","cookie":"","sym":True,"useCookie":True}
 
 # Mainwindow Class
@@ -45,10 +46,9 @@ class MainWindow(QMainWindow,Objective):
         self.btn_help.clicked.connect(self.forHELP)
         self.btn_about.clicked.connect(self.openAbout)
         # 默认目录
-        DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.lineEdit_dir.setText(DF_Path)
         indict["Output"] = DF_Path
-        with open(indict["Output"] + '/setting.conf', 'r', encoding='utf-8') as f:
+        with open(DF_Path + '/setting.conf', 'r', encoding='utf-8') as f:
             tempr = json.loads(f.read())
             indict["sys"] = tempr["sys"]
             indict["cookie"] = tempr["cookie"]
@@ -80,7 +80,7 @@ class MainWindow(QMainWindow,Objective):
 
     # 退出事件记录
     def closeEvent(self,QCloseEvent):
-        with open(indict["Output"] + '/setting.conf', 'w', encoding='utf-8') as f:
+        with open(DF_Path + '/setting.conf', 'w', encoding='utf-8') as f:
             temp_dict = {"UseCookie":indict["useCookie"],"synthesis":indict["sym"],"cookie":indict["cookie"],"sys":indict["sys"]}
             f.write(json.dumps(temp_dict,sort_keys=True,indent=4))
             f.close()
