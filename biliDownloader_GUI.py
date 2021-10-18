@@ -1,8 +1,8 @@
 import sys, os, webbrowser
 import requests, json, re, subprocess
 from time import time,sleep
-from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget
-from PySide2.QtCore import Qt, QThread, Signal, QPoint
+from PySide6.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget
+from PySide6.QtCore import Qt, QThread, Signal, QPoint
 import biliDownloader, bilidabout, bilidsetting
 
 # Initialize
@@ -889,8 +889,8 @@ class biliWorker(QThread):
 ######################################################################
 # 程序入口
 if __name__ == '__main__':
-    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     MainWindow = MainWindow()
     MainWindow.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

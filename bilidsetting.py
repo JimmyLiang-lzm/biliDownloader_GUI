@@ -3,15 +3,20 @@
 ################################################################################
 ## Form generated from reading UI file 'bilidsetting.ui'
 ##
-## Created by: Qt User Interface Compiler version 5.15.2
+## Created by: Qt User Interface Compiler version 6.2.0
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
-
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QLabel, QPlainTextEdit, QPushButton,
+    QSizePolicy, QWidget)
 import images_dl_rc
 
 class Ui_Form(object):
@@ -193,10 +198,9 @@ class Ui_Form(object):
         self.label.setObjectName(u"label")
         self.label.setGeometry(QRect(30, 10, 111, 41))
         font = QFont()
-        font.setFamily(u"\u5fae\u8f6f\u96c5\u9ed1")
+        font.setFamilies([u"\u5fae\u8f6f\u96c5\u9ed1"])
         font.setBold(False)
         font.setItalic(False)
-        font.setWeight(50)
         self.label.setFont(font)
         self.label.setStyleSheet(u"*{\n"
 "	font: 18px \"\u5fae\u8f6f\u96c5\u9ed1\";\n"
