@@ -46,13 +46,12 @@ class MainWindow(QMainWindow,Objective):
         self.btn_help.clicked.connect(self.forHELP)
         self.btn_about.clicked.connect(self.openAbout)
         # 默认目录
-        self.lineEdit_dir.setText(DF_Path)
-        indict["Output"] = DF_Path
         try:
             with open(DF_Path + '/setting.conf', 'r', encoding='utf-8') as f:
                 tempr = json.loads(f.read())
                 indict["sys"] = tempr["sys"]
                 indict["cookie"] = tempr["cookie"]
+                indict["Output"] = tempr["output"]
                 if tempr["UseCookie"]:
                     indict["useCookie"] = True
                     self.checkBox_usecookie.setChecked(True)
@@ -66,8 +65,10 @@ class MainWindow(QMainWindow,Objective):
                     self.checkBox_sym.setChecked(False)
                     indict["sym"] = False
         except:
+            indict["Output"] = DF_Path
             indict["sys"] = sys.platform
             self.checkBox_sym.setChecked(True)
+        self.lineEdit_dir.setText(indict["Output"])
 
     ####################### RW Part ##########################
     # 鼠标点击事件产生
@@ -85,7 +86,7 @@ class MainWindow(QMainWindow,Objective):
     # 退出事件记录
     def closeEvent(self,QCloseEvent):
         with open(DF_Path + '/setting.conf', 'w', encoding='utf-8') as f:
-            temp_dict = {"UseCookie":indict["useCookie"],"synthesis":indict["sym"],"cookie":indict["cookie"],"sys":indict["sys"]}
+            temp_dict = {"UseCookie":indict["useCookie"],"synthesis":indict["sym"],"cookie":indict["cookie"],"sys":indict["sys"],"output":indict["Output"]}
             f.write(json.dumps(temp_dict,sort_keys=True,indent=4))
             f.close()
 
@@ -111,6 +112,7 @@ class MainWindow(QMainWindow,Objective):
         directory = QFileDialog.getExistingDirectory(None,"选择文件夹",indict["Output"])
         if directory != "":
             self.lineEdit_dir.setText(directory)
+            indict["Output"] = directory
         QApplication.processEvents()
 
     def useCookie(self):
