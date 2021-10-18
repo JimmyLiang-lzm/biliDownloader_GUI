@@ -22,8 +22,8 @@ class MainWindow(QMainWindow,Objective):
         self.allSelect = False
         self.setWindowOPEN = False
         # 设置窗口透明
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground,True)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 添加阴影
