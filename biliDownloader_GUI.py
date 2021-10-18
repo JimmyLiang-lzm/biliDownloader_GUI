@@ -1,8 +1,8 @@
 import sys, os, webbrowser
 import requests, json, re, subprocess
 from time import time,sleep
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
+from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget
+from PySide2.QtCore import Qt, QThread, Signal, QPoint
 import biliDownloader, bilidabout, bilidsetting
 
 # Initialize
@@ -284,7 +284,7 @@ class MainWindow(QMainWindow,Objective):
 ############################################################################################
 # Cookie设置窗口类
 class SettingWindow(QWidget,Objective_setting):
-    _signal = pyqtSignal(dict)
+    _signal = Signal(dict)
     def __init__(self, incookie, parent=None):
         super(SettingWindow,self).__init__(parent)
         self.setupUi(self)
@@ -405,7 +405,7 @@ class AboutWindow(QWidget, Objective_about):
 ############################################################################################
 # 检查更新防阻滞线程类
 class checkLatest(QThread):
-    _feedback = pyqtSignal(int)
+    _feedback = Signal(int)
     def __init__(self, inVer):
         super(checkLatest, self).__init__()
         self.lab_version = inVer
@@ -432,12 +432,12 @@ class checkLatest(QThread):
 # biliDownloader下载主工作线程
 class biliWorker(QThread):
     # 信息槽发射
-    business_info = pyqtSignal(str)
-    vq_list = pyqtSignal(str)
-    aq_list = pyqtSignal(str)
-    media_list = pyqtSignal(str)
-    progr_bar = pyqtSignal(dict)
-    is_finished = pyqtSignal(int)
+    business_info = Signal(str)
+    vq_list = Signal(str)
+    aq_list = Signal(str)
+    media_list = Signal(str)
+    progr_bar = Signal(dict)
+    is_finished = Signal(int)
     # 初始化
     def __init__(self, args, model=0):
         super(biliWorker, self).__init__()
