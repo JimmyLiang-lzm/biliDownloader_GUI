@@ -354,21 +354,21 @@ QFrame#title{
      <item row="0" column="1">
       <widget class="QLabel" name="lab_version">
        <property name="text">
-        <string>V1.3.20211016</string>
+        <string>V1.3.20211019</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>2021/10/16</string>
+        <string>2021/10/19</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLabel" name="label_7">
        <property name="text">
-        <string>二代死神</string>
+        <string>二代死神（B站同名）</string>
        </property>
       </widget>
      </item>
