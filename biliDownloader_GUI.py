@@ -577,7 +577,7 @@ class biliWorker(QThread):
                 # Get Video Length
                 length = re_GET["data"]["dash"]["duration"]
                 # Return Data
-                #print(down_dic)
+                # print(json.dumps(down_dic))
                 return 1, video_name, length, down_dic
             except Exception as e:
                 print("PreInfo:",e)
