@@ -612,7 +612,7 @@ class InteractWindow(QWidget, Objective_interact):
         if not os.path.exists(dir_address):
             os.makedirs(dir_address)
         wd = self.node_chart.render(dir_address + "/node_temp.html")
-        self.webEngineView_4.setUrl(QUrl(dir_address + "/node_temp.html"))
+        self.webEngineView_4.setUrl(QUrl("file:///" + dir_address + "/node_temp.html"))
 
     # 节点图绘制程序
     def draw_chart(self,width,height,indict):
