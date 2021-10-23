@@ -996,7 +996,7 @@ class biliWorker(QThread):
             os.remove(input_v)
             os.remove(input_a)
         except Exception as e:
-            self.business_info.emit("视频合成失败：", e)
+            self.business_info.emit("视频合成失败：{}".format(e))
             self.subpON = False
 
 
