@@ -611,8 +611,16 @@ class InteractWindow(QWidget, Objective_interact):
         dir_address = self.html_Path.replace("\\","/")+"/temp"
         if not os.path.exists(dir_address):
             os.makedirs(dir_address)
-        wd = self.node_chart.render(dir_address + "/node_temp.html")
-        self.webEngineView_4.setUrl(QUrl("file:///" + dir_address + "/node_temp.html"))
+        self.node_chart.render(dir_address + "/node_temp.html")
+        access_url = self.url_maker(dir_address + "/node_temp.html")
+        self.webEngineView_4.setUrl(QUrl(access_url))
+
+    # 跨系统平台节点文件路径生成函数
+    def url_maker(self,in_dir):
+        if indict["sys"] == "win32":
+            return "file:///" + in_dir
+        else:
+            return "file://" + in_dir
 
     # 节点图绘制程序
     def draw_chart(self,width,height,indict):
