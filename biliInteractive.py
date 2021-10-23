@@ -174,7 +174,7 @@ class Ui_Form(object):
 "\n"
 "/* \u7ec4\u5408\u6846\u6837\u5f0f */\n"
 "/*QCheckBox{}*/\n"
-"QFrame#title{\n"
+"QFrame{\n"
 "	border: none\n"
 "}\n"
 "\n"
@@ -188,9 +188,9 @@ class Ui_Form(object):
 "	border: 1px dashed rgb(255, 204, 153);\n"
 "	border-radius: 5px\n"
 "}\n"
-"QTreeWidget::item:hov"
-                        "er{\n"
-"	background-color: rgb(255, 204, 153);\n"
+"QTreeWidget::item:hover{\n"
+""
+                        "	background-color: rgb(255, 204, 153);\n"
 "}\n"
 "")
         self.frame = QFrame(Form)

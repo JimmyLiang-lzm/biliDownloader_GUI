@@ -164,7 +164,7 @@ QGroupBox::title{
 
 /* 组合框样式 */
 /*QCheckBox{}*/
-QFrame#title{
+QFrame{
 	border: none
 }
 
