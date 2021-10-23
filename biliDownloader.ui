@@ -216,6 +216,9 @@ QGroupBox::title{
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="format">
+      <string>biliDownloader就绪</string>
+     </property>
     </widget>
     <widget class="QPushButton" name="btn_search">
      <property name="enabled">
@@ -294,8 +297,8 @@ QGroupBox::title{
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>欢迎使用Bili Downloader V1.3.20211019
-Release at 2021/10/19 ......</string>
+      <string>欢迎使用Bili Downloader V1.4.20211023
+Release at 2021/10/23 ......</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox">

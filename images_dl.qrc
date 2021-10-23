@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="title">
+    <file>images/gray_shadow.png</file>
     <file>images/title.png</file>
   </qresource>
   <qresource prefix="Icon">

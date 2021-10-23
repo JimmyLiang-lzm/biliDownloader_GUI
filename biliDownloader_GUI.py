@@ -1,14 +1,18 @@
 import sys, os, webbrowser
 import requests, json, re, subprocess
 from time import time,sleep
-from PyQt5.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QPoint
-import biliDownloader, bilidabout, bilidsetting
+from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget, QTreeWidgetItem
+from PySide2.QtCore import Qt, QThread, Signal, QPoint, QUrl
+from PySide2.QtGui import QIntValidator
+from pyecharts import options as opts
+from pyecharts.charts import Tree
+import biliDownloader, bilidabout, bilidsetting, biliInteractive
 
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
 Objective_setting = bilidsetting.Ui_Form
 Objective_about = bilidabout.Ui_Form
+Objective_interact = biliInteractive.Ui_Form
 DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
 indict = {"Address":"","DownList":[],"VideoQuality":0,"AudioQuality":0,"Output":"","Synthesis":1,"sys":"","cookie":"","sym":True,"useCookie":False}
 
@@ -21,6 +25,7 @@ class MainWindow(QMainWindow,Objective):
         self.haveINFO = False
         self.allSelect = False
         self.setWindowOPEN = False
+        self.isInteractive = False
         # 设置窗口透明
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground,True)
@@ -91,6 +96,7 @@ class MainWindow(QMainWindow,Objective):
             f.close()
 
     ####################### BS Part ##########################
+    # 资源探查事件函数
     def Get_preInfo(self):
         #print(indict)
         indict["Address"] = self.source_search.text()
@@ -103,11 +109,13 @@ class MainWindow(QMainWindow,Objective):
         self.tes.aq_list.connect(self.aqulityList)
         self.tes.media_list.connect(self.mediaList)
         self.tes.is_finished.connect(self.thread_finished)
+        self.tes.interact_info.connect(self.interact_Catch)
         self.btn_search.setEnabled(False)
         self.groupBox.setEnabled(False)
         self.threadBusy = True
         self.tes.start()
 
+    # 选择目录事件函数
     def selectDir(self):
         directory = QFileDialog.getExistingDirectory(None,"选择文件夹",indict["Output"])
         if directory != "":
@@ -115,18 +123,21 @@ class MainWindow(QMainWindow,Objective):
             indict["Output"] = directory
         QApplication.processEvents()
 
+    # 使用VIP Cookie事件函数
     def useCookie(self):
         if self.checkBox_usecookie.isChecked():
             indict["useCookie"] = True
         else:
             indict["useCookie"] = False
 
+    # 使用合成处理事件
     def useSym(self):
         if self.checkBox_sym.isChecked():
             indict["sym"] = True
         else:
             indict["sym"] = False
 
+    # 选择全部视频列表处理函数
     def selectALL(self):
         if self.allSelect:
             count = self.media_list.count()
@@ -145,26 +156,47 @@ class MainWindow(QMainWindow,Objective):
             for i in range(count):
                 self.media_list.itemWidget(self.media_list.item(i)).setChecked(True)
 
+    # 下载视频按钮事件处理函数
     def download(self):
         if self.haveINFO:
-            count = self.media_list.count()
-            indict["DownList"] = []
-            for i in range(count):
-                if self.media_list.itemWidget(self.media_list.item(i)).isChecked():
-                    indict["DownList"].append(i+1)
-            indict["VideoQuality"] = self.combo_vq.currentIndex()
-            indict["AudioQuality"] = self.combo_aq.currentIndex()
-            indict["Output"] = self.lineEdit_dir.text()
-            self.btn_download.setEnabled(False)
-            self.btn_search.setEnabled(False)
-            self.speedCalc(0)
-            self.tes = biliWorker(indict,1)
-            self.tes.business_info.connect(self.businINFO_Catch)
-            self.tes.progr_bar.connect(self.progress_Bar)
-            self.tes.is_finished.connect(self.thread_finished)
-            self.threadBusy = True
-            self.tes.start()
+            if not self.isInteractive:
+                count = self.media_list.count()
+                indict["DownList"] = []
+                for i in range(count):
+                    if self.media_list.itemWidget(self.media_list.item(i)).isChecked():
+                        indict["DownList"].append(i+1)
+                indict["VideoQuality"] = self.combo_vq.currentIndex()
+                indict["AudioQuality"] = self.combo_aq.currentIndex()
+                indict["Output"] = self.lineEdit_dir.text()
+                self.btn_download.setEnabled(False)
+                self.btn_search.setEnabled(False)
+                self.speedCalc(0)
+                self.tes = biliWorker(indict,1)
+                self.tes.business_info.connect(self.businINFO_Catch)
+                self.tes.progr_bar.connect(self.progress_Bar)
+                self.tes.is_finished.connect(self.thread_finished)
+                self.threadBusy = True
+                self.tes.start()
+            else:
+                indict["DownList"] = []
+                indict["VideoQuality"] = self.combo_vq.currentIndex()
+                indict["AudioQuality"] = self.combo_aq.currentIndex()
+                indict["Output"] = self.lineEdit_dir.text()
+                self.btn_download.setEnabled(False)
+                self.btn_search.setEnabled(False)
+                self.btn_pause.setEnabled(False)
+                self.btn_stop.setEnabled(False)
+                self.speedCalc(0)
+                self.tes = biliWorker(indict,2)
+                self.tes.business_info.connect(self.businINFO_Catch)
+                self.tes.progr_bar.connect(self.progress_Bar)
+                self.tes.is_finished.connect(self.thread_finished)
+                self.tes.interact_info.connect(self.interact_Catch)
+                self.tes.Set_Structure(self.now_interact,{})
+                self.threadBusy = True
+                self.tes.start()
 
+    # 暂停下载按钮函数
     def pause_download(self):
         if self.btn_pause.text() == "暂停下载":
             if self.threadBusy:
@@ -175,10 +207,12 @@ class MainWindow(QMainWindow,Objective):
                 self.tes.resume()
                 self.btn_pause.setText("暂停下载")
 
+    # 停止下载事件函数
     def stop_download(self):
         if self.threadBusy:
             self.tes.close_process()
 
+    # 打开设置Cookie窗口函数
     def set_cookie(self):
         if not self.threadBusy:
             self.setting_win = SettingWindow(indict["cookie"])
@@ -186,28 +220,65 @@ class MainWindow(QMainWindow,Objective):
             self.setWindowOPEN = True
             self.setting_win.show()
 
+    # 帮助按钮函数
     def forHELP(self):
         webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/")
 
+    # 打开关于页面函数
     def openAbout(self):
         self.about_win = AboutWindow()
         self.about_win.show()
 
-    # 槽函数
+    ####################### Slot function ##########################
+    # 交互视频下载页面接收数据槽函数
+    def interact_Page(self,indic):
+        if indic == {}:
+            self.plainTextEdit.appendPlainText("交互视频下载已取消")
+            self.thread_finished(3)
+            QApplication.processEvents()
+        else:
+            self.plainTextEdit.appendPlainText("交互视频开始下载")
+            self.tes.Set_Structure(self.now_interact, indic)
+            self.tes.model_set(3)
+            self.btn_pause.setEnabled(True)
+            self.btn_stop.setEnabled(True)
+            self.tes.start()
+
+    # 交互视频下载线程数据接收槽函数
+    def interact_Catch(self, indic):
+        if indic["state"] == 0:
+            self.isInteractive = False
+        elif indic["state"] == 1:
+            self.isInteractive = True
+            self.now_interact = indic["data"]
+            self.plainTextEdit.appendPlainText("探查到本下载视频为交互视频。")
+        elif indic["state"] == 2:
+            self.now_interact = indic["nowin"]
+            self.inv_page = InteractWindow(indic["ivf"], self.now_interact["vname"])
+            self.inv_page._Signal.connect(self.interact_Page)
+            self.inv_page.show()
+        elif indic["state"] == -2:
+            self.plainTextEdit.appendPlainText("节点信息探查出错。")
+
+    # 下载线程事件反馈槽函数
     def businINFO_Catch(self, instr):
         self.plainTextEdit.appendPlainText(instr)
 
+    # 视频质量列表接收槽函数
     def vqulityList(self,instr):
         self.combo_vq.addItem(instr)
 
+    # 音频质量列表接收槽函数
     def aqulityList(self,instr):
         self.combo_aq.addItem(instr)
 
+    # 分P视频表接收槽函数
     def mediaList(self,instr):
         item = QListWidgetItem()
         self.media_list.addItem(item)
         self.media_list.setItemWidget(item, QCheckBox(instr))
 
+    # 进度条进度信息接收槽函数
     def progress_Bar(self, in_dict):
         if in_dict["finish"] == 1:
             self.progressBar.setFormat("biliDownloader就绪")
@@ -225,6 +296,7 @@ class MainWindow(QMainWindow,Objective):
             self.progressBar.setFormat(str_Text)
             self.progressBar.setValue(nowValue)
 
+    # 下载速度计算函数
     def speedCalc(self,inum):
         if inum == 0:
             self.speed = 0
@@ -241,6 +313,7 @@ class MainWindow(QMainWindow,Objective):
                     self.Time = time()
                 self.showTime = time()
 
+    # 文件数据大小计算函数
     def filesizeShow(self, filesize):
         if filesize / 1024 > 1 :
             a = filesize / 1024
@@ -259,6 +332,7 @@ class MainWindow(QMainWindow,Objective):
         else:
             return "{}B".format(round(filesize,1))
 
+    # 下载线程结束信号接收槽函数
     def thread_finished(self,inum):
         self.threadBusy = False
         if inum == 1:
@@ -272,7 +346,13 @@ class MainWindow(QMainWindow,Objective):
             self.haveINFO = False
             self.btn_search.setEnabled(True)
             self.groupBox.setEnabled(True)
+        elif inum == 3:
+            self.btn_download.setEnabled(True)
+            self.btn_search.setEnabled(True)
+            self.btn_pause.setEnabled(True)
+            self.btn_stop.setEnabled(True)
 
+    # VIP Cookie窗口交互接收槽函数
     def setWindow_catch(self, in_dict):
         if in_dict["code"] == 1:
             indict["cookie"] = in_dict["cookie"]
@@ -283,10 +363,11 @@ class MainWindow(QMainWindow,Objective):
         else:
             pass
 
+
 ############################################################################################
 # Cookie设置窗口类
 class SettingWindow(QWidget,Objective_setting):
-    _signal = pyqtSignal(dict)
+    _signal = Signal(dict)
     def __init__(self, incookie, parent=None):
         super(SettingWindow,self).__init__(parent)
         self.setupUi(self)
@@ -339,6 +420,7 @@ class SettingWindow(QWidget,Objective_setting):
     def forHelp(self):
         webbrowser.open("https://zmtechn.gitee.io/2021/10/05/Get_bilibili_cookie/")
 
+
 ############################################################################################
 # 关于窗口类
 class AboutWindow(QWidget, Objective_about):
@@ -376,18 +458,22 @@ class AboutWindow(QWidget, Objective_about):
             QMouseEvent.accept()
 
     ####################### BS Part #######################
+    # 访问作者网站按钮函数
     def accessWeb(self):
         webbrowser.open("https://jimmyliang-lzm.github.io/")
 
+    # 检查版本更新函数
     def checkLatest(self):
         self.cl = checkLatest(self.lab_version.text())
         self.btn_latest.setEnabled(False)
         self.cl._feedback.connect(self.verShow)
         self.cl.start()
 
+    # 访问发布页面函数
     def accessRelease(self):
         webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases")
 
+    # 打开BUG反馈ISSUE页面
     def callBUG(self):
         webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/issues")
 
@@ -404,10 +490,167 @@ class AboutWindow(QWidget, Objective_about):
         elif inum == 2:
             self.btn_latest.setText("网络出错")
 
+
+############################################################################################
+# 交互视频下载窗口类
+class InteractWindow(QWidget, Objective_interact):
+    _Signal = Signal(dict)
+    def __init__(self, full_iv, vname, parent=None):
+        super(InteractWindow, self).__init__(parent)
+        assert type(full_iv) is dict
+        assert type(vname) is str
+        self.setupUi(self)
+        self.feedback_dict = {}
+        self.html_Path = DF_Path
+        self.ivideo_name = self.name_replace(vname)
+        self.lineEdit_height.setValidator(QIntValidator())
+        self.lineEdit_width.setValidator(QIntValidator())
+        # print("Initial OK.")
+        # 设置窗口透明
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        # print("Set Trans OK.")
+        # 设置鼠标动作位置
+        self.m_Position = 0
+        # 连接器
+        self.btnmin.clicked.connect(lambda: self.showMinimized())
+        self.btn_adjsize.clicked.connect(self.re_show)
+        self.btn_save2html.clicked.connect(self.save2html)
+        self.btn_exportJSON.clicked.connect(self.save2json)
+        self.btn_startdownload.clicked.connect(self.download_process)
+        # 数据初始化
+        self.full_json = full_iv
+        self.chartdict = self.recursion_for_chart(full_iv)
+        # print("Get Chart Dict OK.")
+        self.info_Init(full_iv,self.treeWidget_4)
+        self.treeWidget_4.expandToDepth(2)
+        # print("Init treewidget OK.")
+        self.draw_chart("670","420",self.chartdict)
+        self.show_chart()
+        # print("Show Chart OK.")
+
+
+    ####################### RW Part #######################
+    # 鼠标点击事件产生
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.m_Position = event.globalPos() - self.pos()
+            event.accept()
+
+    # 鼠标移动事件
+    def mouseMoveEvent(self, QMouseEvent):
+        if Qt.LeftButton:
+            self.move(QMouseEvent.globalPos() - self.m_Position)
+            QMouseEvent.accept()
+
+    # 定义关闭事件
+    def closeEvent(self, QCloseEvent):
+        print(self.feedback_dict)
+        self._Signal.emit(self.feedback_dict)
+
+    ########################## BS PART #############################
+    # 下载按钮->下载字典构建进程函数
+    def download_process(self):
+        n = self.treeWidget_4.topLevelItemCount()
+        for i in range(n):
+            item = self.treeWidget_4.topLevelItem(i)
+            if item.checkState(0) == Qt.Checked:
+                self.feedback_dict[item.text(0)] = {}
+                self.feedback_dict[item.text(0)]["cid"] = item.text(1)
+                self.feedback_dict[item.text(0)]["choices"] = self.download_list_make(item)
+        self.close()
+
+    # 属性选择框转下载字典递归函数
+    def download_list_make(self,tree_widget_obj):
+        temp = {}
+        count = tree_widget_obj.childCount()
+        if count == 0:
+            return temp
+        for i in range(count):
+            if tree_widget_obj.child(i).checkState(0) == Qt.Checked:
+                name = tree_widget_obj.child(i).text(0)
+                temp[name] = {}
+                temp[name]["cid"] = tree_widget_obj.child(i).text(1)
+                temp[name]["choices"] = self.download_list_make(tree_widget_obj.child(i))
+        return temp
+
+    # Save origin node JSON File
+    def save2json(self):
+        init_path = indict["Output"] + "/" + self.ivideo_name + ".json"
+        directory = QFileDialog.getSaveFileName(None,"选择JSON保存路径",init_path,'JSON(*.json)')
+        if directory[0] != '':
+            with open(directory[0],'w') as f:
+                f.write(json.dumps(self.full_json))
+
+    # Save node picture to HTML
+    def save2html(self):
+        init_path = indict["Output"]+"/"+self.ivideo_name+".html"
+        directory = QFileDialog.getSaveFileName(None,'选择节点图保存路径',init_path,'HTML(*.html)')
+        if directory[0] != '':
+            self.node_chart.set_global_opts(title_opts=opts.TitleOpts(
+                title=self.ivideo_name,
+                subtitle="Made By BiliDownloader"))\
+                .render(directory[0])
+
+    # Re-size node picture.
+    def re_show(self):
+        w = self.lineEdit_width.text()
+        h = self.lineEdit_height.text()
+        self.draw_chart(w,h,self.chartdict)
+        self.show_chart()
+
+    # File name conflict replace
+    def name_replace(self, name):
+        vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
+        vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
+        vn = vn.replace('>', '').replace('\"', '').replace('|', '')
+        return vn
+
+    # 显示节点图
+    def show_chart(self):
+        dir_address = self.html_Path.replace("\\","/")+"/temp"
+        if not os.path.exists(dir_address):
+            os.makedirs(dir_address)
+        wd = self.node_chart.render(dir_address + "/node_temp.html")
+        self.webEngineView_4.setUrl(QUrl(dir_address + "/node_temp.html"))
+
+    # 节点图绘制程序
+    def draw_chart(self,width,height,indict):
+        self.node_chart = (
+            Tree(init_opts=opts.InitOpts(width=width+"px",height=height+"px"))
+            .add(
+                "",
+                indict,
+                collapse_interval=2,
+                symbol="roundRect",
+                initial_tree_depth=-1
+            )
+        )
+
+    # 初始数据字典转化为树形图递归函数
+    def info_Init(self,in_dict,root):
+        for ch in in_dict:
+            item = QTreeWidgetItem(root)
+            item.setText(0,ch)
+            item.setCheckState(0,Qt.Checked)
+            item.setText(1,in_dict[ch]["cid"])
+            item.addChild(self.info_Init(in_dict[ch]["choices"],item))
+
+    # 初始数据字典转化图像专用JSON递归函数
+    def recursion_for_chart(self,in_json):
+        temp = []
+        for ch in in_json:
+            stemp = {"name":"","children":[]}
+            stemp["name"] = ch
+            stemp["children"] = self.recursion_for_chart(in_json[ch]["choices"])
+            temp.append(stemp)
+        return temp
+
+
 ############################################################################################
 # 检查更新防阻滞线程类
 class checkLatest(QThread):
-    _feedback = pyqtSignal(int)
+    _feedback = Signal(int)
     def __init__(self, inVer):
         super(checkLatest, self).__init__()
         self.lab_version = inVer
@@ -430,16 +673,18 @@ class checkLatest(QThread):
             sleep(2)
             self._feedback.emit(-1)
 
+
 ############################################################################################
 # biliDownloader下载主工作线程
 class biliWorker(QThread):
     # 信息槽发射
-    business_info = pyqtSignal(str)
-    vq_list = pyqtSignal(str)
-    aq_list = pyqtSignal(str)
-    media_list = pyqtSignal(str)
-    progr_bar = pyqtSignal(dict)
-    is_finished = pyqtSignal(int)
+    business_info = Signal(str)
+    vq_list = Signal(str)
+    aq_list = Signal(str)
+    media_list = Signal(str)
+    progr_bar = Signal(dict)
+    is_finished = Signal(int)
+    interact_info = Signal(dict)
     # 初始化
     def __init__(self, args, model=0):
         super(biliWorker, self).__init__()
@@ -479,11 +724,17 @@ class biliWorker(QThread):
             self.index_headers["cookie"] = ""
             self.second_headers["cookie"] = ""
 
+    # 运行模式设置函数
+    def model_set(self, innum):
+        self.run_model = innum
+
+    # 结束进程函数
     def close_process(self):
         self.killprocess = True
         self.pauseprocess = False
         self.business_info.emit("正在结束下载进程......")
 
+    # 暂停下载进程函数
     def pause(self):
         if self.subpON:
             self.business_info.emit("视频正在合成，只能终止不能暂停")
@@ -492,6 +743,7 @@ class biliWorker(QThread):
             self.business_info.emit("下载已暂停")
             self.pauseprocess = True
 
+    # 恢复下载进程函数
     def resume(self):
         self.business_info.emit("下载已恢复")
         self.pauseprocess = False
@@ -663,7 +915,7 @@ class biliWorker(QThread):
 
 
     # Download Stream fuction
-    def d_processor(self,url_list,output_dir,dest):
+    def d_processor(self,url_list,output_dir,output_file,dest):
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
@@ -681,7 +933,9 @@ class biliWorker(QThread):
                         m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10)
                         proc["Max"] = int(vc_range)
                         self.progr_bar.emit(proc)
-                        with open(output_dir, 'ab') as f:
+                        if not os.path.exists(output_dir):
+                            os.makedirs(output_dir)
+                        with open(output_file, 'ab') as f:
                             for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
                                 while self.pauseprocess:
                                     sleep(1.5)
@@ -706,7 +960,7 @@ class biliWorker(QThread):
                 print(e)
                 self.business_info.emit("{}出错：{}".format(dest,e))
                 print(proc)
-                os.remove(output_dir)
+                os.remove(output_file)
         return 1
 
 
@@ -803,13 +1057,13 @@ class biliWorker(QThread):
                 # Switch between main line and backup line(video).
                 if self.killprocess:
                     return -2
-                a = self.d_processor(down_dic["video"][self.VQuality][1], video_dir, "下载视频")
+                a = self.d_processor(down_dic["video"][self.VQuality][1], self.output, video_dir, "下载视频")
                 # Perform audio stream length sniffing
                 self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
                 # Switch between main line and backup line(audio).
                 if self.killprocess:
                     return -2
-                b = self.d_processor(down_dic["audio"][self.AQuality][1], audio_dir, "下载音频")
+                b = self.d_processor(down_dic["audio"][self.AQuality][1], self.output, audio_dir, "下载音频")
                 if a or b:
                     return -3
                 # Merge audio and video (USE FFMPEG)
@@ -868,16 +1122,188 @@ class biliWorker(QThread):
         else:
             self.business_info.emit("未找到视频列表信息。")
 
+###################################################################
+    # 交互进程初始数据获取函数
+    def interact_preinfo(self):
+        self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
+        t1 = self.Get_Init_Info(self.index_url)
+        self.index_headers['referer'] = self.index_url
+        self.second_headers = self.index_headers
+        t2 = self.isInteract()
+        if t1[0] or t2[0]:
+            return 1, {}, {}
+        return 0, self.now_interact
 
+    # 交互视频节点分析函数
+    def interact_nodeList(self):
+        self.business_info.emit("开始分析互动视频节点，若长时间（10分钟）未弹出画面说明互动视频存在循环或进程坏死，请退出本程序...")
+        self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
+        self.Get_Init_Info(self.index_url)
+        self.index_headers['referer'] = self.index_url
+        self.second_headers = self.index_headers
+        self.isInteract()
+        self.iv_structure = {}
+        self.iv_structure[self.now_interact["vname"]] = {}
+        self.iv_structure[self.now_interact["vname"]] = self.recursion_GET_List()
+        self.business_info.emit("节点窗口加载中")
+        return self.iv_structure
+
+    # Interactive video download
+    def requests_start(self, now_interact,iv_structure):
+        self.now_interact = now_interact
+        self.recursion_for_Download(iv_structure, self.output)
+        self.business_info.emit("下载交互视频完成。")
+
+    # 设置预下载信息
+    def Set_Structure(self, now_interact,iv_structure):
+        self.now_interact = now_interact
+        self.iv_structure = iv_structure
+
+    # Interactive video initial information
+    def Get_Init_Info(self, url):
+        try:
+            res = requests.get(url, headers=self.index_headers, stream=False,timeout=10)
+            dec = res.content.decode('utf-8')
+            playinfo = re.findall(self.re_playinfo, dec, re.S)
+            INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
+            if playinfo == [] or INITIAL_STATE == []:
+                raise Exception("无法找到初始化信息。")
+            playinfo = json.loads(playinfo[0])
+            INITIAL_STATE = json.loads(INITIAL_STATE[0])
+            self.now_interact["session"] = playinfo["session"]
+            self.now_interact["bvid"] = INITIAL_STATE["bvid"]
+            self.now_interact["cid"] = str(INITIAL_STATE["cidMap"][INITIAL_STATE["bvid"]]["cids"]["1"])
+            self.now_interact["vname"] = self.name_replace(INITIAL_STATE["videoData"]["title"])
+            return 0, ""
+        except Exception as e:
+            return 1, str(e)
+
+    # Judge the interactive video.
+    def isInteract(self):
+        make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + \
+                   self.now_interact["bvid"]
+        try:
+            res = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            des = json.loads(res.content.decode('utf-8'))
+            if "interaction" not in des["data"]:
+                raise Exception("非交互视频")
+            self.now_interact["graph_version"] = str(des["data"]["interaction"]["graph_version"])
+            return 0, ""
+        except Exception as e:
+            return 1, str(e)
+
+    # Get interactive video pre-information
+    def down_list_make(self, cid_num):
+        make_API = "https://api.bilibili.com/x/player/playurl?cid=" + cid_num \
+                   + "&bvid=" + self.now_interact[
+                       "bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
+                   self.now_interact["session"]
+        try:
+            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            playinfo = json.loads(des.content.decode('utf-8'))
+        except Exception as e:
+            return False, str(e)
+        if playinfo != {}:
+            re_GET = playinfo
+            # List Video Quality Table
+            temp_v = {}
+            for i in range(len(re_GET["data"]["accept_quality"])):
+                temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
+            # List Video Download Quality
+            down_dic = {"video": {}, "audio": {}}
+            i = 0
+            # Get Video identity information and Initial SegmentBase.
+            for dic in re_GET["data"]["dash"]["video"]:
+                if str(dic["id"]) in temp_v:
+                    qc = temp_v[str(dic["id"])]
+                    down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["video"][i][1].append(dic["backupUrl"][a])
+                    i += 1
+                else:
+                    continue
+            # List Audio Stream
+            i = 0
+            for dic in re_GET["data"]["dash"]["audio"]:
+                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
+                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
+                for a in range(len(dic["backupUrl"])):
+                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                i += 1
+            # Get Video Length
+            length = re_GET["data"]["dash"]["duration"]
+            # Return Data
+            return True, length, down_dic
+        else:
+            return False, "Get Download List Error."
+
+    # Get interactive video node list (Use recursion algorithm)
+    def recursion_GET_List(self):
+        temp = {"choices": {}}
+        temp["cid"] = self.now_interact["cid"]
+        if self.now_interact["node_id"] == "":
+            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
+                "bvid"] + "&graph_version=" + self.now_interact["graph_version"]
+        else:
+            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
+                "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
+                           "node_id"]
+        try:
+            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            desp = json.loads(des.content.decode('utf-8'))
+        except Exception as e:
+            self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
+            print("Interactive Video Get List Error:",e)
+            return temp
+        if "edges" not in desp["data"]:
+            return temp
+        for ch in desp["data"]["edges"]["choices"]:
+            self.now_interact["cid"] = str(ch["cid"])
+            self.now_interact["node_id"] = str(ch["node_id"])
+            # print(ch)
+            temp["choices"][ch["option"]] = self.recursion_GET_List()
+        return temp
+
+    # Interactive video download processor (Use recursion algorithm)
+    def recursion_for_Download(self, json_list, output_dir):
+        for ch in json_list:
+            chn = self.name_replace(ch)
+            output = output_dir + "/" + chn
+            video_dir = output + "/" + chn + '_video.m4s'
+            audio_dir = output + "/" + chn + '_audio.m4s'
+            dic_return = self.down_list_make(json_list[ch]["cid"])
+            if not dic_return[0]:
+                self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
+                print(dic_return[1])
+                return -1
+            down_dic = dic_return[2]
+            self.second_headers["range"] = down_dic["video"][self.VQuality][2]
+            self.d_processor(down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
+            self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
+            self.d_processor(down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
+            if self.synthesis:
+                self.business_info.emit('正在启动ffmpeg......')
+                self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
+            self.recursion_for_Download(json_list[ch]["choices"], output)
+        return 0
+############################################################
+    # 运行线程
     def run(self):
         #self.reloader()
         if self.run_model == 0:
+            # 探查资源类型
+            self.interact_info.emit({"state":0})
             r = self.show_preDetail()
+            d = self.interact_preinfo()
             if r == 1:
+                if d[0] == 0:
+                    self.interact_info.emit({"state":1,"data":d[1]})
                 self.is_finished.emit(1)
             else:
                 self.is_finished.emit(0)
         elif self.run_model == 1:
+            # 下载非交互视频
             if self.d_list != []:
                 # print(1)
                 self.Download_List()
@@ -887,6 +1313,19 @@ class biliWorker(QThread):
                 self.is_finished.emit(2)
             else:
                 self.is_finished.emit(2)
+        elif self.run_model == 2:
+            # 交互视频信息读取
+            d = self.interact_nodeList()
+            if d == {}:
+                self.interact_info.emit({"state":-2,"data":{}})
+                self.is_finished.emit(3)
+            else:
+                self.interact_info.emit({"state":2,"nowin":self.now_interact,"ivf":d})
+        elif self.run_model == 3:
+            # 交互视频下载
+            self.requests_start(self.now_interact,self.iv_structure)
+            self.is_finished.emit(3)
+
 
 ######################################################################
 # 程序入口
