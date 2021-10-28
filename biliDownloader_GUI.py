@@ -26,6 +26,7 @@ class MainWindow(QMainWindow,Objective):
         self.allSelect = False
         self.setWindowOPEN = False
         self.isInteractive = False
+        self.bu_info_count = 0
         # 设置窗口透明
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground,True)
@@ -262,7 +263,11 @@ class MainWindow(QMainWindow,Objective):
 
     # 下载线程事件反馈槽函数
     def businINFO_Catch(self, instr):
+        if self.bu_info_count >= 2233:
+            self.plainTextEdit.setPlainText("")
+            self.bu_info_count = 0
         self.plainTextEdit.appendPlainText(instr)
+        self.bu_info_count += 1
 
     # 视频质量列表接收槽函数
     def vqulityList(self,instr):
@@ -276,7 +281,10 @@ class MainWindow(QMainWindow,Objective):
     def mediaList(self,instr):
         item = QListWidgetItem()
         self.media_list.addItem(item)
-        self.media_list.setItemWidget(item, QCheckBox(instr))
+        ck = QCheckBox(instr[1])
+        if instr[0]:
+            ck.setChecked(True)
+        self.media_list.setItemWidget(item, ck)
 
     # 进度条进度信息接收槽函数
     def progress_Bar(self, in_dict):
@@ -376,7 +384,7 @@ class SettingWindow(QWidget,Objective_setting):
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # 设置鼠标动作位置
-        self.m_Position = 0
+        self.m_Position = QPoint(0,0)
         # 添加阴影
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(30)
@@ -431,7 +439,7 @@ class AboutWindow(QWidget, Objective_about):
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # 设置鼠标动作位置
-        self.m_Position = 0
+        self.m_Position = QPoint(0,0)
         # 添加阴影
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(30)
@@ -511,7 +519,7 @@ class InteractWindow(QWidget, Objective_interact):
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # print("Set Trans OK.")
         # 设置鼠标动作位置
-        self.m_Position = 0
+        self.m_Position = QPoint(0,0)
         # 连接器
         self.btnmin.clicked.connect(lambda: self.showMinimized())
         self.btn_adjsize.clicked.connect(self.re_show)
@@ -580,7 +588,7 @@ class InteractWindow(QWidget, Objective_interact):
         directory = QFileDialog.getSaveFileName(None,"选择JSON保存路径",init_path,'JSON(*.json)')
         if directory[0] != '':
             with open(directory[0],'w') as f:
-                f.write(json.dumps(self.full_json))
+                f.write(json.dumps(self.full_json, ensure_ascii=False))
 
     # Save node picture to HTML
     def save2html(self):
@@ -689,7 +697,7 @@ class biliWorker(QThread):
     business_info = Signal(str)
     vq_list = Signal(str)
     aq_list = Signal(str)
-    media_list = Signal(str)
+    media_list = Signal(list)
     progr_bar = Signal(dict)
     is_finished = Signal(int)
     interact_info = Signal(dict)
@@ -765,85 +773,102 @@ class biliWorker(QThread):
 
     # Change /SS movie address
     def ssADDRCheck(self, inurl):
-        checking = re.findall('/play/ss', inurl.split("?")[0], re.S)
+        checking1 = re.findall('/play/ss', inurl.split("?")[0], re.S)
+        checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         try:
-            if checking != []:
+            if checking1 != []:
                 res = requests.get(inurl, headers=self.index_headers, stream=False, timeout=10)
                 dec = res.content.decode('utf-8')
                 INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
                 temp = json.loads(INITIAL_STATE[0])
                 self.index_url = temp["mediaInfo"]["episodes"][0]["link"]
-                return temp["mediaInfo"]["episodes"][0]["link"]
+                return 1, temp["mediaInfo"]["episodes"][0]["link"]
+            elif checking2 != []:
+                return 1, inurl
             else:
-                return inurl
+                return 0, inurl
         except Exception as e:
             print(e)
-            return inurl
+            return 0, inurl
 
     # Searching Key Word
     def search_preinfo(self, index_url):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
         try:
-            res = requests.get(index_url, headers=self.index_headers, stream=False, timeout=10)
+            res = requests.get(index_url[1], headers=self.index_headers, stream=False, timeout=10)
             dec = res.content.decode('utf-8')
         except:
             return 0, "", "", {}
         # Use RE to find Download JSON Data
         playinfo = re.findall(self.re_playinfo, dec, re.S)
         INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
-        # If Crawler can GET Data
-        if playinfo != [] and INITIAL_STATE != []:
-            try:
-                #print(playinfo[0])
-                re_init = json.loads(INITIAL_STATE[0])
-                re_GET = json.loads(playinfo[0])
-                # Get video name
-                vn1 = re.findall(self.vname_expression, dec, re.S)[0].split('>')[1]
-                vn2 = ""
-                if "videoData" in re_init:
-                    vn2 = re_init["videoData"]["pages"][re_init["p"] - 1]["part"]
-                elif "mediaInfo" in re_init:
-                    vn2 = re_init["epInfo"]["titleFormat"] + ":" + re_init["epInfo"]["longTitle"]
-                video_name = self.name_replace(vn1) + "_[" + self.name_replace(vn2) + "]"
-                # List Video Quality Table
-                temp_v = {}
-                for i in range(len(re_GET["data"]["accept_quality"])):
-                    temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
-                # List Video Download Quality
-                down_dic = {"video": {}, "audio": {}}
-                i = 0
-                # Get Video identity information and Initial SegmentBase.
-                #print(1)
-                for dic in re_GET["data"]["dash"]["video"]:
-                    if str(dic["id"]) in temp_v:
-                        qc = temp_v[str(dic["id"])]
-                        down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                        for a in range(len(dic["backupUrl"])):
-                            down_dic["video"][i][1].append(dic["backupUrl"][a])
-                        i += 1
-                    else:
-                        continue
-                # List Audio Stream
-                i = 0
-                #print(2)
-                for dic in re_GET["data"]["dash"]["audio"]:
-                    au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
-                    down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
-                                            'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
-                    i += 1
-                # Get Video Length
-                length = re_GET["data"]["dash"]["duration"]
-                # Return Data
-                # print(json.dumps(down_dic))
-                return 1, video_name, length, down_dic
-            except Exception as e:
-                print("PreInfo:",e)
-                return 0, "", "", {}
-        else:
+        if playinfo == [] or INITIAL_STATE == []:
+            print("Session等初始化信息获取失败。")
             return 0, "", "", {}
+        re_init = json.loads(INITIAL_STATE[0])
+        re_GET = json.loads(playinfo[0])
+        print(json.dumps(re_init))
+        if index_url[0] == 0:
+            now_cid = re_init["videoData"]["pages"][re_init["p"]-1]["cid"]
+            try:
+                makeurl = "https://api.bilibili.com/x/player/playurl?cid="+ str(now_cid) +\
+                          "&qn=116&type=&otype=json&fourk=1&bvid="+ re_init["bvid"] +\
+                          "&fnver=0&fnval=976&session=" + re_GET["session"]
+                self.second_headers['referer'] = index_url[1]
+                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10)
+                re_GET = json.loads(res.content.decode('utf-8'))
+                print(json.dumps(re_GET))
+            except Exception as e:
+                print("获取Playlist失败:",e)
+                return 0, "", "", {}
+        # If Crawler can GET Data
+        try:
+            # Get video name
+            vn1 = re.findall(self.vname_expression, dec, re.S)[0].split('>')[1]
+            vn2 = ""
+            if "videoData" in re_init:
+                vn2 = re_init["videoData"]["pages"][re_init["p"] - 1]["part"]
+            elif "mediaInfo" in re_init:
+                vn2 = re_init["epInfo"]["titleFormat"] + ":" + re_init["epInfo"]["longTitle"]
+            video_name = self.name_replace(vn1) + "_[" + self.name_replace(vn2) + "]"
+            # List Video Quality Table
+            temp_v = {}
+            for i in range(len(re_GET["data"]["accept_quality"])):
+                temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
+            # List Video Download Quality
+            down_dic = {"video": {}, "audio": {}}
+            i = 0
+            # Get Video identity information and Initial SegmentBase.
+            #print(1)
+            for dic in re_GET["data"]["dash"]["video"]:
+                if str(dic["id"]) in temp_v:
+                    qc = temp_v[str(dic["id"])]
+                    down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["video"][i][1].append(dic["backupUrl"][a])
+                    i += 1
+                else:
+                    continue
+            # List Audio Stream
+            i = 0
+            #print(2)
+            for dic in re_GET["data"]["dash"]["audio"]:
+                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
+                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
+                for a in range(len(dic["backupUrl"])):
+                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                i += 1
+            # Get Video Length
+            length = re_GET["data"]["dash"]["duration"]
+            # Return Data
+            # print(json.dumps(down_dic))
+            return 1, video_name, length, down_dic
+        except Exception as e:
+            print("PreInfo:",e)
+            return 0, "", "", {}
+
 
     # Search the list of Video download address.
     def search_videoList(self, index_url):
@@ -865,7 +890,7 @@ class biliWorker(QThread):
                     return 1, init_list
                 elif "mediaInfo" in re_init:
                     init_list["bvid"] = re_init["mediaInfo"]["media_id"]
-                    init_list["p"] = re_init["epInfo"]["i"]
+                    init_list["p"] = re_init["epInfo"]["i"] + 1
                     init_list["pages"] = re_init["mediaInfo"]["episodes"]
                     #print(init_list)
                     return 2, init_list
@@ -892,26 +917,35 @@ class biliWorker(QThread):
                     #self.business_info.emit("We Get!")
                     self.business_info.emit('当前需要下载的BV号为：{}'.format(preList[1]["bvid"]))
                     self.business_info.emit('当前BV包含视频数量为{}个'.format(len(preList[1]["pages"])))
-                    #self.business_info.emit('-----------具体分P视频名称与下载号-----------')
                     for sp in preList[1]["pages"]:
-                        self.media_list.emit("{}-->{}".format(sp["page"], sp["part"]))
+                        form_str = "{}-->{}".format(sp["page"], sp["part"])
+                        if sp["page"] == preList[1]["p"]:
+                            self.media_list.emit([1,form_str])
+                        else:
+                            self.media_list.emit([0,form_str])
                 elif preList[0] == 2:
                     # Show media pages
                     self.business_info.emit('当前需要下载的媒体号为：{}'.format(preList[1]["bvid"]))
                     self.business_info.emit('当前媒体包含视频数量为{}个'.format(len(preList[1]["pages"])))
                     #self.business_info.emit('-----------具体分P视频名称与下载号-----------')
+                    i = 0
                     for sp in preList[1]["pages"]:
-                        self.media_list.emit("{}-->{}".format(sp["title"], sp["share_copy"]))
+                        i += 1
+                        form_str = "{}-->{}".format(i, sp["share_copy"])
+                        if i == preList[1]["p"]:
+                            self.media_list.emit([1,form_str])
+                        else:
+                            self.media_list.emit([0, form_str])
                 self.business_info.emit('--------------------我是分割线--------------------')
                 # Show Video Download Detail
                 self.business_info.emit('当前下载视频名称：{}'.format(temp[1]))
                 self.business_info.emit('当前下载视频长度： {} 秒'.format(temp[2]))
                 #print('当前可下载视频流：')
                 for i in range(len(temp[3]["video"])):
-                    #print("{}-->视频画质：{}".format(i, temp[3]["video"][i][0]))
+                    # print("{}-->视频画质：{}".format(i, temp[3]["video"][i][0]))
                     self.vq_list.emit("{}.{}".format(i+1, temp[3]["video"][i][0]))
                 for i in range(len(temp[3]["audio"])):
-                    #print("{}-->音频编码：{}".format(i, temp[3]["audio"][i][0]))
+                    # print("{}-->音频编码：{}".format(i, temp[3]["audio"][i][0]))
                     self.aq_list.emit("{}.{}".format(i+1, temp[3]["audio"][i][0]))
                 return 1
             else:
@@ -1089,12 +1123,11 @@ class biliWorker(QThread):
 
     # For Download partition Video
     def Download_List(self):
-        # r_list = self.args2list()
         r_list = self.d_list
         all_list = self.search_videoList(self.index_url)
         preIndex = self.index_url.split("?")[0]
-        # print(2)
-        # print(all_list,r_list)
+        print(all_list,r_list)
+        print(preIndex)
         if all_list[0] == 1:
             if r_list[0] == 0:
                 for p in all_list[1]["pages"]:
@@ -1145,6 +1178,7 @@ class biliWorker(QThread):
     # 交互视频节点分析函数
     def interact_nodeList(self):
         self.business_info.emit("开始分析互动视频节点，若长时间（10分钟）未弹出画面说明互动视频存在循环或进程坏死，请退出本程序...")
+        self.business_info.emit("-----------------------------------------------------------------------------------------")
         self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
         self.Get_Init_Info(self.index_url)
         self.index_headers['referer'] = self.index_url
@@ -1152,8 +1186,8 @@ class biliWorker(QThread):
         self.isInteract()
         self.iv_structure = {}
         self.iv_structure[self.now_interact["vname"]] = {}
-        self.iv_structure[self.now_interact["vname"]] = self.recursion_GET_List()
-        self.business_info.emit("节点窗口加载中")
+        self.iv_structure[self.now_interact["vname"]] = self.recursion_GET_List("初始节点")
+        self.business_info.emit("节点探查完毕，窗口加载中...")
         return self.iv_structure
 
     # Interactive video download
@@ -1247,7 +1281,7 @@ class biliWorker(QThread):
             return False, "Get Download List Error."
 
     # Get interactive video node list (Use recursion algorithm)
-    def recursion_GET_List(self):
+    def recursion_GET_List(self, inword):
         temp = {"choices": {}}
         temp["cid"] = self.now_interact["cid"]
         if self.now_interact["node_id"] == "":
@@ -1269,8 +1303,8 @@ class biliWorker(QThread):
         for ch in desp["data"]["edges"]["choices"]:
             self.now_interact["cid"] = str(ch["cid"])
             self.now_interact["node_id"] = str(ch["node_id"])
-            # print(ch)
-            temp["choices"][ch["option"]] = self.recursion_GET_List()
+            self.business_info.emit(inword +"-->"+ch["option"])
+            temp["choices"][ch["option"]] = self.recursion_GET_List(inword +"-->"+ch["option"])
         return temp
 
     # Interactive video download processor (Use recursion algorithm)
