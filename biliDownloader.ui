@@ -297,8 +297,8 @@ QGroupBox::title{
       <bool>true</bool>
      </property>
      <property name="plainText">
-      <string>欢迎使用Bili Downloader V1.4.20211023
-Release at 2021/10/23 ......</string>
+      <string>欢迎使用Bili Downloader V1.4.20211028
+Release at 2021/10/28 ......</string>
      </property>
     </widget>
     <widget class="QGroupBox" name="groupBox">
