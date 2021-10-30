@@ -34,7 +34,7 @@
 
 ## 🎨软件界面 GUI
 
-![mainGUI](https://jimmyliang-lzm.github.io/2021/10/05/bilid_GUI_help/mainGUI.jpg)
+![mainGUI](https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/mainGUI.jpg)
 
 ## ⚖声明 Declaration
 
