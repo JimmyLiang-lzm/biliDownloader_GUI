@@ -1,6 +1,7 @@
 # BiliDownloader: BiliBili Video Downloader
 
 > 基于Python开发的可视化B站视频专用下载器（支持交互视频下载）
+> 
 > Visualized video downloader for BiliBili based on Python
 
 [![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/PySide2-5.15.4-green.svg) [![mavel](https://img.shields.io/badge/BiliDownloader-Command-pink.svg)](https://github.com/JimmyLiang-lzm/biliDownloader)
@@ -11,10 +12,10 @@
 * Beautiful screen, friendly interactive experience
 * 下载兼容性好，若主下载线路阻塞，软件将自动选择备用线路进行下载
 * Well download compatibility, automatically select the alternate line when the main line is blocked
-* 可自动合并音画分离的视频流
-* Merge the stream of video and audio, automatically
-* 可获取并下载不同清晰度的音视频流
-* Can obtain and download audio and video streams of different definitions
+* 可自动合并音画分离的视频流（支持杜比视界视频合成）
+* Merge the stream of video and audio, automatically.(Dolby Vision Video is supported)
+* 可获取并下载不同清晰度的音视频流（从360P到杜比视界全部支持下载）
+* Can obtain and download audio and video streams of different definitions.(Include 360P to Dolby Vision)
 * 可下载付费番剧或高质量视频（需要大会员Cookie）
 * Paid series or high-quality videos can be downloaded (VIP Cookie required)
 * 可进行分P视频批量下载
@@ -33,7 +34,7 @@
 
 ## 🎨软件界面 GUI
 
-![mainGUI](https://jimmyliang-lzm.github.io/2021/10/05/bilid_GUI_help/mainGUI.jpg)
+![mainGUI](https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/mainGUI.jpg)
 
 ## ⚖声明 Declaration
 
