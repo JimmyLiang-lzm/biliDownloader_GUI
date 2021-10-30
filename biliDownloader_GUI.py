@@ -8,13 +8,29 @@ from pyecharts import options as opts
 from pyecharts.charts import Tree
 import biliDownloader, bilidabout, bilidsetting, biliInteractive
 
+# Release Information
+Release_INFO = ["V1.5.20211030","2021/10/30"]
+
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
 Objective_setting = bilidsetting.Ui_Form
 Objective_about = bilidabout.Ui_Form
 Objective_interact = biliInteractive.Ui_Form
 DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
-indict = {"Address":"","DownList":[],"VideoQuality":0,"AudioQuality":0,"Output":"","Synthesis":1,"sys":"","cookie":"","sym":True,"useCookie":False}
+indict = {
+    "Address":"",
+    "DownList":[],
+    "VideoQuality":0,
+    "AudioQuality":0,
+    "Output":"",
+    "Synthesis":1,
+    "sys":"",
+    "cookie":"",
+    "sym":True,
+    "useCookie":False,
+    "useProxy":False,
+    "Proxy": {'http': '','https':'',}
+}
 
 # Mainwindow Class
 class MainWindow(QMainWindow,Objective):
@@ -48,7 +64,7 @@ class MainWindow(QMainWindow,Objective):
         self.btn_download.clicked.connect(self.download)
         self.btn_pause.clicked.connect(self.pause_download)
         self.btn_stop.clicked.connect(self.stop_download)
-        self.btn_changecookie.clicked.connect(self.set_cookie)
+        self.btn_changeconfig.clicked.connect(self.set_config)
         self.btn_help.clicked.connect(self.forHELP)
         self.btn_about.clicked.connect(self.openAbout)
         # 默认目录
@@ -58,6 +74,8 @@ class MainWindow(QMainWindow,Objective):
                 indict["sys"] = tempr["sys"]
                 indict["cookie"] = tempr["cookie"]
                 indict["Output"] = tempr["output"]
+                indict["useProxy"] = tempr["useProxy"]
+                indict["Proxy"] = tempr["Proxy"]
                 if tempr["UseCookie"]:
                     indict["useCookie"] = True
                     self.checkBox_usecookie.setChecked(True)
@@ -74,7 +92,10 @@ class MainWindow(QMainWindow,Objective):
             indict["Output"] = DF_Path
             indict["sys"] = sys.platform
             self.checkBox_sym.setChecked(True)
+        # 部分显示初始化
         self.lineEdit_dir.setText(indict["Output"])
+        self.plainTextEdit.setPlainText("欢迎使用Bili Downloader {}\nRelease at {} ......"
+                                        .format(Release_INFO[0],Release_INFO[1]))
 
     ####################### RW Part ##########################
     # 鼠标点击事件产生
@@ -92,7 +113,15 @@ class MainWindow(QMainWindow,Objective):
     # 退出事件记录
     def closeEvent(self,QCloseEvent):
         with open(DF_Path + '/setting.conf', 'w', encoding='utf-8') as f:
-            temp_dict = {"UseCookie":indict["useCookie"],"synthesis":indict["sym"],"cookie":indict["cookie"],"sys":indict["sys"],"output":indict["Output"]}
+            temp_dict = {
+                "UseCookie":indict["useCookie"],
+                "synthesis":indict["sym"],
+                "cookie":indict["cookie"],
+                "sys":indict["sys"],
+                "output":indict["Output"],
+                "useProxy":indict["useProxy"],
+                "Proxy":indict["Proxy"]
+            }
             f.write(json.dumps(temp_dict,sort_keys=True,indent=4))
             f.close()
 
@@ -213,10 +242,10 @@ class MainWindow(QMainWindow,Objective):
         if self.threadBusy:
             self.tes.close_process()
 
-    # 打开设置Cookie窗口函数
-    def set_cookie(self):
+    # 打开高级设置窗口函数
+    def set_config(self):
         if not self.threadBusy:
-            self.setting_win = SettingWindow(indict["cookie"])
+            self.setting_win = SettingWindow(indict)
             self.setting_win._signal.connect(self.setWindow_catch)
             self.setWindowOPEN = True
             self.setting_win.show()
@@ -360,11 +389,12 @@ class MainWindow(QMainWindow,Objective):
             self.btn_pause.setEnabled(True)
             self.btn_stop.setEnabled(True)
 
-    # VIP Cookie窗口交互接收槽函数
+    # 高级设置窗口交互接收槽函数
     def setWindow_catch(self, in_dict):
+        global indict
         if in_dict["code"] == 1:
-            indict["cookie"] = in_dict["cookie"]
-            self.plainTextEdit.appendPlainText('已成功修改Cookie')
+            indict = in_dict["indict"]
+            self.plainTextEdit.appendPlainText('设置成功（成功修改cookie与网络代理）')
             QApplication.processEvents()
         elif in_dict["code"] == 0:
             self.setWindowOPEN = False
@@ -373,13 +403,16 @@ class MainWindow(QMainWindow,Objective):
 
 
 ############################################################################################
-# Cookie设置窗口类
+# 高级设置窗口类
 class SettingWindow(QWidget,Objective_setting):
     _signal = Signal(dict)
-    def __init__(self, incookie, parent=None):
+    def __init__(self, ins_dict, parent=None):
         super(SettingWindow,self).__init__(parent)
         self.setupUi(self)
-        self.edit_cookies.setPlainText(incookie)
+        self.ins_dict = ins_dict
+        self.edit_cookies.setPlainText(ins_dict["cookie"])
+        self.cb_useProxy.setChecked(ins_dict["useProxy"])
+        self.lineEdit.setText(ins_dict["Proxy"]["http"])
         # 设置窗口透明
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
@@ -393,9 +426,12 @@ class SettingWindow(QWidget,Objective_setting):
         self.setGraphicsEffect(effect)
         # 连接器
         self.btnmin.clicked.connect(lambda: self.showMinimized())
-        self.btn_editcookie.clicked.connect(self.setCookie)
+        self.btn_cancel.clicked.connect(lambda: self.close())
+        self.btn_editconfig.clicked.connect(self.setConfig)
         self.btn_cleanplain.clicked.connect(self.clearTEXT)
         self.btn_wherecookie.clicked.connect(self.forHelp)
+        self.btn_testProxy.clicked.connect(self.testProxy)
+        self.btn_huseProxy.clicked.connect(self.ProxyHelp)
     ####################### RW Part ##########################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
@@ -414,10 +450,27 @@ class SettingWindow(QWidget,Objective_setting):
         self._signal.emit({"code":0})
 
     ####################### BS Part ##########################
-    # 设置Cookie
-    def setCookie(self):
-        cookie = self.edit_cookies.toPlainText()
-        self._signal.emit({"code":1,"cookie":cookie})
+    # 测试代理函数
+    def testProxy(self):
+        proxy_url = self.lineEdit.text()
+        proxy_temp = {'http': proxy_url,'https':proxy_url,}
+        self.ts = checkProxy(proxy_temp)
+        self.lineEdit.setEnabled(False)
+        self.btn_testProxy.setEnabled(False)
+        self.btn_testProxy.setText("正在检测")
+        self.ts._feedback.connect(self.proxy_catch)
+        self.ts.start()
+
+    # 确定设置函数
+    def setConfig(self):
+        self.ins_dict["cookie"] = self.edit_cookies.toPlainText()
+        if self.cb_useProxy.isChecked():
+            self.ins_dict["useProxy"] = True
+        else:
+            self.ins_dict["useProxy"] = False
+        proxy_url = self.lineEdit.text()
+        self.ins_dict["Proxy"] = {'http': proxy_url,'https':proxy_url,}
+        self._signal.emit({"code":1,"indict":self.ins_dict})
         self.close()
 
     # 清空编辑框
@@ -427,6 +480,25 @@ class SettingWindow(QWidget,Objective_setting):
     # 帮助按钮
     def forHelp(self):
         webbrowser.open("https://zmtechn.gitee.io/2021/10/05/Get_bilibili_cookie/")
+
+    # 代理帮助按钮
+    def ProxyHelp(self):
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/#3-5-“僅限港澳台地區”视频下载")
+
+    ########################### 槽函数 ################################
+    # 代理地址测试线程槽函数
+    def proxy_catch(self, in_dict):
+        if in_dict["code"] == 1:
+            text_temp = "测试状态：成功 地区：" + in_dict["area"] + " IP:" + in_dict["ip"]
+            self.lineEdit_test.setText(text_temp)
+            self.lineEdit.setEnabled(True)
+            self.btn_testProxy.setText("测试地址")
+            self.btn_testProxy.setEnabled(True)
+        else:
+            self.lineEdit_test.setText("测试状态：连接失败")
+            self.lineEdit.setEnabled(True)
+            self.btn_testProxy.setText("测试地址")
+            self.btn_testProxy.setEnabled(True)
 
 
 ############################################################################################
@@ -451,6 +523,9 @@ class AboutWindow(QWidget, Objective_about):
         self.btn_access.clicked.connect(self.accessWeb)
         self.btn_latest.clicked.connect(self.checkLatest)
         self.btn_bugCall.clicked.connect(self.callBUG)
+        # 初始化显示设置
+        self.lab_version.setText(Release_INFO[0])
+        self.label_6.setText(Release_INFO[1])
 
     ####################### RW Part #######################
     # 鼠标点击事件产生
@@ -513,11 +588,9 @@ class InteractWindow(QWidget, Objective_interact):
         self.ivideo_name = self.name_replace(vname)
         self.lineEdit_height.setValidator(QIntValidator())
         self.lineEdit_width.setValidator(QIntValidator())
-        # print("Initial OK.")
         # 设置窗口透明
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        # print("Set Trans OK.")
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 连接器
@@ -529,13 +602,10 @@ class InteractWindow(QWidget, Objective_interact):
         # 数据初始化
         self.full_json = full_iv
         self.chartdict = self.recursion_for_chart(full_iv)
-        # print("Get Chart Dict OK.")
         self.info_Init(full_iv,self.treeWidget_4)
         self.treeWidget_4.expandToDepth(2)
-        # print("Init treewidget OK.")
         self.draw_chart("670","420",self.chartdict)
         self.show_chart()
-        # print("Show Chart OK.")
 
 
     ####################### RW Part #######################
@@ -671,11 +741,18 @@ class checkLatest(QThread):
         super(checkLatest, self).__init__()
         self.lab_version = inVer
 
+    def ver2num(self,inVer):
+        temp = inVer.replace("V","").split(".")
+        temp = int(temp[0] + temp[1] + temp[2])
+        return temp
+
     def run(self):
         try:
             des = requests.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json",timeout=5)
             res = json.loads(des.content.decode('utf-8'))["biliDownloader_GUI"]
-            if res == self.lab_version:
+            latestVer = self.ver2num(res)
+            myVer = self.ver2num(self.lab_version)
+            if latestVer <= myVer:
                 self._feedback.emit(0)
                 sleep(2)
                 self._feedback.emit(-1)
@@ -688,6 +765,30 @@ class checkLatest(QThread):
             self._feedback.emit(2)
             sleep(2)
             self._feedback.emit(-1)
+
+
+############################################################################################
+# 测试代理地址防阻滞线程类
+class checkProxy(QThread):
+    _feedback = Signal(dict)
+    def __init__(self, in_Proxy):
+        super(checkProxy, self).__init__()
+        self.use_Proxy = in_Proxy
+        self.index_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+        }
+
+    def run(self):
+        try:
+            temp = {"code":1}
+            des = requests.get("https://api.bilibili.com/x/player/v2?cid=429970170&aid=891280356&bvid=BV1aP4y1b79t",
+                               headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
+            res = json.loads(des.content.decode('utf-8'))["data"]["ip_info"]
+            temp["ip"] = res["ip"]
+            temp["area"] = res["country"]
+            self._feedback.emit(temp)
+        except Exception as e:
+            self._feedback.emit({"code":-1,"message":"测试失败"})
 
 
 ############################################################################################
@@ -739,6 +840,10 @@ class biliWorker(QThread):
         else:
             self.index_headers["cookie"] = ""
             self.second_headers["cookie"] = ""
+        if args["useProxy"]:
+            self.Proxy = args["Proxy"]
+        else:
+            self.Proxy = {}
 
     # 运行模式设置函数
     def model_set(self, innum):
@@ -777,7 +882,7 @@ class biliWorker(QThread):
         checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         try:
             if checking1 != []:
-                res = requests.get(inurl, headers=self.index_headers, stream=False, timeout=10)
+                res = requests.get(inurl, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                 dec = res.content.decode('utf-8')
                 INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
                 temp = json.loads(INITIAL_STATE[0])
@@ -796,7 +901,7 @@ class biliWorker(QThread):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
         try:
-            res = requests.get(index_url[1], headers=self.index_headers, stream=False, timeout=10)
+            res = requests.get(index_url[1], headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
         except:
             return 0, "", "", {}
@@ -816,7 +921,7 @@ class biliWorker(QThread):
                           "&qn=116&type=&otype=json&fourk=1&bvid="+ re_init["bvid"] +\
                           "&fnver=0&fnval=976&session=" + re_GET["session"]
                 self.second_headers['referer'] = index_url[1]
-                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10)
+                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
                 re_GET = json.loads(res.content.decode('utf-8'))
                 print(json.dumps(re_GET))
             except Exception as e:
@@ -873,7 +978,7 @@ class biliWorker(QThread):
     # Search the list of Video download address.
     def search_videoList(self, index_url):
         try:
-            res = requests.get(index_url, headers=self.index_headers, stream=False, timeout=10)
+            res = requests.get(index_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
         except:
             return 0, {}
@@ -899,7 +1004,6 @@ class biliWorker(QThread):
             except Exception as e:
                 print("videoList:",e)
                 return 0, {}
-
         else:
             return 0, {}
 
@@ -949,7 +1053,12 @@ class biliWorker(QThread):
                     self.aq_list.emit("{}.{}".format(i+1, temp[3]["audio"][i][0]))
                 return 1
             else:
-                self.business_info.emit("尚未找到源地址，请检查网站地址或充值大会员！")
+                self.business_info.emit("未找到视频资源，请您确认以下条件是否满足：\n"
+                                        "1.计算机已联网并能正常访问到B站；\n"
+                                        "2.您已经使用VIP Cookie进行下载；\n"
+                                        "3.区域限制类视频您已配置有效的代理地址；\n"
+                                        "4.视频资源能在浏览器里能被正常访问到。\n"
+                                        "若您确定已经满足以上条件，请及时进入“关于程序”界面反馈BUG。")
                 return 0
         except Exception as e:
             print(e)
@@ -962,7 +1071,7 @@ class biliWorker(QThread):
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
                 # video stream length sniffing
-                video_bytes = requests.get(line, headers=self.second_headers, stream=False, timeout=(5,10))
+                video_bytes = requests.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
                 self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
@@ -972,7 +1081,7 @@ class biliWorker(QThread):
                 while(err <= 3):
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
-                        m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10)
+                        m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
                         proc["Max"] = int(vc_range)
                         self.progr_bar.emit(proc)
                         if not os.path.exists(output_dir):
@@ -1006,7 +1115,7 @@ class biliWorker(QThread):
         return 1
 
 
-    # FFMPEG Synthesis fuction
+    # FFMPEG Synthesis Function
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
         ffcommand = ""
         if self.systemd == "win32":
@@ -1204,7 +1313,7 @@ class biliWorker(QThread):
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = requests.get(url, headers=self.index_headers, stream=False,timeout=10)
+            res = requests.get(url, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -1225,7 +1334,7 @@ class biliWorker(QThread):
         make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + \
                    self.now_interact["bvid"]
         try:
-            res = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            res = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -1241,7 +1350,7 @@ class biliWorker(QThread):
                        "bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
                    self.now_interact["session"]
         try:
-            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             playinfo = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             return False, str(e)
@@ -1292,7 +1401,7 @@ class biliWorker(QThread):
                 "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
                            "node_id"]
         try:
-            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10)
+            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             desp = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")

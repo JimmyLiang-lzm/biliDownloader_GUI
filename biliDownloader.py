@@ -264,9 +264,9 @@ class Ui_MainWindow(object):
         self.checkBox_usecookie = QCheckBox(self.groupBox)
         self.checkBox_usecookie.setObjectName(u"checkBox_usecookie")
         self.checkBox_usecookie.setGeometry(QRect(300, 60, 141, 31))
-        self.btn_changecookie = QPushButton(self.groupBox)
-        self.btn_changecookie.setObjectName(u"btn_changecookie")
-        self.btn_changecookie.setGeometry(QRect(300, 90, 131, 31))
+        self.btn_changeconfig = QPushButton(self.groupBox)
+        self.btn_changeconfig.setObjectName(u"btn_changeconfig")
+        self.btn_changeconfig.setGeometry(QRect(300, 90, 131, 31))
         self.title = QFrame(self.mainwidget)
         self.title.setObjectName(u"title")
         self.title.setGeometry(QRect(40, 20, 371, 61))
@@ -295,8 +295,8 @@ class Ui_MainWindow(object):
         self.btnclose.setText("")
         self.btnmax.setText("")
         self.btnmin.setText("")
-        self.plainTextEdit.setPlainText(QCoreApplication.translate("MainWindow", u"\u6b22\u8fce\u4f7f\u7528Bili Downloader V1.4.20211028\n"
-"Release at 2021/10/28 ......", None))
+        self.plainTextEdit.setPlainText(QCoreApplication.translate("MainWindow", u"\u6b22\u8fce\u4f7f\u7528Bili Downloader V1.2.20211005\n"
+"Release at 2021/10/06 ......", None))
         self.groupBox.setTitle(QCoreApplication.translate("MainWindow", u"\u64cd\u4f5c\u6846", None))
         self.btn_download.setText(QCoreApplication.translate("MainWindow", u"\u4e0b\u8f7d\u8d44\u6e90", None))
         self.checkBox_sym.setText(QCoreApplication.translate("MainWindow", u"FFMPEG\u5408\u6210", None))
@@ -312,7 +312,7 @@ class Ui_MainWindow(object):
         self.btn_stop.setText(QCoreApplication.translate("MainWindow", u"\u505c\u6b62\u4e0b\u8f7d", None))
         self.btn_selectALL.setText(QCoreApplication.translate("MainWindow", u"\u5168\u9009", None))
         self.checkBox_usecookie.setText(QCoreApplication.translate("MainWindow", u"\u4f7f\u7528VIP Cookie", None))
-        self.btn_changecookie.setText(QCoreApplication.translate("MainWindow", u"\u4fee\u6539Cookie", None))
+        self.btn_changeconfig.setText(QCoreApplication.translate("MainWindow", u"\u9ad8\u7ea7\u8bbe\u7f6e", None))
         self.btn_about.setText(QCoreApplication.translate("MainWindow", u"\u5173\u4e8e", None))
         self.btn_help.setText(QCoreApplication.translate("MainWindow", u"\u5e2e\u52a9", None))
     # retranslateUi

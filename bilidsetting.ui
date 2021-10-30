@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>288</height>
+    <width>620</width>
+    <height>461</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>修改Cookie</string>
+   <string>高级设置</string>
   </property>
   <property name="windowIcon">
    <iconset resource="images_dl.qrc">
@@ -171,16 +171,16 @@ QFrame#title{
   <widget class="QWidget" name="mainwidget" native="true">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>30</y>
-     <width>471</width>
-     <height>231</height>
+     <x>40</x>
+     <y>40</y>
+     <width>531</width>
+     <height>371</height>
     </rect>
    </property>
    <widget class="QPushButton" name="btnmax">
     <property name="geometry">
      <rect>
-      <x>400</x>
+      <x>460</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -196,7 +196,7 @@ QFrame#title{
    <widget class="QPushButton" name="btnclose">
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>490</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -212,7 +212,7 @@ QFrame#title{
    <widget class="QPushButton" name="btnmin">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>430</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -250,59 +250,194 @@ QFrame#title{
 </string>
     </property>
     <property name="text">
-     <string>修改Cookie</string>
+     <string>高级设置</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="edit_cookies">
+   <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>60</y>
-      <width>411</width>
-      <height>101</height>
+      <y>190</y>
+      <width>471</width>
+      <height>121</height>
      </rect>
     </property>
-    <property name="placeholderText">
-     <string>请在此输入您在浏览器中复制的Cookie</string>
+    <property name="title">
+     <string>Cookie修改</string>
     </property>
+    <widget class="QPushButton" name="btn_cleanplain">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>30</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>清空</string>
+     </property>
+    </widget>
+    <widget class="QPlainTextEdit" name="edit_cookies">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>311</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>请在此输入您在浏览器中复制的Cookie</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_wherecookie">
+     <property name="geometry">
+      <rect>
+       <x>340</x>
+       <y>70</y>
+       <width>111</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Cookie在哪？</string>
+     </property>
+    </widget>
    </widget>
-   <widget class="QPushButton" name="btn_editcookie">
+   <widget class="QGroupBox" name="groupBox_2">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>180</y>
-      <width>111</width>
-      <height>31</height>
+      <y>50</y>
+      <width>471</width>
+      <height>121</height>
      </rect>
     </property>
-    <property name="text">
-     <string>修改Cookie</string>
+    <property name="title">
+     <string>代理设置</string>
     </property>
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>30</y>
+       <width>301</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>输入代理地址</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>72</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>代理地址</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_testProxy">
+     <property name="geometry">
+      <rect>
+       <x>360</x>
+       <y>30</y>
+       <width>93</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>测试地址</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_useProxy">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>101</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>使用代理</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_huseProxy">
+     <property name="geometry">
+      <rect>
+       <x>332</x>
+       <y>70</y>
+       <width>121</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>如何使用代理？</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_test">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>70</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">/* 编辑框样式 */
+QLineEdit{
+	border-radius: 15px;
+	border: 2px solid rgb(255, 153, 153);
+	padding-left: 5px;
+	padding-right: 5px;
+}</string>
+     </property>
+     <property name="text">
+      <string>测试状态：未测试</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
-   <widget class="QPushButton" name="btn_wherecookie">
+   <widget class="QPushButton" name="btn_editconfig">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>180</y>
-      <width>111</width>
+      <x>200</x>
+      <y>320</y>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Cookie在哪？</string>
+     <string>确定设置</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_cleanplain">
+   <widget class="QPushButton" name="btn_cancel">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>180</y>
-      <width>111</width>
+      <x>360</x>
+      <y>320</y>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>清空</string>
+     <string>取消设置</string>
     </property>
    </widget>
   </widget>
