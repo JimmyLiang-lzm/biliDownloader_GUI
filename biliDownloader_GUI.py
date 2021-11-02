@@ -9,7 +9,7 @@ from pyecharts.charts import Tree
 import biliDownloader, bilidabout, bilidsetting, biliInteractive
 
 # Release Information
-Release_INFO = ["V1.5.20211030","2021/10/30"]
+Release_INFO = ["V1.5.20211102","2021/11/03"]
 
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
@@ -42,6 +42,7 @@ class MainWindow(QMainWindow,Objective):
         self.allSelect = False
         self.setWindowOPEN = False
         self.isInteractive = False
+        self.isAudio = False
         self.bu_info_count = 0
         # 设置窗口透明
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
@@ -130,9 +131,13 @@ class MainWindow(QMainWindow,Objective):
     def Get_preInfo(self):
         #print(indict)
         indict["Address"] = self.source_search.text()
+        # 无信息状态恢复
+        self.haveINFO = False
+        self.isAudio = False
         self.combo_vq.clear()
         self.combo_aq.clear()
         self.media_list.clear()
+        # 启动线程
         self.tes = biliWorker(indict,0)
         self.tes.business_info.connect(self.businINFO_Catch)
         self.tes.vq_list.connect(self.vqulityList)
@@ -189,25 +194,7 @@ class MainWindow(QMainWindow,Objective):
     # 下载视频按钮事件处理函数
     def download(self):
         if self.haveINFO:
-            if not self.isInteractive:
-                count = self.media_list.count()
-                indict["DownList"] = []
-                for i in range(count):
-                    if self.media_list.itemWidget(self.media_list.item(i)).isChecked():
-                        indict["DownList"].append(i+1)
-                indict["VideoQuality"] = self.combo_vq.currentIndex()
-                indict["AudioQuality"] = self.combo_aq.currentIndex()
-                indict["Output"] = self.lineEdit_dir.text()
-                self.btn_download.setEnabled(False)
-                self.btn_search.setEnabled(False)
-                self.speedCalc(0)
-                self.tes = biliWorker(indict,1)
-                self.tes.business_info.connect(self.businINFO_Catch)
-                self.tes.progr_bar.connect(self.progress_Bar)
-                self.tes.is_finished.connect(self.thread_finished)
-                self.threadBusy = True
-                self.tes.start()
-            else:
+            if self.isInteractive:
                 indict["DownList"] = []
                 indict["VideoQuality"] = self.combo_vq.currentIndex()
                 indict["AudioQuality"] = self.combo_aq.currentIndex()
@@ -217,12 +204,33 @@ class MainWindow(QMainWindow,Objective):
                 self.btn_pause.setEnabled(False)
                 self.btn_stop.setEnabled(False)
                 self.speedCalc(0)
-                self.tes = biliWorker(indict,2)
+                self.tes = biliWorker(indict, 2)
                 self.tes.business_info.connect(self.businINFO_Catch)
                 self.tes.progr_bar.connect(self.progress_Bar)
                 self.tes.is_finished.connect(self.thread_finished)
                 self.tes.interact_info.connect(self.interact_Catch)
-                self.tes.Set_Structure(self.now_interact,{})
+                self.tes.Set_Structure(self.now_interact, {})
+                self.threadBusy = True
+                self.tes.start()
+            else:
+                count = self.media_list.count()
+                indict["DownList"] = []
+                for i in range(count):
+                    if self.media_list.itemWidget(self.media_list.item(i)).isChecked():
+                        indict["DownList"].append(i + 1)
+                indict["VideoQuality"] = self.combo_vq.currentIndex()
+                indict["AudioQuality"] = self.combo_aq.currentIndex()
+                indict["Output"] = self.lineEdit_dir.text()
+                self.btn_download.setEnabled(False)
+                self.btn_search.setEnabled(False)
+                self.speedCalc(0)
+                if self.isAudio:
+                    self.tes = biliWorker(indict, 4)
+                else:
+                    self.tes = biliWorker(indict, 1)
+                self.tes.business_info.connect(self.businINFO_Catch)
+                self.tes.progr_bar.connect(self.progress_Bar)
+                self.tes.is_finished.connect(self.thread_finished)
                 self.threadBusy = True
                 self.tes.start()
 
@@ -383,11 +391,23 @@ class MainWindow(QMainWindow,Objective):
             self.haveINFO = False
             self.btn_search.setEnabled(True)
             self.groupBox.setEnabled(True)
+            self.plainTextEdit.appendPlainText("未找到视频资源，请您确认以下条件是否满足：\n"
+                                        "1.计算机已联网并能正常访问到B站；\n"
+                                        "2.您已经使用VIP Cookie进行下载；\n"
+                                        "3.区域限制类视频您已配置有效的代理地址；\n"
+                                        "4.视频资源能在浏览器里能被正常访问到。\n"
+                                        "若您确定已经满足以上条件，请及时进入“关于程序”界面反馈BUG。")
         elif inum == 3:
             self.btn_download.setEnabled(True)
             self.btn_search.setEnabled(True)
             self.btn_pause.setEnabled(True)
             self.btn_stop.setEnabled(True)
+        elif inum == 4:
+            self.haveINFO = True
+            self.btn_search.setEnabled(True)
+            self.groupBox.setEnabled(True)
+            self.isAudio = True
+
 
     # 高级设置窗口交互接收槽函数
     def setWindow_catch(self, in_dict):
@@ -414,6 +434,7 @@ class SettingWindow(QWidget,Objective_setting):
         self.cb_useProxy.setChecked(ins_dict["useProxy"])
         self.lineEdit.setText(ins_dict["Proxy"]["http"])
         # 设置窗口透明
+        self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # 设置鼠标动作位置
@@ -508,6 +529,7 @@ class AboutWindow(QWidget, Objective_about):
         super(AboutWindow, self).__init__(parent)
         self.setupUi(self)
         # 设置窗口透明
+        self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # 设置鼠标动作位置
@@ -552,10 +574,6 @@ class AboutWindow(QWidget, Objective_about):
         self.cl._feedback.connect(self.verShow)
         self.cl.start()
 
-    # 访问发布页面函数
-    def accessRelease(self):
-        webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases")
-
     # 打开BUG反馈ISSUE页面
     def callBUG(self):
         webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/issues")
@@ -589,6 +607,7 @@ class InteractWindow(QWidget, Objective_interact):
         self.lineEdit_height.setValidator(QIntValidator())
         self.lineEdit_width.setValidator(QIntValidator())
         # 设置窗口透明
+        self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         # 设置鼠标动作位置
@@ -623,7 +642,7 @@ class InteractWindow(QWidget, Objective_interact):
 
     # 定义关闭事件
     def closeEvent(self, QCloseEvent):
-        print(self.feedback_dict)
+        # print(self.feedback_dict)
         self._Signal.emit(self.feedback_dict)
 
     ########################## BS PART #############################
@@ -758,7 +777,7 @@ class checkLatest(QThread):
                 self._feedback.emit(-1)
             else:
                 self._feedback.emit(1)
-                webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases")
+                webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases/latest")
                 sleep(2)
         except Exception as e:
             print(e)
@@ -878,6 +897,7 @@ class biliWorker(QThread):
 
     # Change /SS movie address
     def ssADDRCheck(self, inurl):
+        # checking1:番剧首页视频地址检查； checking2:番剧单个视频地址检查
         checking1 = re.findall('/play/ss', inurl.split("?")[0], re.S)
         checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         try:
@@ -904,6 +924,7 @@ class biliWorker(QThread):
             res = requests.get(index_url[1], headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
         except:
+            print("初始化信息获取失败。")
             return 0, "", "", {}
         # Use RE to find Download JSON Data
         playinfo = re.findall(self.re_playinfo, dec, re.S)
@@ -911,9 +932,10 @@ class biliWorker(QThread):
         if playinfo == [] or INITIAL_STATE == []:
             print("Session等初始化信息获取失败。")
             return 0, "", "", {}
+        # Bangumi Video
         re_init = json.loads(INITIAL_STATE[0])
         re_GET = json.loads(playinfo[0])
-        print(json.dumps(re_init))
+        # Normal Video
         if index_url[0] == 0:
             now_cid = re_init["videoData"]["pages"][re_init["p"]-1]["cid"]
             try:
@@ -923,7 +945,7 @@ class biliWorker(QThread):
                 self.second_headers['referer'] = index_url[1]
                 res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
                 re_GET = json.loads(res.content.decode('utf-8'))
-                print(json.dumps(re_GET))
+                # print(json.dumps(re_GET))
             except Exception as e:
                 print("获取Playlist失败:",e)
                 return 0, "", "", {}
@@ -945,7 +967,6 @@ class biliWorker(QThread):
             down_dic = {"video": {}, "audio": {}}
             i = 0
             # Get Video identity information and Initial SegmentBase.
-            #print(1)
             for dic in re_GET["data"]["dash"]["video"]:
                 if str(dic["id"]) in temp_v:
                     qc = temp_v[str(dic["id"])]
@@ -957,7 +978,6 @@ class biliWorker(QThread):
                     continue
             # List Audio Stream
             i = 0
-            #print(2)
             for dic in re_GET["data"]["dash"]["audio"]:
                 au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
                 down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
@@ -968,7 +988,6 @@ class biliWorker(QThread):
             # Get Video Length
             length = re_GET["data"]["dash"]["duration"]
             # Return Data
-            # print(json.dumps(down_dic))
             return 1, video_name, length, down_dic
         except Exception as e:
             print("PreInfo:",e)
@@ -1053,12 +1072,6 @@ class biliWorker(QThread):
                     self.aq_list.emit("{}.{}".format(i+1, temp[3]["audio"][i][0]))
                 return 1
             else:
-                self.business_info.emit("未找到视频资源，请您确认以下条件是否满足：\n"
-                                        "1.计算机已联网并能正常访问到B站；\n"
-                                        "2.您已经使用VIP Cookie进行下载；\n"
-                                        "3.区域限制类视频您已配置有效的代理地址；\n"
-                                        "4.视频资源能在浏览器里能被正常访问到。\n"
-                                        "若您确定已经满足以上条件，请及时进入“关于程序”界面反馈BUG。")
                 return 0
         except Exception as e:
             print(e)
@@ -1110,8 +1123,9 @@ class biliWorker(QThread):
             except Exception as e:
                 print(e)
                 self.business_info.emit("{}出错：{}".format(dest,e))
-                print(proc)
-                os.remove(output_file)
+                # print(proc)
+                if os.path.exists(output_file):
+                    os.remove(output_file)
         return 1
 
 
@@ -1235,8 +1249,8 @@ class biliWorker(QThread):
         r_list = self.d_list
         all_list = self.search_videoList(self.index_url)
         preIndex = self.index_url.split("?")[0]
-        print(all_list,r_list)
-        print(preIndex)
+        # print(all_list,r_list)
+        # print(preIndex)
         if all_list[0] == 1:
             if r_list[0] == 0:
                 for p in all_list[1]["pages"]:
@@ -1272,7 +1286,7 @@ class biliWorker(QThread):
         else:
             self.business_info.emit("未找到视频列表信息。")
 
-###################################################################
+    ###################################################################
     # 交互进程初始数据获取函数
     def interact_preinfo(self):
         self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
@@ -1438,19 +1452,171 @@ class biliWorker(QThread):
                 self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
             self.recursion_for_Download(json_list[ch]["choices"], output)
         return 0
-############################################################
+
+    ###################################################################
+    # 音频进程
+    def search_AUPreinfo(self, au_url):
+        # check1:音乐歌单页面检测；check2:单个音乐页面检测
+        check1 = re.findall(r'/audio/am(\d+)', au_url, re.S)
+        check2 = re.findall(r'/audio/au(\d+)', au_url, re.S)
+        if check1 != []:
+            # print(check1[0])
+            temps = self.AuList_Maker(check1[0], 2)
+            if temps[0]:
+                # print(json.dumps(temps[1]))
+                return 1, temps[1]
+            else:
+                return 0, "Audio List Get Error."
+        elif check2 != []:
+            # print(check2[0])
+            temps = self.AuList_Maker(check2[0], 1)
+            if temps[0]:
+                # print(json.dumps(temps[1]))
+                return 2, temps[1]
+            else:
+                return 0, "Audio Single Get Error."
+        else:
+            print("Is NOT Music.")
+            return 0, {}
+
+    def AuList_Maker(self, sid, modeNUM):
+        list_dict = {"audio":[],"total":0}
+        if modeNUM == 1:
+            try:
+                makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=" + sid
+                res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                des = res.content.decode('utf-8')
+                auinfo = json.loads(des)["data"]
+                temp = {}
+                temp["title"] = auinfo["title"]+"_"+auinfo["author"]
+                temp["sid"] = sid
+                temp["cover"] = auinfo["cover"]
+                temp["duration"] = auinfo["duration"]
+                temp["lyric"] = auinfo["lyric"]
+                list_dict["audio"].append(temp)
+                list_dict["total"] = 1
+            except Exception as e:
+                print("AuList_Maker_Single:",e)
+                return 0, "AuList_Maker_Single:{}".format(e)
+            return 1, list_dict
+        elif modeNUM == 2:
+            try:
+                pn = 1
+                while True:
+                    makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid="+sid+"&pn="+str(pn)+"&ps=30"
+                    res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                    des = res.content.decode('utf-8')
+                    mu_dic = json.loads(des)["data"]
+                    for sp in mu_dic["data"]:
+                        # print(sp)
+                        temp = {}
+                        temp["title"] = sp["title"] + "_" + sp["author"]
+                        temp["sid"] = str(sp["id"])
+                        temp["cover"] = sp["cover"]
+                        temp["duration"] = sp["duration"]
+                        temp["lyric"] = sp["lyric"]
+                        list_dict["audio"].append(temp)
+                        list_dict["total"] += 1
+                    if pn >= mu_dic["pageCount"]:
+                        break
+                    else:
+                        pn += 1
+                        continue
+            except Exception as e:
+                print("AuList_Maker_List:",e)
+                return 0, "AuList_Maker_List:{}".format(e)
+            return 1, list_dict
+        else:
+            return 0, "ModeNum Error."
+
+    # 显示音频信息
+    def Audio_Show(self):
+        au_dic = self.search_AUPreinfo(self.index_url)
+        if au_dic[0] == 0:
+            print(au_dic[1])
+            return 0
+        if au_dic[0] == 1:
+            self.business_info.emit('当前歌单包含音乐数量为{}个'.format(au_dic[1]["total"]))
+        elif au_dic[0] == 2:
+            self.business_info.emit('当前下载歌曲名称为：{}'.format(au_dic[1]["audio"][0]["title"]))
+            self.business_info.emit('歌曲长度为：{}'.format(au_dic[1]["audio"][0]["duration"]))
+        else:
+            return 0
+        i = 0
+        for sp in au_dic[1]["audio"]:
+            i += 1
+            form_make = "{}-->{}".format(i,sp["title"])
+            self.media_list.emit([0,form_make])
+        self.vq_list.emit("无")
+        self.aq_list.emit("最高音质")
+        return 1
+
+    # 获取单个音频下载地址
+    def Audio_getDownloadList(self, sid):
+        make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid="+sid
+        res = requests.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+        des = res.content.decode('utf-8')
+        au_list = json.loads(des)["data"]["cdns"]
+        return au_list
+
+    # 附带资源下载
+    def simple_downloader(self, url, output_dir, output_file):
+        try:
+            res = requests.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            file = res.content
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            with open(output_file, 'wb') as f:
+                f.write(file)
+        except Exception as e:
+            self.business_info.emit("附带下载失败：{}".format(url))
+            print("附带下载失败：",e)
+
+
+    # 音乐下载函数
+    def audio_downloader(self):
+        self.second_headers["referer"] = "https://www.bilibili.com/"
+        self.second_headers["sec-fetch-dest"] = 'audio'
+        self.second_headers["sec-fetch-mode"] = 'no-cors'
+        temp_dic = self.search_AUPreinfo(self.index_url)
+        if temp_dic[0] == 0:
+            self.business_info.emit("获取音乐前置信息出错。")
+            return 0
+        try:
+            for index in self.d_list:
+                sp = temp_dic[1]["audio"][index-1]
+                output_dir = self.output + "/" + self.name_replace(sp["title"])
+                output_name = output_dir + "/" + self.name_replace(sp["title"])
+                self.business_info.emit("正在下载音乐：{}".format(sp["title"]))
+                if sp["cover"] != "":
+                    self.simple_downloader(sp["cover"],output_dir,output_name+"_封面.jpg")
+                if sp["lyric"] != "":
+                    self.simple_downloader(sp["lyric"],output_dir,output_name+"_歌词.lrc")
+                au_downlist = self.Audio_getDownloadList(sp["sid"])
+                self.second_headers["range"] = 'bytes=0-'
+                self.d_processor(au_downlist,output_dir,output_name+".mp3","下载音乐")
+            self.business_info.emit("音乐下载进程结束！")
+            return 1
+        except Exception as e:
+            self.business_info.emit("音频下载出错：{}".format(e))
+            print("音频下载出错：",e)
+            return 0
+
+    ###################################################################
     # 运行线程
     def run(self):
         #self.reloader()
         if self.run_model == 0:
             # 探查资源类型
             self.interact_info.emit({"state":0})
-            r = self.show_preDetail()
             d = self.interact_preinfo()
+            r = self.show_preDetail()
             if r == 1:
                 if d[0] == 0:
                     self.interact_info.emit({"state":1,"data":d[1]})
                 self.is_finished.emit(1)
+            elif self.Audio_Show():
+                self.is_finished.emit(4)
             else:
                 self.is_finished.emit(0)
         elif self.run_model == 1:
@@ -1476,6 +1642,16 @@ class biliWorker(QThread):
             # 交互视频下载
             self.requests_start(self.now_interact,self.iv_structure)
             self.is_finished.emit(3)
+        elif self.run_model == 4:
+            # 音频列表下载
+            if self.d_list != []:
+                self.audio_downloader()
+                if self.killprocess:
+                    self.business_info.emit("下载已终止")
+                self.progr_bar.emit({"finish": 1})
+                self.is_finished.emit(2)
+            else:
+                self.is_finished.emit(2)
 
 
 ######################################################################

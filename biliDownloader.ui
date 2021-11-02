@@ -373,12 +373,12 @@ Release at 2021/10/06 ......</string>
        <rect>
         <x>20</x>
         <y>30</y>
-        <width>51</width>
+        <width>81</width>
         <height>31</height>
        </rect>
       </property>
       <property name="text">
-       <string>清晰度</string>
+       <string>视频清晰度</string>
       </property>
      </widget>
      <widget class="QListWidget" name="media_list">
