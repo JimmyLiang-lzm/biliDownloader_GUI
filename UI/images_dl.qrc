@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="title">
+    <file>images/title_live_s.png</file>
+    <file>images/live_shadow.png</file>
     <file>images/gray_shadow.png</file>
     <file>images/title.png</file>
   </qresource>

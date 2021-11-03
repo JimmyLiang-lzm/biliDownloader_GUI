@@ -6,7 +6,7 @@ from PySide2.QtCore import Qt, QThread, Signal, QPoint, QUrl
 from PySide2.QtGui import QIntValidator
 from pyecharts import options as opts
 from pyecharts.charts import Tree
-import biliDownloader, bilidabout, bilidsetting, biliInteractive
+from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
 
 # Release Information
 Release_INFO = ["V1.5.20211102","2021/11/03"]

@@ -15,7 +15,7 @@ from PySide2.QtWidgets import *
 from PySide2.QtWebEngineWidgets import QWebEngineView
 
 
-import images_dl_rc
+from UI import images_dl_rc
 
 class Ui_Form(object):
     def setupUi(self, Form):
