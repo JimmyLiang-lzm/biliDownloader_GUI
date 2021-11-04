@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1137</width>
-    <height>707</height>
+    <width>703</width>
+    <height>613</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -183,344 +183,295 @@ QTreeWidget::item:hover{
 }
 </string>
   </property>
-  <widget class="QFrame" name="frame">
+  <widget class="QWidget" name="mainwidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>1111</width>
-     <height>671</height>
+     <x>30</x>
+     <y>30</y>
+     <width>631</width>
+     <height>551</height>
     </rect>
    </property>
+   <property name="autoFillBackground">
+    <bool>false</bool>
+   </property>
    <property name="styleSheet">
-    <string notr="true">QFrame#frame{
-	background-image: url(:/title/images/gray_shadow.png);
-}</string>
+    <string notr="true"/>
    </property>
-   <property name="frameShape">
-    <enum>QFrame::StyledPanel</enum>
-   </property>
-   <property name="frameShadow">
-    <enum>QFrame::Raised</enum>
-   </property>
-   <widget class="QWidget" name="mainwidget" native="true">
+   <widget class="QTreeWidget" name="treeWidget_4">
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>40</y>
-      <width>1051</width>
-      <height>601</height>
+      <y>60</y>
+      <width>571</width>
+      <height>331</height>
      </rect>
     </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <column>
+     <property name="text">
+      <string>节点</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>CID</string>
+     </property>
+    </column>
+   </widget>
+   <widget class="QPushButton" name="btnmax">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>20</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnmin">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>20</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btnclose">
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>20</y>
+      <width>16</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="flat">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>10</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>微软雅黑</family>
+      <pointsize>-1</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
+     </font>
     </property>
     <property name="styleSheet">
-     <string notr="true"/>
+     <string notr="true">*{
+	font: 18px &quot;微软雅黑&quot;;
+}
+</string>
     </property>
-    <widget class="QTreeWidget" name="treeWidget_4">
+    <property name="text">
+     <string>互动视频下载</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_canceldownload">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>490</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>取消下载</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_startdownload">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>410</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>开始下载</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_exportJSON">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>450</y>
+      <width>181</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>导出节点JSON</string>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_7">
+    <property name="geometry">
+     <rect>
+      <x>230</x>
+      <y>400</y>
+      <width>371</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>节点图</string>
+    </property>
+    <widget class="QLineEdit" name="lineEdit_height">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>60</y>
-       <width>281</width>
-       <height>431</height>
-      </rect>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <column>
-      <property name="text">
-       <string>节点</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>CID</string>
-      </property>
-     </column>
-    </widget>
-    <widget class="QPushButton" name="btnmax">
-     <property name="geometry">
-      <rect>
-       <x>980</x>
-       <y>20</y>
-       <width>16</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btnmin">
-     <property name="geometry">
-      <rect>
-       <x>950</x>
-       <y>20</y>
-       <width>16</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QPushButton" name="btnclose">
-     <property name="geometry">
-      <rect>
-       <x>1010</x>
-       <y>20</y>
-       <width>16</width>
-       <height>16</height>
+       <x>60</x>
+       <y>70</y>
+       <width>61</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string/>
+      <string>420</string>
      </property>
-     <property name="flat">
-      <bool>true</bool>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
-    <widget class="QLabel" name="label_10">
+    <widget class="QLineEdit" name="lineEdit_width">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>10</y>
-       <width>141</width>
-       <height>41</height>
+       <x>60</x>
+       <y>30</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="inputMethodHints">
+      <set>Qt::ImhNone</set>
+     </property>
+     <property name="text">
+      <string>670</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_11">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>70</y>
+       <width>31</width>
+       <height>31</height>
       </rect>
      </property>
      <property name="font">
       <font>
-       <family>微软雅黑</family>
+       <family>Microsoft YaHei</family>
        <pointsize>-1</pointsize>
        <weight>50</weight>
        <italic>false</italic>
        <bold>false</bold>
       </font>
      </property>
-     <property name="styleSheet">
-      <string notr="true">*{
-	font: 18px &quot;微软雅黑&quot;;
-}
-</string>
-     </property>
      <property name="text">
-      <string>互动视频下载</string>
+      <string>高度</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_canceldownload">
+    <widget class="QPushButton" name="btn_adjsize">
      <property name="geometry">
       <rect>
-       <x>180</x>
-       <y>540</y>
-       <width>131</width>
+       <x>150</x>
+       <y>30</y>
+       <width>91</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>取消下载</string>
+      <string>调整节点图</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_startdownload">
+    <widget class="QLabel" name="label_12">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>500</y>
-       <width>281</width>
+       <x>20</x>
+       <y>30</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Microsoft YaHei</family>
+       <pointsize>-1</pointsize>
+       <weight>50</weight>
+       <italic>false</italic>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>宽度</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_save2html">
+     <property name="geometry">
+      <rect>
+       <x>150</x>
+       <y>70</y>
+       <width>201</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>开始下载</string>
+      <string>保存为网页</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_exportJSON">
+    <widget class="QPushButton" name="btn_nodeview">
      <property name="geometry">
       <rect>
-       <x>30</x>
-       <y>540</y>
-       <width>131</width>
+       <x>260</x>
+       <y>30</y>
+       <width>91</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>导出节点JSON</string>
+      <string>查看节点图</string>
      </property>
-    </widget>
-    <widget class="QGroupBox" name="groupBox_7">
-     <property name="geometry">
-      <rect>
-       <x>330</x>
-       <y>50</y>
-       <width>691</width>
-       <height>521</height>
-      </rect>
-     </property>
-     <property name="title">
-      <string>节点浏览器</string>
-     </property>
-     <widget class="QGroupBox" name="groupBox_8">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>70</y>
-        <width>691</width>
-        <height>451</height>
-       </rect>
-      </property>
-      <property name="title">
-       <string/>
-      </property>
-      <widget class="QWebEngineView" name="webEngineView_4">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>671</width>
-         <height>421</height>
-        </rect>
-       </property>
-       <property name="url">
-        <url>
-         <string>https://www.bilibili.com/</string>
-        </url>
-       </property>
-       <property name="zoomFactor">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_height">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>30</y>
-        <width>61</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>420</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="QLineEdit" name="lineEdit_width">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>30</y>
-        <width>61</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="inputMethodHints">
-       <set>Qt::ImhNone</set>
-      </property>
-      <property name="text">
-       <string>670</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_11">
-      <property name="geometry">
-       <rect>
-        <x>150</x>
-        <y>30</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Microsoft YaHei</family>
-        <pointsize>-1</pointsize>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>高度</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_adjsize">
-      <property name="geometry">
-       <rect>
-        <x>430</x>
-        <y>30</y>
-        <width>111</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>调整节点图</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_12">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>30</y>
-        <width>31</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <family>Microsoft YaHei</family>
-        <pointsize>-1</pointsize>
-        <weight>50</weight>
-        <italic>false</italic>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string>宽度</string>
-      </property>
-     </widget>
-     <widget class="QPushButton" name="btn_save2html">
-      <property name="geometry">
-       <rect>
-        <x>560</x>
-        <y>30</y>
-        <width>111</width>
-        <height>31</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>保存为网页</string>
-      </property>
-     </widget>
     </widget>
    </widget>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="images_dl.qrc"/>
  </resources>

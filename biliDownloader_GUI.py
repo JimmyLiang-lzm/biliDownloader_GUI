@@ -2,14 +2,14 @@ import sys, os, webbrowser
 import requests, json, re, subprocess
 from time import time,sleep
 from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget, QTreeWidgetItem
-from PySide2.QtCore import Qt, QThread, Signal, QPoint, QUrl
+from PySide2.QtCore import Qt, QThread, Signal, QPoint
 from PySide2.QtGui import QIntValidator
 from pyecharts import options as opts
 from pyecharts.charts import Tree
 from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
 
 # Release Information
-Release_INFO = ["V1.5.20211102","2021/11/03"]
+Release_INFO = ["V1.5.20211104","2021/11/05"]
 
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
@@ -38,6 +38,7 @@ class MainWindow(QMainWindow,Objective):
         super(MainWindow,self).__init__(parent)
         self.setupUi(self)
         self.threadBusy = False
+        self.Move = False
         self.haveINFO = False
         self.allSelect = False
         self.setWindowOPEN = False
@@ -102,14 +103,19 @@ class MainWindow(QMainWindow,Objective):
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.Move = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
 
     # 鼠标移动事件
     def mouseMoveEvent(self, QMouseEvent):
-        if Qt.LeftButton:
+        if Qt.LeftButton and self.Move:
             self.move(QMouseEvent.globalPos() - self.m_Position)
             QMouseEvent.accept()
+
+    # 鼠标释放事件
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.Move = False
 
     # 退出事件记录
     def closeEvent(self,QCloseEvent):
@@ -429,6 +435,7 @@ class SettingWindow(QWidget,Objective_setting):
     def __init__(self, ins_dict, parent=None):
         super(SettingWindow,self).__init__(parent)
         self.setupUi(self)
+        self.Move = False
         self.ins_dict = ins_dict
         self.edit_cookies.setPlainText(ins_dict["cookie"])
         self.cb_useProxy.setChecked(ins_dict["useProxy"])
@@ -457,14 +464,19 @@ class SettingWindow(QWidget,Objective_setting):
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.Move = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
 
     # 鼠标移动事件
     def mouseMoveEvent(self, QMouseEvent):
-        if Qt.LeftButton:
+        if Qt.LeftButton and self.Move:
             self.move(QMouseEvent.globalPos() - self.m_Position)
             QMouseEvent.accept()
+
+    # 鼠标释放事件
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.Move = False
 
     # 定义关闭事件
     def closeEvent(self, QCloseEvent):
@@ -528,6 +540,7 @@ class AboutWindow(QWidget, Objective_about):
     def __init__(self, parent=None):
         super(AboutWindow, self).__init__(parent)
         self.setupUi(self)
+        self.Move = False
         # 设置窗口透明
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
@@ -553,14 +566,19 @@ class AboutWindow(QWidget, Objective_about):
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.Move = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
 
     # 鼠标移动事件
     def mouseMoveEvent(self, QMouseEvent):
-        if Qt.LeftButton:
+        if Qt.LeftButton and self.Move:
             self.move(QMouseEvent.globalPos() - self.m_Position)
             QMouseEvent.accept()
+
+    # 鼠标释放事件
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.Move = False
 
     ####################### BS Part #######################
     # 访问作者网站按钮函数
@@ -601,6 +619,7 @@ class InteractWindow(QWidget, Objective_interact):
         assert type(full_iv) is dict
         assert type(vname) is str
         self.setupUi(self)
+        self.Move = False
         self.feedback_dict = {}
         self.html_Path = DF_Path
         self.ivideo_name = self.name_replace(vname)
@@ -610,6 +629,12 @@ class InteractWindow(QWidget, Objective_interact):
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        # 添加阴影
+        effect = QGraphicsDropShadowEffect(self)
+        effect.setBlurRadius(30)
+        effect.setOffset(0, 0)
+        effect.setColor(Qt.gray)
+        self.setGraphicsEffect(effect)
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 连接器
@@ -618,27 +643,32 @@ class InteractWindow(QWidget, Objective_interact):
         self.btn_save2html.clicked.connect(self.save2html)
         self.btn_exportJSON.clicked.connect(self.save2json)
         self.btn_startdownload.clicked.connect(self.download_process)
+        self.btn_nodeview.clicked.connect(self.show_chart)
         # 数据初始化
         self.full_json = full_iv
         self.chartdict = self.recursion_for_chart(full_iv)
         self.info_Init(full_iv,self.treeWidget_4)
         self.treeWidget_4.expandToDepth(2)
         self.draw_chart("670","420",self.chartdict)
-        self.show_chart()
 
 
     ####################### RW Part #######################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.Move = True
             self.m_Position = event.globalPos() - self.pos()
             event.accept()
 
     # 鼠标移动事件
     def mouseMoveEvent(self, QMouseEvent):
-        if Qt.LeftButton:
+        if Qt.LeftButton and self.Move:
             self.move(QMouseEvent.globalPos() - self.m_Position)
             QMouseEvent.accept()
+
+    # 鼠标释放事件
+    def mouseReleaseEvent(self, QMouseEvent):
+        self.Move = False
 
     # 定义关闭事件
     def closeEvent(self, QCloseEvent):
@@ -694,7 +724,6 @@ class InteractWindow(QWidget, Objective_interact):
         w = self.lineEdit_width.text()
         h = self.lineEdit_height.text()
         self.draw_chart(w,h,self.chartdict)
-        self.show_chart()
 
     # File name conflict replace
     def name_replace(self, name):
@@ -710,7 +739,7 @@ class InteractWindow(QWidget, Objective_interact):
             os.makedirs(dir_address)
         self.node_chart.render(dir_address + "/node_temp.html")
         access_url = self.url_maker(dir_address + "/node_temp.html")
-        self.webEngineView_4.setUrl(QUrl(access_url))
+        webbrowser.open(access_url)
 
     # 跨系统平台节点文件路径生成函数
     def url_maker(self,in_dir):
@@ -1078,7 +1107,7 @@ class biliWorker(QThread):
             return 0
 
 
-    # Download Stream fuction
+    # Download Stream function
     def d_processor(self,url_list,output_dir,output_file,dest):
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
@@ -1530,6 +1559,7 @@ class biliWorker(QThread):
             return 0, "ModeNum Error."
 
     # 显示音频信息
+    @property
     def Audio_Show(self):
         au_dic = self.search_AUPreinfo(self.index_url)
         if au_dic[0] == 0:
@@ -1615,7 +1645,7 @@ class biliWorker(QThread):
                 if d[0] == 0:
                     self.interact_info.emit({"state":1,"data":d[1]})
                 self.is_finished.emit(1)
-            elif self.Audio_Show():
+            elif self.Audio_Show:
                 self.is_finished.emit(4)
             else:
                 self.is_finished.emit(0)
