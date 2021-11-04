@@ -20,12 +20,17 @@
   <property name="styleSheet">
    <string notr="true">*{
 	font: 14px &quot;Microsoft YaHei&quot;;
+	color:rgb(0, 0, 0);
 }
 /* 主体颜色
 .QWidget#centralwidget{
 	background-color: rgb(156, 156, 156);
 	border-radius:20px;
 } */
+QLabel{
+	color: rgb(0, 0, 0);
+}
+
 .QWidget#mainwidget{
 	background-color: rgb(255, 255, 255);
 	border-radius:20px;
@@ -33,15 +38,16 @@
 
 /* 编辑框样式 */
 QLineEdit{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
 	border-radius: 15px;
 	border: 2px solid rgb(255, 153, 153);
 	padding-left: 5px;
-	padding-right: 27px;
+	padding-right: 5px;
 }
 QLineEdit:hover{
+	color: rgb(0, 0, 0);
 	background-color: rgb(255, 238, 238);
-}
-QLineEdit:focus{
 }
 
 /* 按钮样式 */
@@ -98,12 +104,16 @@ QListWidget{
 	border: 2px solid rgb(255, 153, 153);
 	border-radius:15px;
 	padding: 5px;
+	background-color: rgb(255, 255, 255);
 }
 QListWidget::item{
 	border: 1px dashed rgb(255, 204, 153);
-	border-radius: 5px
+	border-radius: 5px;
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
 }
 QListWidget::item:hover{
+	color: rgb(0, 0, 0);
 	background-color: rgb(255, 204, 153);
 }
 QListWidget::item:focus{
@@ -116,8 +126,11 @@ QComboBox{
 	border: 2px solid rgb(255, 153, 153);
 	padding-left: 5px;
 	padding-right: 5px;
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
 }
 QComboBox:hover{
+	color: rgb(0, 0, 0);
 	background: rgb(255, 238, 238)
 }
 QComboBox QAbstractItemView{
@@ -145,6 +158,8 @@ QPlainTextEdit{
 	border-radius: 15px;
 	border: 2px solid rgb(255, 153, 153);
 	padding: 5px;
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
 }
 
 /* Title Frame样式 */
@@ -163,6 +178,32 @@ QGroupBox::title{
 	subcontrol-origin: margin;
 	subcontrol-position: top center;
 	padding: 0 3px;
+	color: rgb(0, 0, 0);
+}
+
+/* 组合框样式 */
+QCheckBox{
+	color: rgb(0, 0, 0);
+}
+
+
+/* 树形框样式 */
+QTreeWidget{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
+	border: 2px solid rgb(255, 153, 153);
+	border-radius: 15px;
+	padding: 5px;
+}
+QTreeWidget::item{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 255, 255);
+	border: 1px dashed rgb(255, 204, 153);
+	border-radius: 5px;
+}
+QTreeWidget::item:hover{
+	color: rgb(0, 0, 0);
+	background-color: rgb(255, 204, 153);
 }
 </string>
   </property>
