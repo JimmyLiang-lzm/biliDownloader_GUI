@@ -1,11 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-# 注意：pathex=['biliDownloader_GUI的绝对路径']
+
 
 block_cipher = None
 
 
 a = Analysis(['biliDownloader_GUI.py'],
-             pathex=['F:\\pythonCode\\biliDownload_GUI'],
+             pathex=[],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -33,7 +33,7 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon='images\\bilidownloader.ico')
+          entitlements_file=None , icon='UI\\images\\bilidownloader.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

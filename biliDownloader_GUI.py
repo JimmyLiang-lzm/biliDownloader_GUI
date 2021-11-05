@@ -46,8 +46,8 @@ class MainWindow(QMainWindow,Objective):
         self.isAudio = False
         self.bu_info_count = 0
         # 设置窗口透明
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground,True)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 添加阴影
@@ -442,8 +442,8 @@ class SettingWindow(QWidget,Objective_setting):
         self.lineEdit.setText(ins_dict["Proxy"]["http"])
         # 设置窗口透明
         self.setWindowModality(Qt.ApplicationModal)
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 添加阴影
@@ -543,8 +543,8 @@ class AboutWindow(QWidget, Objective_about):
         self.Move = False
         # 设置窗口透明
         self.setWindowModality(Qt.ApplicationModal)
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
         self.m_Position = QPoint(0,0)
         # 添加阴影
@@ -627,8 +627,8 @@ class InteractWindow(QWidget, Objective_interact):
         self.lineEdit_width.setValidator(QIntValidator())
         # 设置窗口透明
         self.setWindowModality(Qt.ApplicationModal)
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
         # 添加阴影
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(30)
