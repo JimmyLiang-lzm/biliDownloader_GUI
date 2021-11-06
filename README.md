@@ -20,7 +20,7 @@
 * Paid series or high-quality videos can be downloaded (VIP Cookie required)
 * 可进行分P视频批量下载
 * Downloadable segmented video batches
-* 可下载交互视频！（2021-10-23更新）
+* 可下载非循环类交互视频！（2021-10-23更新）
 * Downloadable interactive video (Updated 2021-10-23)
 * 解除区域访问限制，可利用代理IP或科学上网工具下载非内陆视频资源（2021-10-30更新）
 * You can use IP proxy or SSR to remove regional resource access restrictions (Updated 2021-10-30)
