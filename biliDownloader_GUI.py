@@ -9,7 +9,7 @@ from pyecharts.charts import Tree
 from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
 
 # Release Information
-Release_INFO = ["V1.5.20211104","2021/11/05"]
+Release_INFO = ["V1.5.20211209","2021/12/10"]
 
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
@@ -266,7 +266,7 @@ class MainWindow(QMainWindow,Objective):
 
     # 帮助按钮函数
     def forHELP(self):
-        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/")
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/07/bilid_GUI_help/")
 
     # 打开关于页面函数
     def openAbout(self):
@@ -512,11 +512,11 @@ class SettingWindow(QWidget,Objective_setting):
 
     # 帮助按钮
     def forHelp(self):
-        webbrowser.open("https://zmtechn.gitee.io/2021/10/05/Get_bilibili_cookie/")
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/Get_bilibili_cookie/")
 
     # 代理帮助按钮
     def ProxyHelp(self):
-        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/06/bilid_GUI_help/#3-5-“僅限港澳台地區”视频下载")
+        webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/07/bilid_GUI_help/#3-5-“僅限港澳台地區”视频下载")
 
     ########################### 槽函数 ################################
     # 代理地址测试线程槽函数
@@ -965,19 +965,19 @@ class biliWorker(QThread):
         re_init = json.loads(INITIAL_STATE[0])
         re_GET = json.loads(playinfo[0])
         # Normal Video
-        if index_url[0] == 0:
-            now_cid = re_init["videoData"]["pages"][re_init["p"]-1]["cid"]
-            try:
-                makeurl = "https://api.bilibili.com/x/player/playurl?cid="+ str(now_cid) +\
-                          "&qn=116&type=&otype=json&fourk=1&bvid="+ re_init["bvid"] +\
-                          "&fnver=0&fnval=976&session=" + re_GET["session"]
-                self.second_headers['referer'] = index_url[1]
-                res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
-                re_GET = json.loads(res.content.decode('utf-8'))
-                # print(json.dumps(re_GET))
-            except Exception as e:
-                print("获取Playlist失败:",e)
-                return 0, "", "", {}
+        # if index_url[0] == 0:
+        #     now_cid = re_init["videoData"]["pages"][re_init["p"]-1]["cid"]
+        #     try:
+        #         makeurl = "https://api.bilibili.com/x/player/playurl?cid="+ str(now_cid) +\
+        #                   "&qn=116&type=&otype=json&fourk=1&bvid="+ re_init["bvid"] +\
+        #                   "&fnver=0&fnval=976&session=" + re_GET["session"]
+        #         self.second_headers['referer'] = index_url[1]
+        #         res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
+        #         re_GET = json.loads(res.content.decode('utf-8'))
+        #         # print(json.dumps(re_GET))
+        #     except Exception as e:
+        #         print("获取Playlist失败:",e)
+        #         return 0, "", "", {}
         # If Crawler can GET Data
         try:
             # Get video name
@@ -1132,6 +1132,8 @@ class biliWorker(QThread):
                             for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
                                 while self.pauseprocess:
                                     sleep(1.5)
+                                    if self.killprocess == True:
+                                        return -1
                                 if chunks:
                                     f.write(chunks)
                                     proc["Now"] += self.chunk_size
@@ -1264,7 +1266,7 @@ class biliWorker(QThread):
                 if self.killprocess:
                     return -2
                 if self.synthesis:
-                    self.business_info.emit('正在启动ffmpeg......')
+                    self.business_info.emit('正在启动FFMPEG......')
                     # Synthesis processor
                     self.ffmpeg_synthesis(video_dir, audio_dir, self.output + '/' + video_name + '.mp4')
             except Exception as e:
