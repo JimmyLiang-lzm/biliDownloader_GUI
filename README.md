@@ -6,6 +6,9 @@
 
 [![maven](https://img.shields.io/badge/Python-3.8.8-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.26.0-green.svg) ![mavel](https://img.shields.io/badge/PySide2-5.15.4-green.svg) [![mavel](https://img.shields.io/badge/BiliDownloader-Command-pink.svg)](https://github.com/JimmyLiang-lzm/biliDownloader)
 
+查看软件教程请访问（Use tutorial address）：[https://zmtblog.xdkd.ltd/2021/10/07/bilid_GUI_help/](https://zmtblog.xdkd.ltd/2021/10/07/bilid_GUI_help/)
+
+
 ## ✨特性 Feature
 
 * 漂亮的界面，友好的人机交互体验
