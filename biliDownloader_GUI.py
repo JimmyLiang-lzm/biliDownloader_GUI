@@ -334,6 +334,7 @@ class MainWindow(QMainWindow,Objective):
         if in_dict["finish"] == 1:
             self.progressBar.setFormat("biliDownloader就绪")
             self.progressBar.setValue(0)
+            QApplication.processEvents()
         elif in_dict["finish"] == 0:
             nowValue = round(1000000*in_dict["Now"]/in_dict["Max"])
             self.speedCalc(1)
@@ -829,10 +830,10 @@ class checkProxy(QThread):
     def run(self):
         try:
             temp = {"code":1}
-            des = requests.get("https://api.bilibili.com/x/player/v2?cid=429970170&aid=891280356&bvid=BV1aP4y1b79t",
+            des = requests.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo",
                                headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
-            res = json.loads(des.content.decode('utf-8'))["data"]["ip_info"]
-            temp["ip"] = res["ip"]
+            res = json.loads(des.content.decode('utf-8'))["data"]
+            temp["ip"] = res["addr"]
             temp["area"] = res["country"]
             self._feedback.emit(temp)
         except Exception as e:
