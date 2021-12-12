@@ -243,7 +243,7 @@ QTreeWidget::item:hover{
       </rect>
      </property>
      <property name="maximum">
-      <number>1000000</number>
+      <number>10000</number>
      </property>
      <property name="value">
       <number>0</number>

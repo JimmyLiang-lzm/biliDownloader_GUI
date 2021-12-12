@@ -225,7 +225,7 @@ class Ui_MainWindow(object):
         self.progressBar = QProgressBar(self.mainwidget)
         self.progressBar.setObjectName(u"progressBar")
         self.progressBar.setGeometry(QRect(40, 580, 801, 31))
-        self.progressBar.setMaximum(1000000)
+        self.progressBar.setMaximum(1000)
         self.progressBar.setValue(0)
         self.progressBar.setAlignment(Qt.AlignCenter)
         self.progressBar.setTextVisible(True)

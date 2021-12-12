@@ -1,15 +1,25 @@
-import sys, os, webbrowser
-import requests, json, re, subprocess
+import sys, os, webbrowser, socket
+import requests.packages.urllib3.util.connection as urllib3_conn
+import json, re, subprocess
 from time import time,sleep
 from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget, QTreeWidgetItem
-from PySide2.QtCore import Qt, QThread, Signal, QPoint
+from PySide2.QtCore import Qt, QThread, Signal, QPoint, QTimer
 from PySide2.QtGui import QIntValidator
 from pyecharts import options as opts
 from pyecharts.charts import Tree
 from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
+# 共享VIP Cookie预留（不使用请注释）
+#import requests
+#import req_encrypt as request
+
+# 不使用共享VIP Cookie（使用请注释）
+import requests as request
 
 # Release Information
-Release_INFO = ["V1.5.20211209","2021/12/10"]
+Release_INFO = ["V1.5.20211212","2021/12/12(内测版)"]
+
+# 强制使用IPv4
+urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
 
 # Initialize
 Objective = biliDownloader.Ui_MainWindow
@@ -45,6 +55,7 @@ class MainWindow(QMainWindow,Objective):
         self.isInteractive = False
         self.isAudio = False
         self.bu_info_count = 0
+        self.in_dict = {"finish":1}
         # 设置窗口透明
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -98,6 +109,10 @@ class MainWindow(QMainWindow,Objective):
         self.lineEdit_dir.setText(indict["Output"])
         self.plainTextEdit.setPlainText("欢迎使用Bili Downloader {}\nRelease at {} ......"
                                         .format(Release_INFO[0],Release_INFO[1]))
+        # 计时器初始化
+        self.progressBarTimer = QTimer()
+        self.progressBarTimer.start(100)
+        self.progressBarTimer.timeout.connect(self.progress_Show)
 
     ####################### RW Part ##########################
     # 鼠标点击事件产生
@@ -329,41 +344,41 @@ class MainWindow(QMainWindow,Objective):
             ck.setChecked(True)
         self.media_list.setItemWidget(item, ck)
 
-    # 进度条进度信息接收槽函数
-    def progress_Bar(self, in_dict):
+    def progress_Show(self):
+        in_dict = self.in_dict
         if in_dict["finish"] == 1:
+            self.speedCalc(0)
             self.progressBar.setFormat("biliDownloader就绪")
             self.progressBar.setValue(0)
             QApplication.processEvents()
         elif in_dict["finish"] == 0:
-            nowValue = round(1000000*in_dict["Now"]/in_dict["Max"])
+            nowValue = 1000 * round(in_dict["Now"] / in_dict["Max"], 3)
             self.speedCalc(1)
             str_Text = "总大小：{} 已下载：{} 下载速度：{}/s 进度：%p%".format(
-                self.filesizeShow(in_dict["Max"]),self.filesizeShow(in_dict["Now"]),self.filesizeShow(self.speed))
+                self.filesizeShow(in_dict["Max"]), self.filesizeShow(in_dict["Now"]), self.filesizeShow(self.speed))
+            # str_Text = "总大小：{} 已下载：{} 进度：%p%".format(
+            #     self.filesizeShow(in_dict["Max"]), self.filesizeShow(in_dict["Now"]))
             self.progressBar.setFormat(str_Text)
             self.progressBar.setValue(nowValue)
         else:
-            nowValue = round(1000000*in_dict["Now"]/in_dict["Max"])
+            nowValue = 1000 * round(in_dict["Now"] / in_dict["Max"], 3)
             str_Text = "正在合成视频：%p%"
             self.progressBar.setFormat(str_Text)
             self.progressBar.setValue(nowValue)
+
+    # 进度条进度信息接收槽函数
+    def progress_Bar(self, in_dict):
+        self.in_dict = in_dict
 
     # 下载速度计算函数
     def speedCalc(self,inum):
         if inum == 0:
             self.speed = 0
-            self.calc = 0
-            self.Time = time()
-            self.showTime = time()
+            self.after_size = 0
         elif inum == 1:
-            self.calc += 1
-            if time() - self.showTime >= 0.25:
-                time_between = time() - self.Time
-                if time_between != 0:
-                    self.speed = 1024*self.calc/time_between
-                    self.calc = 0
-                    self.Time = time()
-                self.showTime = time()
+            # 1000/200ms
+            self.speed = (self.in_dict["Now"] - self.after_size)*5
+            self.after_size = self.in_dict["Now"]
 
     # 文件数据大小计算函数
     def filesizeShow(self, filesize):
@@ -730,7 +745,7 @@ class InteractWindow(QWidget, Objective_interact):
     def name_replace(self, name):
         vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
         vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
-        vn = vn.replace('>', '').replace('\"', '').replace('|', '')
+        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08','')
         return vn
 
     # 显示节点图
@@ -797,7 +812,7 @@ class checkLatest(QThread):
 
     def run(self):
         try:
-            des = requests.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json",timeout=5)
+            des = request.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json", timeout=5)
             res = json.loads(des.content.decode('utf-8'))["biliDownloader_GUI"]
             latestVer = self.ver2num(res)
             myVer = self.ver2num(self.lab_version)
@@ -830,8 +845,8 @@ class checkProxy(QThread):
     def run(self):
         try:
             temp = {"code":1}
-            des = requests.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo",
-                               headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
+            des = request.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo",
+                              headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
             res = json.loads(des.content.decode('utf-8'))["data"]
             temp["ip"] = res["addr"]
             temp["area"] = res["country"]
@@ -922,7 +937,7 @@ class biliWorker(QThread):
     def name_replace(self, name):
         vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
         vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
-        vn = vn.replace('>', '').replace('\"', '').replace('|', '')
+        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08','')
         return vn
 
     # Change /SS movie address
@@ -932,7 +947,7 @@ class biliWorker(QThread):
         checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         try:
             if checking1 != []:
-                res = requests.get(inurl, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                res = request.get(inurl, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                 dec = res.content.decode('utf-8')
                 INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
                 temp = json.loads(INITIAL_STATE[0])
@@ -951,7 +966,7 @@ class biliWorker(QThread):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
         try:
-            res = requests.get(index_url[1], headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(index_url[1], headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
         except:
             print("初始化信息获取失败。")
@@ -973,7 +988,7 @@ class biliWorker(QThread):
         #                   "&qn=116&type=&otype=json&fourk=1&bvid="+ re_init["bvid"] +\
         #                   "&fnver=0&fnval=976&session=" + re_GET["session"]
         #         self.second_headers['referer'] = index_url[1]
-        #         res = requests.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
+        #         res = request.get(makeurl, headers=self.second_headers, stream=False, timeout=10, proxies=self.Proxy)
         #         re_GET = json.loads(res.content.decode('utf-8'))
         #         # print(json.dumps(re_GET))
         #     except Exception as e:
@@ -1027,7 +1042,7 @@ class biliWorker(QThread):
     # Search the list of Video download address.
     def search_videoList(self, index_url):
         try:
-            res = requests.get(index_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(index_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
         except:
             return 0, {}
@@ -1114,7 +1129,7 @@ class biliWorker(QThread):
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
                 # video stream length sniffing
-                video_bytes = requests.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
+                video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
                 self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
@@ -1124,7 +1139,7 @@ class biliWorker(QThread):
                 while(err <= 3):
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
-                        m4sv_bytes = requests.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
+                        m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
                         proc["Max"] = int(vc_range)
                         self.progr_bar.emit(proc)
                         if not os.path.exists(output_dir):
@@ -1140,7 +1155,9 @@ class biliWorker(QThread):
                                     proc["Now"] += self.chunk_size
                                     self.progr_bar.emit(proc)
                                 if self.killprocess == True:
+                                    m4sv_bytes.close()
                                     return -1
+                        m4sv_bytes.close()
                         break
                     except Exception as e:
                         if re.findall('10054',str(e),re.S) == []:
@@ -1160,9 +1177,11 @@ class biliWorker(QThread):
                     os.remove(output_file)
         return 1
 
-
     # FFMPEG Synthesis Function
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
+        if os.path.exists(output_add):
+            self.business_info.emit("文件：{}\n已存在。".format(output_add))
+            return -1
         ffcommand = ""
         if self.systemd == "win32":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -1241,11 +1260,15 @@ class biliWorker(QThread):
                 # Judge file whether exists
                 video_dir = self.output + '/' + video_name + '_video.m4s'
                 audio_dir = self.output + '/' + video_name + '_audio.m4s'
+                sym_video_dir = self.output + '/' + video_name + '.mp4'
                 if os.path.exists(video_dir):
                     self.business_info.emit("文件：{}\n已存在。".format(video_dir))
                     return -1
                 if os.path.exists(audio_dir):
                     self.business_info.emit("文件：{}\n已存在。".format(audio_dir))
+                    return -1
+                if os.path.exists(sym_video_dir):
+                    self.business_info.emit("文件：{}\n已存在。".format(sym_video_dir))
                     return -1
                 # self.business_info.emit("需要下载的视频：{}".format(video_name))
                 # Perform video stream length sniffing
@@ -1269,7 +1292,7 @@ class biliWorker(QThread):
                 if self.synthesis:
                     self.business_info.emit('正在启动FFMPEG......')
                     # Synthesis processor
-                    self.ffmpeg_synthesis(video_dir, audio_dir, self.output + '/' + video_name + '.mp4')
+                    self.ffmpeg_synthesis(video_dir, audio_dir, sym_video_dir)
             except Exception as e:
                 print(e)
         else:
@@ -1359,7 +1382,7 @@ class biliWorker(QThread):
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = requests.get(url, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            res = request.get(url, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -1380,7 +1403,7 @@ class biliWorker(QThread):
         make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + \
                    self.now_interact["bvid"]
         try:
-            res = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            res = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -1396,7 +1419,7 @@ class biliWorker(QThread):
                        "bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
                    self.now_interact["session"]
         try:
-            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            des = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             playinfo = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             return False, str(e)
@@ -1447,7 +1470,7 @@ class biliWorker(QThread):
                 "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
                            "node_id"]
         try:
-            des = requests.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            des = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
             desp = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
@@ -1516,7 +1539,7 @@ class biliWorker(QThread):
         if modeNUM == 1:
             try:
                 makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=" + sid
-                res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                 des = res.content.decode('utf-8')
                 auinfo = json.loads(des)["data"]
                 temp = {}
@@ -1536,7 +1559,7 @@ class biliWorker(QThread):
                 pn = 1
                 while True:
                     makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid="+sid+"&pn="+str(pn)+"&ps=30"
-                    res = requests.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                    res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                     des = res.content.decode('utf-8')
                     mu_dic = json.loads(des)["data"]
                     for sp in mu_dic["data"]:
@@ -1587,7 +1610,7 @@ class biliWorker(QThread):
     # 获取单个音频下载地址
     def Audio_getDownloadList(self, sid):
         make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid="+sid
-        res = requests.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+        res = request.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
         des = res.content.decode('utf-8')
         au_list = json.loads(des)["data"]["cdns"]
         return au_list
@@ -1595,7 +1618,7 @@ class biliWorker(QThread):
     # 附带资源下载
     def simple_downloader(self, url, output_dir, output_file):
         try:
-            res = requests.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
             file = res.content
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)
