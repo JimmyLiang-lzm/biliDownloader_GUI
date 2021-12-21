@@ -17,7 +17,7 @@
 * Well download compatibility, automatically select the alternate line when the main line is blocked
 * 可自动合并音画分离的视频流（支持杜比视界视频合成）
 * Merge the stream of video and audio, automatically.(Dolby Vision Video is supported)
-* 可获取并下载不同清晰度的音视频流（从360P到杜比视界全部支持下载）
+* 可获取并下载不同清晰度的音视频流，从360P到8K全部支持下载（包含杜比视界）
 * Can obtain and download audio and video streams of different definitions.(Include 360P to Dolby Vision)
 * 可下载付费番剧或高质量视频（需要大会员Cookie）
 * Paid series or high-quality videos can be downloaded (VIP Cookie required)
