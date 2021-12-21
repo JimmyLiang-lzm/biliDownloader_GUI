@@ -1,7 +1,8 @@
 import sys, os, webbrowser, socket
 import requests.packages.urllib3.util.connection as urllib3_conn
 import json, re, subprocess
-from time import time,sleep
+# from time import time,sleep
+from time import sleep
 from PySide2.QtWidgets import QApplication, QMainWindow, QGraphicsDropShadowEffect, QCheckBox, QListWidgetItem, QFileDialog, QWidget, QTreeWidgetItem
 from PySide2.QtCore import Qt, QThread, Signal, QPoint, QTimer
 from PySide2.QtGui import QIntValidator
@@ -9,14 +10,14 @@ from pyecharts import options as opts
 from pyecharts.charts import Tree
 from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
 # 共享VIP Cookie预留（不使用请注释）
-#import requests
-#import req_encrypt as request
+# import requests
+# import req_encrypt as request
 
-# 不使用共享VIP Cookie（使用请注释）
+# 不使用共享VIP Cookie（不使用请取消注释）
 import requests as request
 
 # Release Information
-Release_INFO = ["V1.5.20211212","2021/12/12(内测版)"]
+Release_INFO = ["V1.5.20211222","2021/12/21"]
 
 # 强制使用IPv4
 urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
