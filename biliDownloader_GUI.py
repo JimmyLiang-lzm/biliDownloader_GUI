@@ -698,10 +698,10 @@ class InteractWindow(QWidget, Objective_interact):
         n = self.treeWidget_4.topLevelItemCount()
         for i in range(n):
             item = self.treeWidget_4.topLevelItem(i)
+            self.feedback_dict[item.text(0)] = {}
             if item.checkState(0) == Qt.Checked:
-                self.feedback_dict[item.text(0)] = {}
                 self.feedback_dict[item.text(0)]["cid"] = item.text(1)
-                self.feedback_dict[item.text(0)]["choices"] = self.download_list_make(item)
+            self.feedback_dict[item.text(0)]["choices"] = self.download_list_make(item)
         self.close()
 
     # 属性选择框转下载字典递归函数
@@ -711,11 +711,11 @@ class InteractWindow(QWidget, Objective_interact):
         if count == 0:
             return temp
         for i in range(count):
+            name = tree_widget_obj.child(i).text(0)
+            temp[name] = {}
             if tree_widget_obj.child(i).checkState(0) == Qt.Checked:
-                name = tree_widget_obj.child(i).text(0)
-                temp[name] = {}
                 temp[name]["cid"] = tree_widget_obj.child(i).text(1)
-                temp[name]["choices"] = self.download_list_make(tree_widget_obj.child(i))
+            temp[name]["choices"] = self.download_list_make(tree_widget_obj.child(i))
         return temp
 
     # Save origin node JSON File
@@ -796,6 +796,51 @@ class InteractWindow(QWidget, Objective_interact):
             stemp["children"] = self.recursion_for_chart(in_json[ch]["choices"])
             temp.append(stemp)
         return temp
+
+    # 自动选择
+    def onTreeClicked(self, item, num):
+        # 如果是顶部节点，只考虑Child：
+        if item.childCount() and not item.parent(): #判断是顶部节点，也就是根节点
+            if item.checkState(0) == Qt.Unchecked: #规定点击根节点只有两态切换，没有中间态
+                for i in range(item.childCount()): #遍历子节点进行状态切换
+                    item.child(i).setCheckState(0, Qt.Unchecked)
+            elif item.checkState(0) == Qt.Checked:
+                for i in range(item.childCount()):
+                    item.child(i).setCheckState(0, Qt.Checked)
+
+        # 如果是底部节点，只考虑Parent
+        if item.parent() and not item.childCount():
+            parent_item = item.parent() #获得父节点
+            brother_item_num = parent_item.childCount() #获得兄弟节点的数目，包括自身在内
+            checked_num = 0 #设置计数器
+            for i in range(brother_item_num): #根据三态不同状态值进行数值累计
+                checked_num += parent_item.child(i).checkState(0)
+            if checked_num == 0: #最终结果进行比较，决定父节点的三态
+                parent_item.setCheckState(0, Qt.Unchecked)
+            elif checked_num/2 == brother_item_num:
+                parent_item.setCheckState(0, Qt.Checked)
+            else:
+                parent_item.setCheckState(0, Qt.PartiallyChecked)
+
+        # 中间层需要全面考虑
+        if item.parent() and item.childCount():
+            if item.checkState(0) == Qt.Unchecked: #规定点击根节点只有两态切换，没有中间态
+                for i in range(item.childCount()): #遍历子节点进行状态切换
+                    item.child(i).setCheckState(0, Qt.Unchecked)
+            elif item.checkState(0) == Qt.Checked:
+                for i in range(item.childCount()):
+                    item.child(i).setCheckState(0, Qt.Checked)
+            parent_item = item.parent()  # 获得父节点
+            brother_item_num = parent_item.childCount()  # 获得兄弟节点的数目，包括自身在内
+            checked_num = 0  # 设置计数器
+            for i in range(brother_item_num):  # 根据三态不同状态值进行数值累计
+                checked_num += parent_item.child(i).checkState(0)
+            if checked_num == 0:  # 最终结果进行比较，决定父节点的三态
+                parent_item.setCheckState(0, Qt.Unchecked)
+            elif checked_num / 2 == brother_item_num:
+                parent_item.setCheckState(0, Qt.Checked)
+            else:
+                parent_item.setCheckState(0, Qt.PartiallyChecked)
 
 
 ############################################################################################
@@ -1158,8 +1203,11 @@ class biliWorker(QThread):
                                 if self.killprocess == True:
                                     m4sv_bytes.close()
                                     return -1
-                        m4sv_bytes.close()
-                        break
+                        if proc["Now"] >= proc["Max"]:
+                            m4sv_bytes.close()
+                            break
+                        else:
+                            print("服务器断开连接，重新连接下载端口....")
                     except Exception as e:
                         if re.findall('10054',str(e),re.S) == []:
                             err += 1
@@ -1493,19 +1541,20 @@ class biliWorker(QThread):
             output = output_dir + "/" + chn
             video_dir = output + "/" + chn + '_video.m4s'
             audio_dir = output + "/" + chn + '_audio.m4s'
-            dic_return = self.down_list_make(json_list[ch]["cid"])
-            if not dic_return[0]:
-                self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
-                print(dic_return[1])
-                return -1
-            down_dic = dic_return[2]
-            self.second_headers["range"] = down_dic["video"][self.VQuality][2]
-            self.d_processor(down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
-            self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
-            self.d_processor(down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
-            if self.synthesis:
-                self.business_info.emit('正在启动ffmpeg......')
-                self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
+            if "cid" in json_list[ch]:
+                dic_return = self.down_list_make(json_list[ch]["cid"])
+                if not dic_return[0]:
+                    self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
+                    print(dic_return[1])
+                    return -1
+                down_dic = dic_return[2]
+                self.second_headers["range"] = down_dic["video"][self.VQuality][2]
+                self.d_processor(down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
+                self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
+                self.d_processor(down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
+                if self.synthesis:
+                    self.business_info.emit('正在启动ffmpeg......')
+                    self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
             self.recursion_for_Download(json_list[ch]["choices"], output)
         return 0
 
