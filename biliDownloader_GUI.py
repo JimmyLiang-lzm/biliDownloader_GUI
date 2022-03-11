@@ -17,7 +17,7 @@ from UI import biliDownloader, bilidsetting, bilidabout, biliInteractive
 import requests as request
 
 # Release Information
-Release_INFO = ["V1.5.20211222","2021/12/21"]
+Release_INFO = ["V1.5.20220311","2022/03/11"]
 
 # 强制使用IPv4
 urllib3_conn.allowed_gai_family = lambda: socket.AF_INET
