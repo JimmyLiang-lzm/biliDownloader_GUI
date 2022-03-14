@@ -1180,13 +1180,12 @@ class biliWorker(QThread):
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
                 self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
                 # Get the full video stream
-                proc = {"Max": 0, "Now": 0, "finish": 0}
+                proc = {"Max": int(vc_range), "Now": 0, "finish": 0}
                 err = 0
                 while(err <= 3):
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
                         m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
-                        proc["Max"] = int(vc_range)
                         self.progr_bar.emit(proc)
                         if not os.path.exists(output_dir):
                             os.makedirs(output_dir)
