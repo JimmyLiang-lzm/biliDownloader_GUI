@@ -1,9 +1,9 @@
-import os, sys
+import os, sys, webbrowser
+import json, re
 from pathlib import Path
 import requests as request
-import json, re
 from PySide2.QtCore import QThread, Signal, Qt, QPoint, QSize
-from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, QLabel, QListWidgetItem
+from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, QLabel, QListWidgetItem, QFileDialog
 from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
 from pyecharts import options as opts
@@ -22,6 +22,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.Move = False
         self.treelist_dict = {}
         self.current_path = []
+        self.node_chart = None
         self.cache_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
         self.list_NodeChoose.clear()
         # 设置窗口透明
@@ -38,6 +39,10 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.m_Position = QPoint(0, 0)
         # 连接器
         self.btnmin.clicked.connect(lambda: self.showMinimized())
+        self.btn_adjsize.clicked.connect(self.re_show)
+        self.btn_nodeview.clicked.connect(self.show_chart)
+        self.btn_save2html.clicked.connect(self.save2html)
+        self.btn_exportJSON.clicked.connect(self.save2json)
         # 初始化变量
         self.init_args = args
         self.info_init()
@@ -148,6 +153,44 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         w = self.lineEdit_width.text()
         h = self.lineEdit_height.text()
         self.draw_chart(w, h, self.chartdict)
+
+    # 查看节点图
+    def show_chart(self):
+        dir_address = self.cache_Path.replace("\\","/") + "/temp"
+        if not os.path.exists(dir_address):
+            os.makedirs(dir_address)
+        if not self.node_chart:
+            self.re_show()
+        self.node_chart.render(dir_address + "/node_temp.html")
+        access_url = self.url_maker(dir_address + "/node_temp.html")
+        webbrowser.open(access_url)
+
+    # 访问URL制作
+    def url_maker(self,in_dir):
+        if sys.platform == "win32":
+            return "file:///" + in_dir
+        else:
+            return "file://" + in_dir
+
+    # 节点图保存为网页
+    def save2html(self):
+        init_path = self.init_args["Output"] + "/" + self.base_info["vname"] + ".html"
+        directory = QFileDialog.getSaveFileName(None,'选择节点图保存路径',init_path,'HTML(*.html)')
+        if not self.node_chart:
+            self.re_show()
+        if directory[0] != '':
+            self.node_chart.set_global_opts(title_opts=opts.TitleOpts(
+                title=self.ivideo_name,
+                subtitle="Made By BiliDownloader"))\
+                .render(directory[0])
+
+    # 导出节点JSON
+    def save2json(self):
+        init_path = self.init_args["Output"] + "/" + self.base_info["vname"] + ".json"
+        directory = QFileDialog.getSaveFileName(None, "选择JSON保存路径", init_path, 'JSON(*.json)')
+        if directory[0] != '':
+            with open(directory[0],'w') as f:
+                f.write(json.dumps(self.full_json, ensure_ascii=False))
 
     ####################### RW Part #######################
     # 鼠标点击事件产生
@@ -303,10 +346,13 @@ class biliWorker_interact(QThread):
 
     # Judge the interactive video.
     def isInteract(self):
-        make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + \
-                   self.now_interact["bvid"]
+        make_API = "https://api.bilibili.com/x/player/v2"
+        param = {
+            'cid': self.now_interact["cid"],
+            'bvid': self.now_interact["bvid"],
+        }
         try:
-            res = request.get(make_API, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -318,15 +364,15 @@ class biliWorker_interact(QThread):
     # Edge Choose Search
     def Get_Edge(self):
         temp = {}
-        if self.now_interact["node_id"] == "":
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-                "bvid"] + "&graph_version=" + self.now_interact["graph_version"]
-        else:
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-                        "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
-                                   "node_id"]
+        make_API = "https://api.bilibili.com/x/stein/nodeinfo"
+        param = {
+            'bvid': self.now_interact["bvid"],
+            'graph_version': self.now_interact["graph_version"],
+        }
+        if self.now_interact["node_id"] != "":
+            param['node_id'] = self.now_interact["node_id"]
         try:
-            des = request.get(make_API, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
             res = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             print("Get Edges:",e)
@@ -408,7 +454,8 @@ if __name__ == '__main__':
         'useProxy':False,
         'proxy':{},
         'useCookie':False,
-        'cookie':''
+        'cookie':'',
+        'Output': 'G:/Cache',
     }
     app = QApplication(sys.argv)
     InteractiveWindow = biliInteractMainWindow(args)
