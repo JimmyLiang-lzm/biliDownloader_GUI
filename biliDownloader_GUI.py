@@ -1051,38 +1051,43 @@ class biliWorker(QThread):
                 vn2 = re_init["epInfo"]["titleFormat"] + ":" + re_init["epInfo"]["longTitle"]
             video_name = self.name_replace(vn1) + "_[" + self.name_replace(vn2) + "]"
             # List Video Quality Table
-            temp_v = {}
-            for i in range(len(re_GET["data"]["accept_quality"])):
-                temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
-            # List Video Download Quality
-            down_dic = {"video": {}, "audio": {}}
-            i = 0
-            # Get Video identity information and Initial SegmentBase.
-            for dic in re_GET["data"]["dash"]["video"]:
-                if str(dic["id"]) in temp_v:
-                    qc = temp_v[str(dic["id"])]
-                    down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["video"][i][1].append(dic["backupUrl"][a])
-                    i += 1
-                else:
-                    continue
-            # List Audio Stream
-            i = 0
-            for dic in re_GET["data"]["dash"]["audio"]:
-                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
-                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
-                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
-                i += 1
-            # Get Video Length
-            length = re_GET["data"]["dash"]["duration"]
+            length, down_dic = self.tmp_dffss(re_GET)
             # Return Data
             return 1, video_name, length, down_dic
         except Exception as e:
             print("PreInfo:",e)
             return 0, "", "", {}
+
+
+    def tmp_dffss(self, re_GET):
+        temp_v = {}
+        for i in range(len(re_GET["data"]["accept_quality"])):
+            temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
+        # List Video Download Quality
+        down_dic = {"video": {}, "audio": {}}
+        i = 0
+        # Get Video identity information and Initial SegmentBase.
+        for dic in re_GET["data"]["dash"]["video"]:
+            if str(dic["id"]) in temp_v:
+                qc = temp_v[str(dic["id"])]
+                down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
+                for a in range(len(dic["backupUrl"])):
+                    down_dic["video"][i][1].append(dic["backupUrl"][a])
+                i += 1
+            else:
+                continue
+        # List Audio Stream
+        i = 0
+        for dic in re_GET["data"]["dash"]["audio"]:
+            au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+            down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
+                                    'bytes=' + dic["SegmentBase"]["Initialization"]]
+            for a in range(len(dic["backupUrl"])):
+                down_dic["audio"][i][1].append(dic["backupUrl"][a])
+            i += 1
+        # Get Video Length
+        length = re_GET["data"]["dash"]["duration"]
+        return length, down_dic
 
 
     # Search the list of Video download address.
@@ -1474,33 +1479,7 @@ class biliWorker(QThread):
         if playinfo != {}:
             re_GET = playinfo
             # List Video Quality Table
-            temp_v = {}
-            for i in range(len(re_GET["data"]["accept_quality"])):
-                temp_v[str(re_GET["data"]["accept_quality"][i])] = str(re_GET["data"]["accept_description"][i])
-            # List Video Download Quality
-            down_dic = {"video": {}, "audio": {}}
-            i = 0
-            # Get Video identity information and Initial SegmentBase.
-            for dic in re_GET["data"]["dash"]["video"]:
-                if str(dic["id"]) in temp_v:
-                    qc = temp_v[str(dic["id"])]
-                    down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                    for a in range(len(dic["backupUrl"])):
-                        down_dic["video"][i][1].append(dic["backupUrl"][a])
-                    i += 1
-                else:
-                    continue
-            # List Audio Stream
-            i = 0
-            for dic in re_GET["data"]["dash"]["audio"]:
-                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
-                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
-                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
-                i += 1
-            # Get Video Length
-            length = re_GET["data"]["dash"]["duration"]
+            length, down_dic = self.tmp_dffss(re_GET)
             # Return Data
             return True, length, down_dic
         else:
@@ -1546,7 +1525,7 @@ class biliWorker(QThread):
                     self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
                     print(dic_return[1])
                     return -1
-                down_dic = dic_return[2]
+                _, _, down_dic = dic_return
                 self.second_headers["range"] = down_dic["video"][self.VQuality][2]
                 self.d_processor(down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
                 self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
