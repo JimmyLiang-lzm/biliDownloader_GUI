@@ -167,6 +167,7 @@ class InteractWindow(QWidget, Ui_Form):
             item.setText(1,in_dict[ch]["cid"])
             item.addChild(self.info_Init(in_dict[ch]["choices"],item))
 
+
     # 初始数据字典转化图像专用JSON递归函数
     def recursion_for_chart(self,in_json):
         temp = []

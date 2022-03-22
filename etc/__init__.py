@@ -3,7 +3,7 @@ import os, sys
 # 发布版本信息
 Release_INFO = ["V1.5.20220311","2022/03/11"]
 
-# 保存个人信息模板
+# 保存个人信息模板初始化
 indict = {
     "Address": "",
     "DownList": [],
