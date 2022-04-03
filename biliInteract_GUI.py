@@ -2,7 +2,7 @@ import os, sys, webbrowser
 import json, re
 from pathlib import Path
 import requests as request
-from PySide2.QtCore import QThread, Signal, Qt, QPoint, QSize, QModelIndex
+from PySide2.QtCore import QThread, Signal, Qt, QPoint, QSize
 from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, QLabel, QListWidgetItem, QFileDialog, QMessageBox
 from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
@@ -18,6 +18,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
     _Signal = Signal(dict)
     def __init__(self, args, parent=None):
         super(biliInteractMainWindow, self).__init__(parent)
+        self.feedback_dict = {'dlmode': -1,}
         self.setupUi(self)
         self.Move = False
         # 节点树形框字典初始化
@@ -55,6 +56,8 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.btn_back.clicked.connect(self.go_back_node)
         self.btn_refreash.clicked.connect(self.renew_show)
         self.tw_nodelist.itemClicked['QTreeWidgetItem*','int'].connect(self.item_setCheck)
+        self.tw_nodelist.itemDoubleClicked['QTreeWidgetItem*','int'].connect(self.item_setNodePosition)
+        self.btn_downCurChoose.clicked.connect(self.dl_current_node)
         # 初始化变量
         self.init_args = args
         self.info_init()
@@ -73,7 +76,6 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.lab_ivName.setText(self.base_info["vname"])
         self.base_info["curname"] = self.current_path[-1]
         self.lab_curchoose.setText(self.base_info["curname"])
-        self.lab_curCID.setText(self.base_info["cid"])
         # print(json.dumps(self.treelist_dict))
         self.tw_nodelist.clear()
         self.renew_treelist(self.treelist_dict, self.tw_nodelist)
@@ -98,7 +100,14 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
 
     # 刷新选择窗口的选项
     def renew_chooselist(self):
-        temp = self.get_current_list()
+        temp = self.get_current_list(self.current_path.copy(), 1)
+        # 显示节点信息
+        if 'node_id' in temp:
+            self.lab_curNID.setText(temp["node_id"])
+        if 'choices' in temp:
+            temp = temp['choices']
+        else:
+            temp = {}
         if temp:
             self.list_NodeChoose.clear()
             self.choos.clear()
@@ -144,11 +153,28 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         print('位置指引' ,self.current_path)
 
     # 获取当前节点的选择信息字典
-    def get_current_list(self):
-        tmp = self.treelist_dict
-        for ch in self.current_path:
-            tmp = tmp[ch]['choices']
-        return tmp
+    def get_current_list(self, path: list, mode: int):
+        tmp = self.treelist_dict.copy()
+        for ch in path[:-1]:
+            if 'choices' in tmp[ch]:
+                tmp = tmp[ch]['choices']
+            else:
+                return {}
+        # 判断输出为选项还是该节点信息
+        if (mode == 0) and ('choices' in tmp[path[-1]]):
+            tmp = tmp[path[-1]]['choices']
+            return tmp
+        elif mode == 1:
+            tmp = tmp[path[-1]]
+            return tmp
+        else:
+            return {}
+
+
+    def get_curNode_info(self, path):
+        tmp = self.treelist_dict.copy()
+        for ch in path:
+            pass
 
 
     def recursion_dict_update(self, input_dict: dict, keyPath: list, editKey, editValue):
@@ -164,6 +190,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
     def go_next_node(self):
         # 获取当前节点信息
         chooses = []
+        self.lab_curStatus.setText('正在加载……')
         for cb in self.choos:
             if cb.isChecked():
                 chooses.append(cb.text())
@@ -171,14 +198,14 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
             QMessageBox.information(self, '信息', '你需要选择一个选项哦~')
             return -1
         # 判断是否已探查到
-        tmp = self.get_current_list()[chooses[0]]
+        tmp = self.get_current_list(self.current_path.copy(), 0)[chooses[0]]
         self.pre_load = chooses[0]
         if 'choices' in tmp:
             if tmp['choices']:
                 self.current_path.append(self.pre_load)
                 self.renew_show()
             else:
-                QMessageBox.information(self, '信息', '互动视频这条路已经结束咧2！')
+                QMessageBox.information(self, '信息', '互动视频这条路已经结束咧！')
                 return -1
         else:
             # 获取已选选项node_id
@@ -212,6 +239,17 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         if item.checkState(0) == Qt.Checked:
             dict_status = True
         self.recursion_dict_update(self.treelist_dict, path, 'isChoose', dict_status)
+
+
+    # 设置显示节点位置
+    def item_setNodePosition(self, item, columu):
+        tree_path = self.get_item_path(item)
+        feed = self.get_current_list(tree_path, 0)
+        if not feed:
+            return -1
+        self.current_path = tree_path
+        self.renew_show()
+        return 0
 
 
     # 获取条目路径
@@ -293,6 +331,11 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
             with open(directory[0],'w') as f:
                 f.write(json.dumps(self.full_json, ensure_ascii=False))
 
+
+    # 下载当前节点处理函数
+    def dl_current_node(self):
+        pass
+
     ####################### RW Part #######################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
@@ -313,6 +356,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
 
     # 定义关闭事件
     def closeEvent(self, QCloseEvent):
+        self._Signal.emit(self.feedback_dict)
         for f in os.listdir(self.cache_Path + "/temp"):
             if f.endswith('_node.jpg'):
                 os.remove(self.cache_Path + "/temp/" + f)
@@ -350,8 +394,10 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
                 tmp = self.current_path.copy()
                 tmp.append(self.pre_load)
                 self.treelist_dict = self.recursion_dict_update(self.treelist_dict, tmp, 'choices', indict['nodelist'])
-                QMessageBox.information(self, '信息', '互动视频这条路已经结束咧1！')
+                self.lab_curStatus.setText('加载完毕')
+                QMessageBox.information(self, '信息', '互动视频这条路已经结束咧！')
             print(self.treelist_dict)
+
         elif indict['code'] == -1:
             self.lab_curStatus.setText(indict['data'])
         else:

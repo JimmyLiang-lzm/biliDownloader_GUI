@@ -1,3 +1,5 @@
+import json
+
 from etc import *
 from BiliModule.About import AboutWindow
 from BiliModule.Setting import SettingWindow
@@ -258,12 +260,15 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     ####################### Slot function ##########################
     # 交互视频下载页面接收数据槽函数
     def interact_Page(self,indic):
-        if indic == {}:
+        if not indic:
             self.plainTextEdit.appendPlainText("交互视频下载已取消")
             self.thread_finished(3)
             QApplication.processEvents()
         else:
             self.plainTextEdit.appendPlainText("交互视频开始下载")
+            # print('显示交互装载信息')
+            # print('self.now_interact', json.dumps(self.now_interact))
+            # print('indic', json.dumps(indic))
             self.tes.Set_Structure(self.now_interact, indic)
             self.tes.model_set(3)
             self.btn_pause.setEnabled(True)

@@ -295,6 +295,7 @@ class Ui_Form(object):
         self.list_NodeChoose.setObjectName(u"list_NodeChoose")
         self.list_NodeChoose.setGeometry(QRect(0, 60, 711, 351))
         self.list_NodeChoose.setAutoFillBackground(False)
+        self.list_NodeChoose.setAutoScrollMargin(16)
         self.list_NodeChoose.setDragEnabled(False)
         self.list_NodeChoose.setFlow(QListView.LeftToRight)
         self.list_NodeChoose.setResizeMode(QListView.Fixed)
@@ -355,10 +356,10 @@ class Ui_Form(object):
 
         self.formLayout.setWidget(2, QFormLayout.LabelRole, self.label_5)
 
-        self.lab_curCID = QLabel(self.formLayoutWidget)
-        self.lab_curCID.setObjectName(u"lab_curCID")
+        self.lab_curNID = QLabel(self.formLayoutWidget)
+        self.lab_curNID.setObjectName(u"lab_curNID")
 
-        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.lab_curCID)
+        self.formLayout.setWidget(2, QFormLayout.FieldRole, self.lab_curNID)
 
         self.label_7 = QLabel(self.formLayoutWidget)
         self.label_7.setObjectName(u"label_7")
@@ -440,8 +441,8 @@ class Ui_Form(object):
         self.lab_ivName.setText(QCoreApplication.translate("Form", u"None", None))
         self.label_3.setText(QCoreApplication.translate("Form", u"\u5f53\u524d\u6240\u5728\u9009\u9879\uff1a", None))
         self.lab_curchoose.setText(QCoreApplication.translate("Form", u"None", None))
-        self.label_5.setText(QCoreApplication.translate("Form", u"\u5f53\u524d\u89c6\u9891CID\uff1a", None))
-        self.lab_curCID.setText(QCoreApplication.translate("Form", u"None", None))
+        self.label_5.setText(QCoreApplication.translate("Form", u"\u5f53\u524d\u8282\u70b9ID\uff1a", None))
+        self.lab_curNID.setText(QCoreApplication.translate("Form", u"None", None))
         self.label_7.setText(QCoreApplication.translate("Form", u"\u5f53\u524d\u72b6\u6001\uff1a", None))
         self.lab_curStatus.setText(QCoreApplication.translate("Form", u"\u6b63\u5728\u52a0\u8f7d\u2026\u2026", None))
         self.label_9.setText(QCoreApplication.translate("Form", u"\u9012\u5f52\u6df1\u5ea6", None))

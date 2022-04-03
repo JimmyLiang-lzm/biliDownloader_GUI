@@ -531,7 +531,7 @@ class biliWorker(QThread):
         return self.iv_structure
 
     # Interactive video download
-    def requests_start(self, now_interact,iv_structure):
+    def requests_start(self, now_interact, iv_structure):
         self.now_interact = now_interact
         self.recursion_for_Download(iv_structure, self.output)
         self.business_info.emit("下载交互视频完成。")
@@ -628,6 +628,8 @@ class biliWorker(QThread):
             output = output_dir + "/" + chn
             video_dir = output + "/" + chn + '_video.m4s'
             audio_dir = output + "/" + chn + '_audio.m4s'
+            # 新字典判断
+            # if json_list[ch]['isChoose']:
             if "cid" in json_list[ch]:
                 dic_return = self.down_list_make(json_list[ch]["cid"])
                 if not dic_return[0]:
@@ -642,7 +644,8 @@ class biliWorker(QThread):
                 if self.synthesis:
                     self.business_info.emit('正在启动ffmpeg......')
                     self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
-            self.recursion_for_Download(json_list[ch]["choices"], output)
+            if "choices" in json_list[ch]:
+                self.recursion_for_Download(json_list[ch]["choices"], output)
         return 0
 
     ###################################################################
@@ -833,7 +836,7 @@ class biliWorker(QThread):
                 self.interact_info.emit({"state":2,"nowin":self.now_interact,"ivf":d})
         elif self.run_model == 3:
             # 交互视频下载
-            self.requests_start(self.now_interact,self.iv_structure)
+            self.requests_start(self.now_interact, self.iv_structure)
             self.is_finished.emit(3)
         elif self.run_model == 4:
             # 音频列表下载

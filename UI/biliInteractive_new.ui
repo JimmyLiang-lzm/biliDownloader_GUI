@@ -658,12 +658,12 @@ QTreeWidget::item:hover{
       <item row="2" column="0">
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>当前视频CID：</string>
+         <string>当前节点ID：</string>
         </property>
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QLabel" name="lab_curCID">
+       <widget class="QLabel" name="lab_curNID">
         <property name="text">
          <string>None</string>
         </property>
