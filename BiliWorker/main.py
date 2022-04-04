@@ -284,7 +284,7 @@ class biliWorker(QThread):
 
 
     # Download Stream function
-    def d_processor(self,url_list,output_dir,output_file,dest):
+    def d_processor(self, url_list, output_dir, output_file, dest):
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
@@ -292,7 +292,7 @@ class biliWorker(QThread):
                 video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
-                self.business_info.emit('{}文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
+                self.business_info.emit('{}  文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
                 # Get the full video stream
                 proc = {"Max": int(vc_range), "Now": 0, "finish": 0}
                 err = 0
@@ -515,20 +515,6 @@ class biliWorker(QThread):
             return 1, {}, {}
         return 0, self.now_interact
 
-    # 交互视频节点分析函数
-    def interact_nodeList(self):
-        self.business_info.emit("开始分析互动视频节点，若长时间（10分钟）未弹出画面说明互动视频存在循环或进程坏死，请退出本程序...")
-        self.business_info.emit("-----------------------------------------------------------------------------------------")
-        self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
-        self.Get_Init_Info(self.index_url)
-        self.index_headers['referer'] = self.index_url
-        self.second_headers = self.index_headers
-        self.isInteract()
-        self.iv_structure = {}
-        self.iv_structure[self.now_interact["vname"]] = {}
-        self.iv_structure[self.now_interact["vname"]] = self.recursion_GET_List("初始节点")
-        self.business_info.emit("节点探查完毕，窗口加载中...")
-        return self.iv_structure
 
     # Interactive video download
     def requests_start(self, now_interact, iv_structure):
@@ -562,10 +548,13 @@ class biliWorker(QThread):
 
     # Judge the interactive video.
     def isInteract(self):
-        make_API = "https://api.bilibili.com/x/player/v2?cid=" + self.now_interact["cid"] + "&bvid=" + \
-                   self.now_interact["bvid"]
+        make_API = "https://api.bilibili.com/x/player/v2"
+        param = {
+            'cid': self.now_interact["cid"],
+            'bvid': self.now_interact["bvid"],
+        }
         try:
-            res = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            res = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -574,14 +563,22 @@ class biliWorker(QThread):
         except Exception as e:
             return 1, str(e)
 
-    # Get interactive video pre-information
+    # Get interactive video download URL and Dict
     def down_list_make(self, cid_num):
-        make_API = "https://api.bilibili.com/x/player/playurl?cid=" + cid_num \
-                   + "&bvid=" + self.now_interact[
-                       "bvid"] + "&qn=116&type=&otype=json&fourk=1&fnver=0&fnval=976&session=" + \
-                   self.now_interact["session"]
+        make_API = "https://api.bilibili.com/x/player/playurl"
+        param = {
+            'cid': cid_num,
+            'bvid': self.now_interact["bvid"],
+            'qn': '116',
+            'type':'',
+            'otype': 'json',
+            'fourk': '1',
+            'fnver': '0',
+            'fnval': '976',
+            'session': self.now_interact["session"]
+        }
         try:
-            des = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
             playinfo = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             return False, str(e)
@@ -594,32 +591,6 @@ class biliWorker(QThread):
         else:
             return False, "Get Download List Error."
 
-    # Get interactive video node list (Use recursion algorithm)
-    def recursion_GET_List(self, inword):
-        temp = {"choices": {}}
-        temp["cid"] = self.now_interact["cid"]
-        if self.now_interact["node_id"] == "":
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-                "bvid"] + "&graph_version=" + self.now_interact["graph_version"]
-        else:
-            make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-                "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
-                           "node_id"]
-        try:
-            des = request.get(make_API, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
-            desp = json.loads(des.content.decode('utf-8'))
-        except Exception as e:
-            self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
-            print("Interactive Video Get List Error:",e)
-            return temp
-        if "edges" not in desp["data"]:
-            return temp
-        for ch in desp["data"]["edges"]["choices"]:
-            self.now_interact["cid"] = str(ch["cid"])
-            self.now_interact["node_id"] = str(ch["node_id"])
-            self.business_info.emit(inword +"-->"+ch["option"])
-            temp["choices"][ch["option"]] = self.recursion_GET_List(inword +"-->"+ch["option"])
-        return temp
 
     # Interactive video download processor (Use recursion algorithm)
     def recursion_for_Download(self, json_list, output_dir):
@@ -629,9 +600,10 @@ class biliWorker(QThread):
             video_dir = output + "/" + chn + '_video.m4s'
             audio_dir = output + "/" + chn + '_audio.m4s'
             # 新字典判断
-            # if json_list[ch]['isChoose']:
-            if "cid" in json_list[ch]:
+            if json_list[ch]['isChoose']:
+                # if "cid" in json_list[ch]:
                 dic_return = self.down_list_make(json_list[ch]["cid"])
+                # print(dic_return)
                 if not dic_return[0]:
                     self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
                     print(dic_return[1])
@@ -826,14 +798,14 @@ class biliWorker(QThread):
                 self.is_finished.emit(2)
             else:
                 self.is_finished.emit(2)
-        elif self.run_model == 2:
-            # 交互视频信息读取
-            d = self.interact_nodeList()
-            if d == {}:
-                self.interact_info.emit({"state":-2,"data":{}})
-                self.is_finished.emit(3)
-            else:
-                self.interact_info.emit({"state":2,"nowin":self.now_interact,"ivf":d})
+        # elif self.run_model == 2:
+        #     # 交互视频信息读取
+        #     d = self.interact_nodeList()
+        #     if d == {}:
+        #         self.interact_info.emit({"state":-2,"data":{}})
+        #         self.is_finished.emit(3)
+        #     else:
+        #         self.interact_info.emit({"state":2,"nowin":self.now_interact,"ivf":d})
         elif self.run_model == 3:
             # 交互视频下载
             self.requests_start(self.now_interact, self.iv_structure)

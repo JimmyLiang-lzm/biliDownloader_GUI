@@ -16,7 +16,7 @@ class SettingWindow(QWidget, Ui_Form):
         self.edit_cookies.setPlainText(ins_dict["cookie"])
         self.cb_useProxy.setChecked(ins_dict["useProxy"])
         self.lineEdit.setText(ins_dict["Proxy"]["http"])
-        # 设置窗口透明
+        # 设置父窗口阻塞与窗口透明
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)

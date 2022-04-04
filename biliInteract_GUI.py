@@ -1,24 +1,24 @@
-import os, sys, webbrowser
-import json, re
+import os, sys
+import json, webbrowser
 from pathlib import Path
-import requests as request
-from PySide2.QtCore import QThread, Signal, Qt, QPoint, QSize
+from PySide2.QtCore import Signal, Qt, QPoint, QSize
 from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, QLabel, QListWidgetItem, QFileDialog, QMessageBox
 from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
 from pyecharts import options as opts
 
-from UI import biliInteractive_new
+from UI.biliInteractive_new import Ui_Form
+from BiliWorker.extra import biliWorker_interact
+from BiliModule.RThread import RecurThreadWindow
 
-Object_Interactive_main = biliInteractive_new.Ui_Form
 
 ##############################################################################
 # 交互视频处理主界面
-class biliInteractMainWindow(QWidget, Object_Interactive_main):
+class biliInteractMainWindow(QWidget, Ui_Form):
     _Signal = Signal(dict)
     def __init__(self, args, parent=None):
         super(biliInteractMainWindow, self).__init__(parent)
-        self.feedback_dict = {'dlmode': -1,}
+        self.feedback_dict = {}
         self.setupUi(self)
         self.Move = False
         # 节点树形框字典初始化
@@ -58,9 +58,12 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.tw_nodelist.itemClicked['QTreeWidgetItem*','int'].connect(self.item_setCheck)
         self.tw_nodelist.itemDoubleClicked['QTreeWidgetItem*','int'].connect(self.item_setNodePosition)
         self.btn_downCurChoose.clicked.connect(self.dl_current_node)
+        self.btn_downALLChoose.clicked.connect(self.dl_all_chooses)
+        self.btn_stRecu.clicked.connect(self.st_recursion)
         # 初始化变量
         self.init_args = args
         self.info_init()
+
 
     # 初始化交互视频信息
     def info_init(self):
@@ -69,10 +72,11 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         self.init_args['cache_path'] = self.cache_Path
         self.iv_init = biliWorker_interact(self.init_args)
         self.iv_init.back_result.connect(self.Slot_Handle)
-        self.iv_init.run()
+        self.iv_init.start()
 
     # 更新显示信息
     def renew_show(self):
+        print(self.treelist_dict)
         self.lab_ivName.setText(self.base_info["vname"])
         self.base_info["curname"] = self.current_path[-1]
         self.lab_curchoose.setText(self.base_info["curname"])
@@ -150,7 +154,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
     def show_current_node(self):
         self.le_nodeway.clear()
         self.le_nodeway.setText(self.current_path[-1])
-        print('位置指引' ,self.current_path)
+        # print('位置指引' ,self.current_path)
 
     # 获取当前节点的选择信息字典
     def get_current_list(self, path: list, mode: int):
@@ -170,13 +174,7 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
         else:
             return {}
 
-
-    def get_curNode_info(self, path):
-        tmp = self.treelist_dict.copy()
-        for ch in path:
-            pass
-
-
+    # 字典递归编辑
     def recursion_dict_update(self, input_dict: dict, keyPath: list, editKey, editValue):
         tmp = input_dict
         if len(keyPath) > 1:
@@ -211,11 +209,11 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
             # 获取已选选项node_id
             node_id = tmp['node_id']
             if not self.iv_init:
-                QMessageBox.information(self, '对象错误', '请关闭并重新载入本窗口！')
+                QMessageBox.critical(self, '对象错误', '请关闭并重新载入本窗口！')
                 return -1
             if not self.iv_init.change_method(1, node_id=node_id):
                 return -1
-            self.iv_init.run()
+            self.iv_init.start()
             # print(node_id)
         return 0
 
@@ -334,7 +332,49 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
 
     # 下载当前节点处理函数
     def dl_current_node(self):
-        pass
+        _cur = self.current_path[-1]
+        self.feedback_dict['baseInfo'] = self.base_info
+        self.feedback_dict['indic'] = {}
+        self.feedback_dict['indic'][_cur] = self.get_current_list(self.current_path, 1)
+        self.feedback_dict['indic'][_cur]['isChoose'] = True
+        self.feedback_dict['indic'][_cur].pop('choices')
+        self.close()
+
+
+    # 下载已选择节点
+    def dl_all_chooses(self):
+        self.feedback_dict['baseInfo'] = self.base_info
+        self.feedback_dict['indic'] = self.treelist_dict
+        self.close()
+
+
+    # 开始递归探查
+    def st_recursion(self):
+        if not self.iv_init:
+            QMessageBox.critical(self, '对象错误', '请关闭并重新载入本窗口！')
+            return -1
+        if self.spinBox.value() == 0:
+            return 0
+        if self.spinBox.value() < 0:
+            recur_warning = QMessageBox.warning(self, '递归警告',
+                '当递归深度小于0时将探查直至所有节点结束！\n'
+                '1. 若该互动视频存在无限循环节点则会导致溢出；\n'
+                '2. 当互动视频节点分支较大时您将会等待很长时间。\n'
+                '请谨慎使用无限递归功能！继续请点击确认。', QMessageBox.Yes | QMessageBox.Cancel)
+            if recur_warning == QMessageBox.Cancel:
+                print('已经取消递归')
+                return -1
+        # 开始递归操作
+        deep = self.spinBox.value()
+        nodeID = ''
+        mode = 1
+        if self.cb_RSaCC.isChecked():
+            mode = 2
+            nodeID = self.lab_curNID.text()
+        self.RTWindow = RecurThreadWindow(mode , self.iv_init, nodeID, deep)
+        self.RTWindow._RSignal.connect(self.Recur_Slot_Handle)
+        self.RTWindow.show()
+
 
     ####################### RW Part #######################
     # 鼠标点击事件产生
@@ -385,7 +425,6 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
             self.renew_show()
         elif indict['code'] == 1:
             # 修改字典
-            print(self.treelist_dict)
             if indict['nodelist']:
                 self.current_path.append(self.pre_load)
                 self.treelist_dict = self.recursion_dict_update(self.treelist_dict, self.current_path, 'choices', indict['nodelist'])
@@ -396,248 +435,28 @@ class biliInteractMainWindow(QWidget, Object_Interactive_main):
                 self.treelist_dict = self.recursion_dict_update(self.treelist_dict, tmp, 'choices', indict['nodelist'])
                 self.lab_curStatus.setText('加载完毕')
                 QMessageBox.information(self, '信息', '互动视频这条路已经结束咧！')
-            print(self.treelist_dict)
-
         elif indict['code'] == -1:
             self.lab_curStatus.setText(indict['data'])
         else:
             pass
 
 
-
-
-##############################################################################
-# Bili交互视频处理总进程
-class biliWorker_interact(QThread):
-    #信号发射定义
-    business_info = Signal(str)
-    back_result = Signal(dict)
-    # 初始化
-    def __init__(self, args, model=0, parent=None):
-        super(biliWorker_interact, self).__init__(parent)
-        self.model = model
-        self.index_url = args['url']
-        self.index_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
-        }
-        self.re_playinfo = 'window.__playinfo__=([\s\S]*?)</script>'
-        self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
-        if args["useCookie"]:
-            self.index_headers["cookie"] = args["cookie"]
-            self.second_headers["cookie"] = args["cookie"]
-        else:
-            self.index_headers["cookie"] = ""
-            # self.second_headers["cookie"] = ""
-        if args["useProxy"]:
-            self.Proxy = args["Proxy"]
-        else:
-            self.Proxy = {}
-        self.iscache = args['imgcache']
-        self.cache_path = args['cache_path']+"/temp"
-
-    ###################################################################
-    # BiliDOwnloader基础功能
-    # File name conflict replace
-    def name_replace(self, name):
-        vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
-        vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
-        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08', '')
-        return vn
-
-    ###################################################################
-    # 交互进程初始数据获取函数
-    def interact_preinfo(self):
-        self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
-        t1 = self.Get_Init_Info(self.index_url)
-        if t1[0]:
-            return 1, {}, {}
-        self.index_headers['referer'] = self.index_url
-        self.second_headers = self.index_headers
-        t2 = self.isInteract()
-        if t2[0]:
-            return 1, {}, {}
-        print(self.now_interact)
-        t3 = self.Get_Edge()
-        if t3[0]:
-            return 1, {}, {}
-        return 0, self.now_interact, t3[1]
-
-    # 改变线程运行模式
-    def change_method(self, mode: int, **kwargs):
-        # 单节点探查模式
-        self.model = mode
-        if mode == 1:
-            if not kwargs.get('node_id'):
-                return False
-            self.now_interact['node_id'] = kwargs.get('node_id')
-            return True
-        # 递归探查模式
-        elif mode == 2:
-            return False
-        else:
-            return False
-
-    # # 交互视频节点分析函数
-    # def interact_nodeList(self):
-    #     self.business_info.emit("开始分析互动视频节点，若长时间（10分钟）未弹出画面说明互动视频存在循环或进程坏死，请退出本程序...")
-    #     self.business_info.emit(
-    #         "-----------------------------------------------------------------------------------------")
-    #     self.now_interact = {"cid": "", "bvid": "", "session": "", "graph_version": "", "node_id": "", "vname": ""}
-    #     if self.Get_Init_Info(self.index_url) != 0:
-    #         return -1
-    #     self.index_headers['referer'] = self.index_url
-    #     self.second_headers = self.index_headers
-    #     if self.isInteract() != 0:
-    #         return -1
-    #     self.iv_structure = {}
-    #     self.iv_structure[self.now_interact["vname"]] = {}
-    #     self.iv_structure[self.now_interact["vname"]] = self.recursion_GET_List("初始节点")
-    #     self.business_info.emit("节点探查完毕，窗口加载中...")
-    #     return self.iv_structure
-    #
-    # # Interactive video download
-    # def requests_start(self, now_interact, iv_structure):
-    #     self.now_interact = now_interact
-    #     self.recursion_for_Download(iv_structure, self.output)
-    #     self.business_info.emit("下载交互视频完成。")
-    #
-    # # 设置预下载信息
-    # def Set_Structure(self, now_interact, iv_structure):
-    #     self.now_interact = now_interact
-    #     self.iv_structure = iv_structure
-
-    # Interactive video initial information
-    def Get_Init_Info(self, url):
-        try:
-            res = request.get(url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
-            dec = res.content.decode('utf-8')
-            playinfo = re.findall(self.re_playinfo, dec, re.S)
-            INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
-            if playinfo == [] or INITIAL_STATE == []:
-                raise Exception("无法找到初始化信息。")
-            playinfo = json.loads(playinfo[0])
-            INITIAL_STATE = json.loads(INITIAL_STATE[0])
-            self.now_interact["session"] = playinfo["session"]
-            self.now_interact["bvid"] = INITIAL_STATE["bvid"]
-            self.now_interact["cid"] = str(INITIAL_STATE["cidMap"][INITIAL_STATE["bvid"]]["cids"]["1"])
-            self.now_interact["vname"] = self.name_replace(INITIAL_STATE["videoData"]["title"])
-            return 0, ""
-        except Exception as e:
-            return 1, str(e)
-
-    # Judge the interactive video.
-    def isInteract(self):
-        make_API = "https://api.bilibili.com/x/player/v2"
-        param = {
-            'cid': self.now_interact["cid"],
-            'bvid': self.now_interact["bvid"],
-        }
-        try:
-            res = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
-            des = json.loads(res.content.decode('utf-8'))
-            if "interaction" not in des["data"]:
-                raise Exception("非交互视频")
-            self.now_interact["graph_version"] = str(des["data"]["interaction"]["graph_version"])
-            return 0, ""
-        except Exception as e:
-            return 1, str(e)
-
-    # Edge Choose Search
-    def Get_Edge(self):
-        temp = {}
-        make_API = "https://api.bilibili.com/x/stein/nodeinfo"
-        param = {
-            'bvid': self.now_interact["bvid"],
-            'graph_version': self.now_interact["graph_version"],
-        }
-        if self.now_interact["node_id"] != "":
-            param['node_id'] = self.now_interact["node_id"]
-        try:
-            des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
-            res = json.loads(des.content.decode('utf-8'))
-        except Exception as e:
-            print("Get Edges:",e)
-            return 1, "获取节点失败（网络连接错误）"
-        if "edges" not in res["data"]:
-            return 0, temp
-        for ch in res["data"]["edges"]["choices"]:
-            temp[ch["option"]] = {}
-            temp[ch["option"]]["cid"] = str(ch["cid"])
-            temp[ch["option"]]["node_id"] = str(ch["node_id"])
-            temp[ch["option"]]["isChoose"] = False
-            if self.iscache:
-                self.img_cache(temp[ch["option"]]["cid"])
-        return 0, temp
-
-    # 节点缩略图下载
-    def img_cache(self, cid):
-        url = "https://i0.hdslb.com/bfs/steins-gate/" + cid + "_screenshot.jpg"
-        if not os.path.exists(self.cache_path):
-            os.makedirs(self.cache_path)
-        output_file = self.cache_path + "/" + cid + "_node.jpg"
-        if Path(output_file).is_file():
-            return 0
-        try:
-            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
-            file = res.content
-            with open(output_file, 'wb') as f:
-                f.write(file)
-            return 0
-        except Exception as e:
-            self.business_info.emit("附带下载失败：{}".format(url))
-            print("附带下载失败：", e)
-            return 1
-
-
-    # # Get interactive video node list (Use recursion algorithm)
-    # def recursion_GET_List(self, inword):
-    #     temp = {"choices": {}}
-    #     temp["cid"] = self.now_interact["cid"]
-    #     if self.now_interact["node_id"] == "":
-    #         make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-    #             "bvid"] + "&graph_version=" + self.now_interact["graph_version"]
-    #     else:
-    #         make_API = "https://api.bilibili.com/x/stein/nodeinfo?bvid=" + self.now_interact[
-    #             "bvid"] + "&graph_version=" + self.now_interact["graph_version"] + "&node_id=" + self.now_interact[
-    #                        "node_id"]
-    #     try:
-    #         des = request.get(make_API, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
-    #         desp = json.loads(des.content.decode('utf-8'))
-    #     except Exception as e:
-    #         self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
-    #         print("Interactive Video Get List Error:", e)
-    #         return temp
-    #     if "edges" not in desp["data"]:
-    #         return temp
-    #     for ch in desp["data"]["edges"]["choices"]:
-    #         self.now_interact["cid"] = str(ch["cid"])
-    #         self.now_interact["node_id"] = str(ch["node_id"])
-    #         self.business_info.emit(inword + "-->" + ch["option"])
-    #         temp["choices"][ch["option"]] = self.recursion_GET_List(inword + "-->" + ch["option"])
-    #     return temp
-
-    # Start Worker Thread
-    def run(self) -> None:
-        if self.model == 0:
-            res = self.interact_preinfo()
-            if res[0]:
-                self.back_result.emit({'code': -1, 'data': '获取初始信息失败'})
-            self.back_result.emit({'code':0,'data':res[1], 'nodelist':res[2]})
-        elif self.model == 1:
-            res = self.Get_Edge()
-            if res[0]:
-                self.back_result.emit({'code':-1,'data':'获取节点信息失败'})
-            self.back_result.emit({'code': 1, 'nodelist': res[1]})
-        else:
-            print("操作指令有误:",self.model)
-            self.back_result.emit({'code':-1,'data':'操作指令有误'})
+    # 递归线程接收槽函数
+    def Recur_Slot_Handle(self, indic):
+        if indic:
+            if indic['status'] == 1:
+                self.treelist_dict[self.base_info["vname"]]['choices'] = indic['data']
+            elif indic['status'] == 2:
+                tmp = self.current_path.copy()
+                self.treelist_dict = self.recursion_dict_update(self.treelist_dict, tmp, 'choices', indic['data'])
+            self.renew_show()
 
 
 if __name__ == '__main__':
     args = {
-        'url':'https://www.bilibili.com/video/BV1Kb4y1v79e',
+        'Address':'https://www.bilibili.com/video/BV1Kb4y1v79e',
         'useProxy':False,
-        'proxy':{},
+        'Proxy':{},
         'useCookie':False,
         'cookie':'',
         'Output': 'G:/Cache',
