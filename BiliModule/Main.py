@@ -1,9 +1,7 @@
 from etc import *
 from BiliModule.About import AboutWindow
 from BiliModule.Setting import SettingWindow
-
-# from BiliModule.Interact import InteractWindow
-from biliInteract_GUI import biliInteractMainWindow
+from BiliModule.Interact import biliInteractMainWindow
 
 from BiliWorker.main import biliWorker
 from BiliWorker.extra import *
