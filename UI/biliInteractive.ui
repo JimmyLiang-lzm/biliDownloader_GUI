@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
-    <height>613</height>
+    <width>1083</width>
+    <height>728</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -212,8 +212,8 @@ QTreeWidget::item:hover{
     <rect>
      <x>30</x>
      <y>30</y>
-     <width>631</width>
-     <height>551</height>
+     <width>1011</width>
+     <height>661</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -222,13 +222,13 @@ QTreeWidget::item:hover{
    <property name="styleSheet">
     <string notr="true"/>
    </property>
-   <widget class="QTreeWidget" name="treeWidget_4">
+   <widget class="QTreeWidget" name="tw_nodelist">
     <property name="geometry">
      <rect>
-      <x>30</x>
-      <y>60</y>
-      <width>571</width>
-      <height>331</height>
+      <x>750</x>
+      <y>260</y>
+      <width>231</width>
+      <height>371</height>
      </rect>
     </property>
     <property name="selectionMode">
@@ -251,7 +251,7 @@ QTreeWidget::item:hover{
    <widget class="QPushButton" name="btnmax">
     <property name="geometry">
      <rect>
-      <x>560</x>
+      <x>940</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -267,7 +267,7 @@ QTreeWidget::item:hover{
    <widget class="QPushButton" name="btnmin">
     <property name="geometry">
      <rect>
-      <x>530</x>
+      <x>910</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -283,7 +283,7 @@ QTreeWidget::item:hover{
    <widget class="QPushButton" name="btnclose">
     <property name="geometry">
      <rect>
-      <x>590</x>
+      <x>970</x>
       <y>20</y>
       <width>16</width>
       <height>16</height>
@@ -324,52 +324,13 @@ QTreeWidget::item:hover{
      <string>互动视频下载</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="btn_canceldownload">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>490</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>取消下载</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_startdownload">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>410</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>开始下载</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btn_exportJSON">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>450</y>
-      <width>181</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>导出节点JSON</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="groupBox_7">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>400</y>
-      <width>371</width>
-      <height>121</height>
+      <x>750</x>
+      <y>50</y>
+      <width>231</width>
+      <height>201</height>
      </rect>
     </property>
     <property name="title">
@@ -435,8 +396,8 @@ QTreeWidget::item:hover{
     <widget class="QPushButton" name="btn_adjsize">
      <property name="geometry">
       <rect>
-       <x>150</x>
-       <y>30</y>
+       <x>130</x>
+       <y>70</y>
        <width>91</width>
        <height>31</height>
       </rect>
@@ -467,23 +428,10 @@ QTreeWidget::item:hover{
       <string>宽度</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="btn_save2html">
-     <property name="geometry">
-      <rect>
-       <x>150</x>
-       <y>70</y>
-       <width>201</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>保存为网页</string>
-     </property>
-    </widget>
     <widget class="QPushButton" name="btn_nodeview">
      <property name="geometry">
       <rect>
-       <x>260</x>
+       <x>130</x>
        <y>30</y>
        <width>91</width>
        <height>31</height>
@@ -491,6 +439,343 @@ QTreeWidget::item:hover{
      </property>
      <property name="text">
       <string>查看节点图</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_exportJSON">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>211</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>导出节点JSON</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_save2html">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>211</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>保存为网页</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>50</y>
+      <width>711</width>
+      <height>581</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>手动节点选择视图</string>
+    </property>
+    <widget class="QListWidget" name="list_NodeChoose">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>60</y>
+       <width>711</width>
+       <height>351</height>
+      </rect>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="autoScrollMargin">
+      <number>16</number>
+     </property>
+     <property name="dragEnabled">
+      <bool>false</bool>
+     </property>
+     <property name="flow">
+      <enum>QListView::LeftToRight</enum>
+     </property>
+     <property name="resizeMode">
+      <enum>QListView::Fixed</enum>
+     </property>
+     <property name="layoutMode">
+      <enum>QListView::SinglePass</enum>
+     </property>
+     <property name="spacing">
+      <number>20</number>
+     </property>
+     <property name="viewMode">
+      <enum>QListView::IconMode</enum>
+     </property>
+     <property name="modelColumn">
+      <number>0</number>
+     </property>
+     <property name="uniformItemSizes">
+      <bool>false</bool>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>ssss</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>gggg</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QPushButton" name="btn_canceldownload">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>460</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>取消下载</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_downALLChoose">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>540</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>下载已选择节点</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_back">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>420</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>上一个节点</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_next">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>420</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>下一个节点</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="le_nodeway">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>420</y>
+       <width>391</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="placeholderText">
+      <string>此处显示节点路径</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_downCurChoose">
+     <property name="geometry">
+      <rect>
+       <x>560</x>
+       <y>500</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>下载当前节点</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="formLayoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>460</y>
+       <width>351</width>
+       <height>111</height>
+      </rect>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>互动视频名称：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLabel" name="lab_ivName">
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>当前所在选项：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLabel" name="lab_curchoose">
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>当前节点ID：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLabel" name="lab_curNID">
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>当前状态：</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLabel" name="lab_curStatus">
+        <property name="text">
+         <string>正在加载……</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QSpinBox" name="spinBox">
+     <property name="geometry">
+      <rect>
+       <x>450</x>
+       <y>470</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>-10</number>
+     </property>
+     <property name="value">
+      <number>-1</number>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_9">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>470</y>
+       <width>72</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>递归深度</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_RSaCC">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>510</y>
+       <width>151</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>从当前节点开始递归</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="tristate">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_stRecu">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>540</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>开始递归</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="cb_showimage">
+     <property name="geometry">
+      <rect>
+       <x>590</x>
+       <y>20</y>
+       <width>101</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>显示缩略图</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="btn_refreash">
+     <property name="geometry">
+      <rect>
+       <x>470</x>
+       <y>20</y>
+       <width>93</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>刷新显示</string>
      </property>
     </widget>
    </widget>

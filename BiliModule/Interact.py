@@ -7,7 +7,7 @@ from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
 from pyecharts import options as opts
 
-from UI.biliInteractive_new import Ui_Form
+from UI.biliInteractive import Ui_Form
 from BiliWorker.extra import biliWorker_interact, BiliImgCache
 from BiliModule.RThread import RecurThreadWindow
 
