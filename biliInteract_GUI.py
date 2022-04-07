@@ -8,7 +8,7 @@ from pyecharts.charts import Tree
 from pyecharts import options as opts
 
 from UI.biliInteractive_new import Ui_Form
-from BiliWorker.extra import biliWorker_interact
+from BiliWorker.extra import biliWorker_interact, BiliImgCache
 from BiliModule.RThread import RecurThreadWindow
 
 
@@ -70,22 +70,34 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.base_info = {"bvid": "", "session": "", "vname": "", "graph_version": "", "cid": "", "node_id": "", "curname":""}
         self.init_args['imgcache'] = self.cb_showimage.isChecked()
         self.init_args['cache_path'] = self.cache_Path
+        # 初始化缓存系统
+        self.IMGCache_SYS = BiliImgCache(self.init_args)
+        # 初始化交互视频探查系统
         self.iv_init = biliWorker_interact(self.init_args)
         self.iv_init.back_result.connect(self.Slot_Handle)
+        # 运行初始化信息查询
         self.iv_init.start()
 
     # 更新显示信息
     def renew_show(self):
         print(self.treelist_dict)
+        # 判断是否需要图片缓存并择机开启图片缓存系统
+        if self.cb_showimage.isChecked() and (not self.IMGCache_SYS.busy):
+            self.IMGCache_SYS.setRecurDict(self.treelist_dict)
+            self.IMGCache_SYS.start()
+        # 刷新信息框显示
         self.lab_ivName.setText(self.base_info["vname"])
         self.base_info["curname"] = self.current_path[-1]
         self.lab_curchoose.setText(self.base_info["curname"])
-        # print(json.dumps(self.treelist_dict))
+        # 树形图刷新
         self.tw_nodelist.clear()
         self.renew_treelist(self.treelist_dict, self.tw_nodelist)
         self.tw_nodelist.expandAll()
+        # 刷新选择视图
         self.renew_chooselist()
+        # 显示当前节点
         self.show_current_node()
+        # 递归整理节点图输出字典
         self.chartdict = self.recursion_for_chart(self.treelist_dict)
         self.lab_curStatus.setText("加载完毕")
 
@@ -211,7 +223,10 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             if not self.iv_init:
                 QMessageBox.critical(self, '对象错误', '请关闭并重新载入本窗口！')
                 return -1
-            if not self.iv_init.change_method(1, node_id=node_id):
+            img_cache = False
+            if self.cb_showimage.isChecked():
+                img_cache = True
+            if not self.iv_init.change_method(1, node_id=node_id, img_cache=img_cache):
                 return -1
             self.iv_init.start()
             # print(node_id)

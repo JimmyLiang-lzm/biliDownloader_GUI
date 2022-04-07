@@ -98,6 +98,8 @@ class biliWorker_interact(QThread):
             self.Proxy = {}
         self.iscache = args['imgcache']
         self.cache_path = args['cache_path'] + "/temp"
+        # 初始化缓存图片下载类
+        self.imgCache_module = BiliImgCache(args)
 
     ###################################################################
     # BiliDOwnloader基础功能
@@ -134,6 +136,7 @@ class biliWorker_interact(QThread):
             if not kwargs.get('node_id'):
                 return False
             self.now_interact['node_id'] = kwargs.get('node_id')
+            self.iscache = kwargs.get('img_cache')
             return True
         # 递归探查模式
         elif mode == 2:
@@ -193,7 +196,6 @@ class biliWorker_interact(QThread):
         except Exception as e:
             return 1, str(e)
 
-
     # Judge the interactive video.
     def isInteract(self):
         make_API = "https://api.bilibili.com/x/player/v2"
@@ -210,7 +212,6 @@ class biliWorker_interact(QThread):
             return 0, ""
         except Exception as e:
             return 1, str(e)
-
 
     # Edge Choose Search
     def Get_Edge(self):
@@ -236,28 +237,9 @@ class biliWorker_interact(QThread):
             temp[ch["option"]]["node_id"] = str(ch["node_id"])
             temp[ch["option"]]["isChoose"] = False
             if self.iscache:
-                self.img_cache(temp[ch["option"]]["cid"])
+                self.imgCache_module.img_cache(temp[ch["option"]]["cid"])
+                # self.img_cache(temp[ch["option"]]["cid"])
         return 0, temp
-
-
-    # 节点缩略图下载
-    def img_cache(self, cid):
-        url = "https://i0.hdslb.com/bfs/steins-gate/" + cid + "_screenshot.jpg"
-        if not os.path.exists(self.cache_path):
-            os.makedirs(self.cache_path)
-        output_file = self.cache_path + "/" + cid + "_node.jpg"
-        if Path(output_file).is_file():
-            return 0
-        try:
-            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
-            file = res.content
-            with open(output_file, 'wb') as f:
-                f.write(file)
-            return 0
-        except Exception as e:
-            self.business_info.emit("附带下载失败：{}".format(url))
-            print("附带下载失败：", e)
-            return 1
 
     # 交互视频节点分析函数
     def interact_nodeList(self):
@@ -276,7 +258,6 @@ class biliWorker_interact(QThread):
         iv_structure = self.recursion_GET_List('当前节点')
         self.business_info.emit("节点探查完毕!!")
         return iv_structure
-
 
     # Get interactive video node list (Use recursion algorithm)
     def recursion_GET_List(self, inword):
@@ -322,7 +303,6 @@ class biliWorker_interact(QThread):
     def kill_rthread(self):
         self.recur_run = False
 
-
     # Start Worker Thread
     def run(self) -> None:
         if self.model == 0:
@@ -346,3 +326,69 @@ class biliWorker_interact(QThread):
             self.back_result.emit({'code':-1,'data':'操作指令有误'})
 
 
+
+##############################################################################
+# Bili交互视频图片缓存线程
+class BiliImgCache(QThread):
+    # 初始化缓存对象
+    def __init__(self, req_dict: dict):
+        super(BiliImgCache, self).__init__()
+        # 初始化requests参数
+        self.index_headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+        }
+        if req_dict["useCookie"]:
+            self.index_headers["cookie"] = req_dict["cookie"]
+        else:
+            self.index_headers["cookie"] = ""
+        if req_dict["useProxy"]:
+            self.Proxy = req_dict["Proxy"]
+        else:
+            self.Proxy = {}
+        self.cache_path = req_dict['cache_path'] + "/temp"
+        # 初始化递归字典
+        self.recur_dict = {}
+        self.busy = False
+
+    # 设置递归字典
+    def setRecurDict(self, indic: dict):
+        self.recur_dict = indic
+
+    # 递归字典转数组主程序
+    def recur_dict2list(self, indic: dict, savelist: list):
+        for ch in indic:
+            savelist.append(indic[ch]['cid'])
+            if "choices" in indic[ch]:
+                savelist = self.recur_dict2list(indic[ch]['choices'], savelist)
+        return savelist
+
+    # 缓存输出主程序
+    def img_cache(self, cid):
+        url = "https://i0.hdslb.com/bfs/steins-gate/" + cid + "_screenshot.jpg"
+        if not os.path.exists(self.cache_path):
+            os.makedirs(self.cache_path)
+        output_file = self.cache_path + "/" + cid + "_node.jpg"
+        if Path(output_file).is_file():
+            return 0
+        try:
+            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            file = res.content
+            with open(output_file, 'wb') as f:
+                f.write(file)
+            return 0
+        except Exception as e:
+            self.business_info.emit("附带下载失败：{}".format(url))
+            print("附带下载失败：", e)
+            return 1
+
+    # 运行自动缓存系统
+    def runAutoImgCache(self):
+        cache_cid_list = self.recur_dict2list(self.recur_dict, [])
+        for cid in cache_cid_list:
+            self.img_cache(cid)
+
+    # 主线程启动
+    def run(self) -> None:
+        self.busy = True
+        self.runAutoImgCache()
+        self.busy = False
