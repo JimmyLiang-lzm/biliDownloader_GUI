@@ -1,4 +1,4 @@
-# BiliDownloader: BiliBili Video Downloader
+# BiliDownloader: BiliBili Media Downloader
 
 > 基于Python开发的可视化B站视频专用下载器（支持交互视频下载）
 > 
