@@ -24,3 +24,6 @@ indict = {
 
 # 本地
 DF_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
+
+# Echarts CDN
+Echart_CDN = 'https://gitee.com/zmtechn/echart-jscdn/raw/master/'

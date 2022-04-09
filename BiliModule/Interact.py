@@ -6,10 +6,12 @@ from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, 
 from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
 from pyecharts import options as opts
+from pyecharts.globals import CurrentConfig
 
 from UI.biliInteractive import Ui_Form
 from BiliWorker.extra import biliWorker_interact, BiliImgCache
 from BiliModule.RThread import RecurThreadWindow
+from etc import DF_Path, Echart_CDN
 
 
 ##############################################################################
@@ -32,7 +34,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         # 节点访问线程对象
         self.iv_init = None
         # 初始化缓存路径
-        self.cache_Path = os.path.dirname(os.path.realpath(sys.argv[0]))
+        self.cache_Path = DF_Path
         self.list_NodeChoose.clear()
         # 设置窗口透明
         self.setWindowModality(Qt.ApplicationModal)
@@ -61,6 +63,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.btn_downALLChoose.clicked.connect(self.dl_all_chooses)
         self.btn_stRecu.clicked.connect(self.st_recursion)
         # 初始化变量
+        CurrentConfig.ONLINE_HOST = Echart_CDN
         self.init_args = args
         self.info_init()
 
@@ -290,7 +293,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
     # 节点图绘制程序
     def draw_chart(self, width, height, indict):
         self.node_chart = (
-            Tree(init_opts=opts.InitOpts(width=width + "px", height=height + "px"))
+            Tree(init_opts=opts.InitOpts(page_title='Bili Node Explorer', width=width + "px", height=height + "px"))
                 .add(
                 "",
                 indict,
@@ -332,7 +335,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             self.re_show()
         if directory[0] != '':
             self.node_chart.set_global_opts(title_opts=opts.TitleOpts(
-                title=self.ivideo_name,
+                title=self.base_info["vname"],
                 subtitle="Made By BiliDownloader"))\
                 .render(directory[0])
 
