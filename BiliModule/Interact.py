@@ -80,7 +80,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
 
     # 更新显示信息
     def renew_show(self):
-        print(self.treelist_dict)
+        # print(self.treelist_dict)
         # 判断是否需要图片缓存并择机开启图片缓存系统
         if self.cb_showimage.isChecked() and (not self.IMGCache_SYS.busy):
             self.IMGCache_SYS.setRecurDict(self.treelist_dict)
@@ -137,7 +137,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         else:
             self.list_NodeChoose.clear()
             self.choos.clear()
-            print('节点结束')
+            # print('节点结束')
 
     # 单个节点选项样式函数
     def choose_item_widget(self, node_name, cid):
@@ -377,7 +377,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
                 '2. 当互动视频节点分支较大时您将会等待很长时间。\n'
                 '请谨慎使用无限递归功能！继续请点击确认。', QMessageBox.Yes | QMessageBox.Cancel)
             if recur_warning == QMessageBox.Cancel:
-                print('已经取消递归')
+                # print('已经取消递归')
                 return -1
         # 开始递归操作
         deep = self.spinBox.value()
@@ -389,6 +389,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.RTWindow = RecurThreadWindow(mode , self.iv_init, nodeID, deep)
         self.RTWindow._RSignal.connect(self.Recur_Slot_Handle)
         self.RTWindow.show()
+        return 0
 
 
     ####################### RW Part #######################
