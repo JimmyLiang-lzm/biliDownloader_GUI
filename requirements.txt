@@ -1,5 +1,13 @@
-psutil==5.8.0
+certifi==2021.10.8
+charset-normalizer==2.0.12
+idna==3.3
+Jinja2==3.1.1
+MarkupSafe==2.1.1
+prettytable==3.2.0
 pyecharts==1.9.1
-pyinstaller==4.7
-PySide2==5.15.2
-requests==2.26.0
+PySide2==5.15.2.1
+requests==2.27.1
+shiboken2==5.15.2.1
+simplejson==3.17.6
+urllib3==1.26.9
+wcwidth==0.2.5
