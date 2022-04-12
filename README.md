@@ -2,7 +2,7 @@
 
 > 基于Python开发的可视化B站视频专用下载器（支持交互视频下载）
 > 
-> Visualized video downloader for BiliBili based on Python
+> Visualized Media Downloader for BiliBili Based on Python
 
 [![maven](https://img.shields.io/badge/Python-3.10-blue.svg)](https://www.python.org/)  [![mavel](https://img.shields.io/badge/GPL-3.0-red.svg)](https://github.com/JimmyLiang-lzm/biliDownloader/blob/master/LICENSE) ![mavel](https://img.shields.io/badge/requests-2.27.1-green.svg) ![mavel](https://img.shields.io/badge/PySide2-5.15.2-green.svg) [![mavel](https://img.shields.io/badge/BiliDownloader-Command-pink.svg)](https://github.com/JimmyLiang-lzm/biliDownloader)
 
