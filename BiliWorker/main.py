@@ -180,8 +180,9 @@ class biliWorker(QThread):
             if str(dic["id"]) in temp_v:
                 qc = temp_v[str(dic["id"])]
                 down_dic["video"][i] = [qc, [dic["baseUrl"]], 'bytes=' + dic["SegmentBase"]["Initialization"]]
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["video"][i][1].append(dic["backupUrl"][a])
+                if dic.get('backupUrl') is list:
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["video"][i][1].append(dic["backupUrl"][a])
                 i += 1
             else:
                 continue
@@ -191,8 +192,9 @@ class biliWorker(QThread):
             au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
             down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
                                     'bytes=' + dic["SegmentBase"]["Initialization"]]
-            for a in range(len(dic["backupUrl"])):
-                down_dic["audio"][i][1].append(dic["backupUrl"][a])
+            if dic.get('backupUrl') is list:
+                for a in range(len(dic["backupUrl"])):
+                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
             i += 1
         # Get Video Length
         length = re_GET["data"]["dash"]["duration"]
