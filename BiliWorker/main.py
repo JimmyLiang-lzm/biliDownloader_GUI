@@ -349,15 +349,19 @@ class biliWorker(QThread):
         ffcommand = ""
         if self.systemd == "win32":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + '/ffmpeg.exe -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+            ffcommand = '"' + ffpath + '\\ffmpeg.exe" -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "linux":
-            ffcommand = 'ffmpeg -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+            ffcommand = 'ffmpeg -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "darwin":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = ffpath + '/ffmpeg -i ' + input_v + ' -i ' + input_a + ' -c:v copy -c:a aac -strict experimental ' + output_add
+            ffcommand ='"' + ffpath + '/ffmpeg" -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         else:
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
             return -2
+        # 内测版专属
+        # self.business_info.emit('--------------------内测分割线--------------------')
+        # self.business_info.emit("操作系统：{}\nFFMPEG命令：{}".format(self.systemd, ffcommand))
+        # self.business_info.emit('--------------------内测分割线--------------------')
         try:
             self.subpON = True
             temp = self.subp_GUIFollow(ffcommand)
@@ -375,7 +379,7 @@ class biliWorker(QThread):
     # Subprocess Progress of FFMPEG, RUN and Following Function
     def subp_GUIFollow(self, ffcommand):
         proc = {"Max": 100, "Now": 0, "finish": 2}
-        subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+        subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding=sys.getfilesystemencoding())
         self.business_info.emit('FFMPEG正在执行合成指令')
         while True:
             status = subp.poll()
