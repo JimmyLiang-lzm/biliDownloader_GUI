@@ -62,6 +62,8 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.btn_downCurChoose.clicked.connect(self.dl_current_node)
         self.btn_downALLChoose.clicked.connect(self.dl_all_chooses)
         self.btn_stRecu.clicked.connect(self.st_recursion)
+        self.btn_select_All.clicked.connect(self.select_All)
+        self.btn_select_None.clicked.connect(self.select_None)
         # 初始化变量
         CurrentConfig.ONLINE_HOST = Echart_CDN
         self.init_args = args
@@ -393,6 +395,26 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.RTWindow._RSignal.connect(self.Recur_Slot_Handle)
         self.RTWindow.show()
         return 0
+
+    # 全选节点
+    def select_All(self):
+        # print(self.treenode_select(self.treelist_dict, True))
+        self.treelist_dict = self.treenode_select(self.treelist_dict, True)
+        self.renew_show()
+
+    # 全不选节点
+    def select_None(self):
+        # print(self.treenode_select(self.treelist_dict, False))
+        self.treelist_dict = self.treenode_select(self.treelist_dict, False)
+        self.renew_show()
+
+    # 节点全部选中或不选中
+    def treenode_select(self, indic, choose: bool):
+        for ch in indic:
+            indic[ch]['isChoose'] = choose
+            if indic[ch].get('choices'):
+                indic[ch]['choices'] = self.treenode_select(indic[ch]['choices'], choose)
+        return indic
 
 
     ####################### RW Part #######################

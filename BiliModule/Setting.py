@@ -16,6 +16,8 @@ class SettingWindow(QWidget, Ui_Form):
         self.edit_cookies.setPlainText(ins_dict["cookie"])
         self.cb_useProxy.setChecked(ins_dict["useProxy"])
         self.lineEdit.setText(ins_dict["Proxy"]["http"])
+        self.dl_err.setValue(ins_dict["dl_err"])
+        self.chunk_size.setValue(ins_dict["chunk_size"])
         # 设置父窗口阻塞与窗口透明
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -79,6 +81,8 @@ class SettingWindow(QWidget, Ui_Form):
             self.ins_dict["useProxy"] = False
         proxy_url = self.lineEdit.text()
         self.ins_dict["Proxy"] = {'http': proxy_url,'https':proxy_url,}
+        self.ins_dict["dl_err"] = self.dl_err.value()
+        self.ins_dict["chunk_size"] = self.chunk_size.value()
         self._signal.emit({"code":1,"indict":self.ins_dict})
         self.close()
 

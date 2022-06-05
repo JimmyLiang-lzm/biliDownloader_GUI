@@ -16,6 +16,8 @@ indict = {
     "sym": True,
     "useCookie": False,
     "useProxy": False,
+    "dl_err": 3,
+    "chunk_size": 1024,
     "Proxy": {
         'http': '',
         'https': '',

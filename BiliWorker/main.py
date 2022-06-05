@@ -39,7 +39,8 @@ class biliWorker(QThread):
         self.re_playinfo = 'window.__playinfo__=([\s\S]*?)</script>'
         self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
         self.vname_expression = '<title(.*?)</title>'
-        self.chunk_size = 1024
+        self.chunk_size = args["chunk_size"]
+        self.set_err = args["dl_err"]
         self.index_headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
         }
@@ -294,11 +295,11 @@ class biliWorker(QThread):
                 video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
-                self.business_info.emit('{}  文件大小：{} MB'.format(dest,round(float(vc_range) / self.chunk_size / 1024), 4))
+                self.business_info.emit('{}  文件大小：{} MB'.format(dest,round(float(vc_range) / 1024 / 1024), 4))
                 # Get the full video stream
                 proc = {"Max": int(vc_range), "Now": 0, "finish": 0}
                 err = 0
-                while(err <= 3):
+                while(err <= self.set_err):
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
                         m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
@@ -327,7 +328,7 @@ class biliWorker(QThread):
                         if re.findall('10054',str(e),re.S) == []:
                             err += 1
                         print(e,err)
-                if err > 3:
+                if err > self.set_err:
                     raise Exception('线路出错，切换线路。')
                 proc["finish"] = 1
                 self.progr_bar.emit(proc)
@@ -340,6 +341,118 @@ class biliWorker(QThread):
                 if os.path.exists(output_file):
                     os.remove(output_file)
         return 1
+
+    # # 线程部署 -> List
+    # def make_Thread_list(self, url: str, thread_num: int, byte_weight: int, tmp_dir) -> list:
+    #     thread_list = []
+    #     st_byte = -1
+    #     for i in range(thread_num):
+    #         # 确定线程下载范围
+    #         st_byte += 1
+    #         ed_byte = int(byte_weight/thread_num) * (i+1)
+    #         if i == (thread_num - 1):
+    #             ed_byte = byte_weight
+    #         range_tuple = (st_byte, ed_byte)
+    #         # 新建线程类
+    #         t = DLThread(url, range_tuple, tmp_dir+'/{}.tmp'.format(i), self.second_headers, self.Proxy)
+    #         tmp = []
+    #         tmp.append(i)
+    #         tmp.append(t)
+    #         thread_list.append(tmp)
+    #         st_byte = ed_byte
+    #     return thread_list
+    #
+    #
+    # # Download Stream function (NEW)
+    # def d_processor(self, url_list, output_dir, output_file, dest):
+    #     for line in url_list:
+    #         self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
+    #         try:
+    #             # video stream length sniffing
+    #             video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5, 10),
+    #                                       proxies=self.Proxy)
+    #             vc_range = video_bytes.headers['Content-Range'].split('/')[1]
+    #             self.business_info.emit("获取{}流范围为：{}".format(dest, vc_range))
+    #             self.business_info.emit(
+    #                 '{}  文件大小：{} MB'.format(dest, round(float(vc_range) / self.chunk_size / 1024), 4))
+    #             # 开始线程分配与文件夹制作
+    #             thread_num = 4
+    #             tmp_dir = output_dir + '/tmp_{}'.format(int(time.time()*1000))
+    #             if not os.path.exists(tmp_dir):
+    #                 os.makedirs(tmp_dir)
+    #             thread_queue = self.make_Thread_list(line, thread_num, int(vc_range), tmp_dir)
+    #             # Get the full video stream
+    #             proc = {"Max": int(vc_range), "Now": 0, "finish": 0}
+    #             err = 0
+    #             self.business_info.emit("下载线程数：{}".format(thread_num))
+    #             # 激活线程
+    #             for t in thread_queue:
+    #                 t[1].start()
+    #             # 下载线程遍历监视代码
+    #             while(err <= 3):
+    #                 # 暂停下载
+    #                 if self.pauseprocess:
+    #                     for th in thread_queue:
+    #                         th[1].pause()
+    #                     while self.pauseprocess:
+    #                         sleep(1.5)
+    #                         if self.killprocess:
+    #                             for th in thread_queue:
+    #                                 th[1].stop()
+    #                             return -1
+    #                 # 停止下载
+    #                 if self.killprocess:
+    #                     for th in thread_queue:
+    #                         th[1].stop()
+    #                     return -1
+    #                 # 获取总状态
+    #                 progress = 0
+    #                 finished_thread = 0
+    #                 for th in thread_queue:
+    #                     status = th[1].get_status()
+    #                     if status['status'] == 3:
+    #                         err += 1
+    #                         th[1].start()
+    #                     if status['now'] >= status['end']:
+    #                         finished_thread += 1
+    #                     progress += status['progress']
+    #                 proc['Now'] = progress
+    #                 self.progr_bar.emit(proc)
+    #                 sleep(0.5)
+    #                 if finished_thread == thread_num:
+    #                     break
+    #             if err > 3:
+    #                 for th in thread_queue:
+    #                     th[1].stop()
+    #                 # 删除临时文件与文件夹
+    #                 for i in os.listdir(tmp_dir):
+    #                     os.remove(tmp_dir + '/{}'.format(i))
+    #                 os.remove(tmp_dir)
+    #                 raise Exception('线路出错，切换线路。')
+    #             # 进行文件拼接
+    #             self.business_info.emit("正在进行文件拼接.....")
+    #             if os.path.isfile(output_file):
+    #                 os.remove(output_file)
+    #             with open(output_file, 'ab') as f:
+    #                 for p in thread_queue:
+    #                     with open(tmp_dir+'/{}.tmp'.format(p[0]), 'rb') as bf:
+    #                         f.write(bf.read())
+    #             # 删除临时文件与文件夹
+    #             for i in os.listdir(tmp_dir):
+    #                 os.remove(tmp_dir + '/{}'.format(i))
+    #             os.remove(tmp_dir)
+    #             # 结束下载进程
+    #             proc["finish"] = 1
+    #             self.progr_bar.emit(proc)
+    #             self.business_info.emit("{}成功！".format(dest))
+    #             return 0
+    #         except Exception as e:
+    #             print(e)
+    #             self.business_info.emit("{}出错：{}".format(dest, e))
+    #             if os.path.exists(output_file):
+    #                 os.remove(output_file)
+    #     return 1
+
 
     # FFMPEG Synthesis Function
     def ffmpeg_synthesis(self,input_v,input_a,output_add):
@@ -826,3 +939,81 @@ class biliWorker(QThread):
                 self.is_finished.emit(2)
             else:
                 self.is_finished.emit(2)
+
+#
+# # 下载线程类
+# class DLThread(QThread):
+#     # 初始化
+#     def __init__(self, url_str: str, byte_range: tuple, tmp_dir: str, header_dict: dict, proxy_dict: dict):
+#         super(DLThread, self).__init__()
+#         assert len(byte_range) == 2
+#         self.url = url_str
+#         self.tmpf_dir = tmp_dir
+#         self.st_byte = byte_range[0]
+#         self.now_byte = byte_range[0]
+#         self.ed_byte = byte_range[1]
+#         self.header = header_dict
+#         self.Proxy = proxy_dict
+#         self.chunk_size = 1024
+#         self.err = 0
+#         # 线程状态status：0为正常下载，1为暂停下载，2为停止下载，3为下载出错
+#         self.status = 0
+#
+#     # 获取线程状态
+#     def get_status(self):
+#         feedback = {}
+#         feedback['status'] = self.status
+#         feedback['start'] = self.st_byte
+#         feedback['end'] = self.ed_byte
+#         feedback['now'] = self.now_byte
+#         feedback['progress'] = self.now_byte - self.st_byte
+#         feedback['err'] = self.err
+#         return feedback
+#
+#     def pause(self):
+#         if self.status == 0:
+#             self.status = 1
+#
+#     def stop(self):
+#         self.status = 2
+#
+#     def resume(self):
+#         if self.status == 1:
+#             self.status = 0
+#
+#     def run(self) -> None:
+#         while (self.err <= 3):
+#             try:
+#                 self.header['range'] = 'bytes=' + str(self.st_byte) + '-' + str(self.ed_byte)
+#                 m4sv_bytes = request.get(self.url, headers=self.header, stream=True, timeout=10, proxies=self.Proxy)
+#                 # if not os.path.exists(output_dir):
+#                 #     os.makedirs(output_dir)
+#                 with open(self.tmpf_dir, 'wb') as f:
+#                     for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
+#                         # 暂停事件函数
+#                         while self.status == 1:
+#                             sleep(1)
+#                             if (self.status == 2) or (self.status == 3):
+#                                 return None
+#                             else:
+#                                 continue
+#                         if chunks:
+#                             f.write(chunks)
+#                             self.now_byte += self.chunk_size
+#                             # self.progr_bar.emit(proc)
+#                         if self.status == 2:
+#                             m4sv_bytes.close()
+#                             return None
+#                 if self.now_byte >= self.ed_byte:
+#                     m4sv_bytes.close()
+#                     break
+#                 else:
+#                     print("线程范围：{}-{} -> 服务器断开连接，重新连接下载端口....".format(self.st_byte, self.ed_byte))
+#             except Exception as e:
+#                 if re.findall('10054', str(e), re.S) == []:
+#                     self.err += 1
+#                 print(e, self.err)
+#         if self.err > 3:
+#             self.status = 3
+#             # raise Exception('线路出错，切换线路。')
+#

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1083</width>
-    <height>728</height>
+    <width>1097</width>
+    <height>792</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -210,10 +210,10 @@ QTreeWidget::item:hover{
   <widget class="QWidget" name="mainwidget" native="true">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>30</y>
+     <x>40</x>
+     <y>40</y>
      <width>1011</width>
-     <height>661</height>
+     <height>711</height>
     </rect>
    </property>
    <property name="autoFillBackground">
@@ -226,9 +226,9 @@ QTreeWidget::item:hover{
     <property name="geometry">
      <rect>
       <x>750</x>
-      <y>260</y>
+      <y>290</y>
       <width>231</width>
-      <height>371</height>
+      <height>391</height>
      </rect>
     </property>
     <property name="selectionMode">
@@ -474,7 +474,7 @@ QTreeWidget::item:hover{
       <x>30</x>
       <y>50</y>
       <width>711</width>
-      <height>581</height>
+      <height>631</height>
      </rect>
     </property>
     <property name="title">
@@ -486,7 +486,7 @@ QTreeWidget::item:hover{
        <x>0</x>
        <y>60</y>
        <width>711</width>
-       <height>351</height>
+       <height>401</height>
       </rect>
      </property>
      <property name="autoFillBackground">
@@ -537,7 +537,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>460</y>
+       <y>510</y>
        <width>141</width>
        <height>31</height>
       </rect>
@@ -550,7 +550,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>540</y>
+       <y>590</y>
        <width>141</width>
        <height>31</height>
       </rect>
@@ -563,7 +563,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>420</y>
+       <y>470</y>
        <width>141</width>
        <height>31</height>
       </rect>
@@ -576,7 +576,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>420</y>
+       <y>470</y>
        <width>141</width>
        <height>31</height>
       </rect>
@@ -589,7 +589,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>160</x>
-       <y>420</y>
+       <y>470</y>
        <width>391</width>
        <height>31</height>
       </rect>
@@ -608,7 +608,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>560</x>
-       <y>500</y>
+       <y>550</y>
        <width>141</width>
        <height>31</height>
       </rect>
@@ -621,7 +621,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>460</y>
+       <y>510</y>
        <width>351</width>
        <height>111</height>
       </rect>
@@ -689,7 +689,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>450</x>
-       <y>470</y>
+       <y>520</y>
        <width>81</width>
        <height>31</height>
       </rect>
@@ -705,7 +705,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>380</x>
-       <y>470</y>
+       <y>520</y>
        <width>72</width>
        <height>31</height>
       </rect>
@@ -718,7 +718,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>380</x>
-       <y>510</y>
+       <y>560</y>
        <width>151</width>
        <height>19</height>
       </rect>
@@ -740,7 +740,7 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>380</x>
-       <y>540</y>
+       <y>590</y>
        <width>151</width>
        <height>31</height>
       </rect>
@@ -778,6 +778,32 @@ QTreeWidget::item:hover{
       <string>刷新显示</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="btn_select_All">
+    <property name="geometry">
+     <rect>
+      <x>760</x>
+      <y>260</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>全选</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_select_None">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>260</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>全不选</string>
+    </property>
    </widget>
   </widget>
  </widget>

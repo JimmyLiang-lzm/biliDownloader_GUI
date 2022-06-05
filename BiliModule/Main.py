@@ -69,6 +69,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 else:
                     self.checkBox_sym.setChecked(False)
                     indict["sym"] = False
+                if tempr.get('dl_err'):
+                    indict['dl_err'] = tempr.get('dl_err')
+                if tempr.get('chunk_size'):
+                    indict['chunk_size'] = tempr.get('chunk_size')
         except:
             indict["Output"] = DF_Path
             indict["sys"] = sys.platform
@@ -114,7 +118,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 "sys":indict["sys"],
                 "output":indict["Output"],
                 "useProxy":indict["useProxy"],
-                "Proxy":indict["Proxy"]
+                "Proxy":indict["Proxy"],
+                "dl_err": indict["dl_err"],
+                "chunk_size": indict["chunk_size"]
             }
             f.write(json.dumps(temp_dict,sort_keys=True,indent=4))
             f.close()
@@ -386,7 +392,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.after_size = 0
         elif inum == 1:
             # 1000/200ms
-            self.speed = (self.in_dict["Now"] - self.after_size)*5
+            self.speed = (self.in_dict["Now"] - self.after_size)*5*2
             self.after_size = self.in_dict["Now"]
 
 
@@ -447,7 +453,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         global indict
         if in_dict["code"] == 1:
             indict = in_dict["indict"]
-            self.plainTextEdit.appendPlainText('设置成功（成功修改cookie与网络代理）')
+            self.plainTextEdit.appendPlainText('设置成功！')
             QApplication.processEvents()
         elif in_dict["code"] == 0:
             self.setWindowOPEN = False

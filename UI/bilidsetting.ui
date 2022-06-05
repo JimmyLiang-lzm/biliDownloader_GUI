@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>620</width>
-    <height>461</height>
+    <height>563</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,7 +213,7 @@ QTreeWidget::item:hover{
      <x>40</x>
      <y>40</y>
      <width>531</width>
-     <height>371</height>
+     <height>481</height>
     </rect>
    </property>
    <widget class="QPushButton" name="btnmax">
@@ -457,7 +457,7 @@ QLineEdit{
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>320</y>
+      <y>430</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -470,7 +470,7 @@ QLineEdit{
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>320</y>
+      <y>430</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -478,6 +478,80 @@ QLineEdit{
     <property name="text">
      <string>取消设置</string>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_3">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>330</y>
+      <width>471</width>
+      <height>81</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>下载设置</string>
+    </property>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>30</y>
+       <width>91</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>下载重试次数</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>30</y>
+       <width>71</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>数据包大小</string>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="dl_err">
+     <property name="geometry">
+      <rect>
+       <x>130</x>
+       <y>30</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>0</number>
+     </property>
+     <property name="value">
+      <number>3</number>
+     </property>
+    </widget>
+    <widget class="QSpinBox" name="chunk_size">
+     <property name="geometry">
+      <rect>
+       <x>350</x>
+       <y>30</y>
+       <width>81</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="minimum">
+      <number>128</number>
+     </property>
+     <property name="maximum">
+      <number>4096</number>
+     </property>
+     <property name="value">
+      <number>1024</number>
+     </property>
+    </widget>
    </widget>
   </widget>
  </widget>

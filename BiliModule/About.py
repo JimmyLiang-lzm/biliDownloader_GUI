@@ -58,7 +58,7 @@ class AboutWindow(QWidget, Ui_Form):
 
     # 检查版本更新函数
     def checkLatest(self):
-        self.cl = checkLatest(self.lab_version.text())
+        self.cl = checkLatest(Release_INFO[0])
         self.btn_latest.setEnabled(False)
         self.cl._feedback.connect(self.verShow)
         self.cl.start()
