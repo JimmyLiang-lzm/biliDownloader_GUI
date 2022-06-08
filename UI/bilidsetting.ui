@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>620</width>
-    <height>563</height>
+    <height>613</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -213,7 +213,7 @@ QTreeWidget::item:hover{
      <x>40</x>
      <y>40</y>
      <width>531</width>
-     <height>481</height>
+     <height>531</height>
     </rect>
    </property>
    <widget class="QPushButton" name="btnmax">
@@ -296,7 +296,7 @@ QTreeWidget::item:hover{
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>190</y>
+      <y>260</y>
       <width>471</width>
       <height>121</height>
      </rect>
@@ -350,7 +350,7 @@ QTreeWidget::item:hover{
       <x>30</x>
       <y>50</y>
       <width>471</width>
-      <height>121</height>
+      <height>201</height>
      </rect>
     </property>
     <property name="title">
@@ -361,7 +361,7 @@ QTreeWidget::item:hover{
       <rect>
        <x>90</x>
        <y>30</y>
-       <width>301</width>
+       <width>361</width>
        <height>31</height>
       </rect>
      </property>
@@ -386,13 +386,13 @@ QTreeWidget::item:hover{
      <property name="geometry">
       <rect>
        <x>360</x>
-       <y>30</y>
+       <y>150</y>
        <width>93</width>
        <height>31</height>
       </rect>
      </property>
      <property name="text">
-      <string>测试地址</string>
+      <string>测试代理</string>
      </property>
     </widget>
     <widget class="QCheckBox" name="cb_useProxy">
@@ -411,9 +411,9 @@ QTreeWidget::item:hover{
     <widget class="QPushButton" name="btn_huseProxy">
      <property name="geometry">
       <rect>
-       <x>332</x>
+       <x>280</x>
        <y>70</y>
-       <width>121</width>
+       <width>171</width>
        <height>31</height>
       </rect>
      </property>
@@ -427,9 +427,9 @@ QTreeWidget::item:hover{
      </property>
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>70</y>
-       <width>191</width>
+       <x>20</x>
+       <y>150</y>
+       <width>331</width>
        <height>31</height>
       </rect>
      </property>
@@ -452,12 +452,77 @@ QLineEdit{
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QCheckBox" name="cb_useAuth">
+     <property name="geometry">
+      <rect>
+       <x>120</x>
+       <y>70</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>使用代理身份验证</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="le_AuthUsr">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>110</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>输入登录用户名</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>110</y>
+       <width>72</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>登录名称</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>260</x>
+       <y>110</y>
+       <width>31</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>密码</string>
+     </property>
+    </widget>
+    <widget class="QLineEdit" name="le_AuthPwd">
+     <property name="geometry">
+      <rect>
+       <x>300</x>
+       <y>110</y>
+       <width>151</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>输入登录验证密码</string>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="btn_editconfig">
     <property name="geometry">
      <rect>
       <x>200</x>
-      <y>430</y>
+      <y>480</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -470,7 +535,7 @@ QLineEdit{
     <property name="geometry">
      <rect>
       <x>360</x>
-      <y>430</y>
+      <y>480</y>
       <width>141</width>
       <height>31</height>
      </rect>
@@ -483,7 +548,7 @@ QLineEdit{
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>330</y>
+      <y>390</y>
       <width>471</width>
       <height>81</height>
      </rect>

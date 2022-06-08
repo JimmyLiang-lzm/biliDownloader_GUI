@@ -4,12 +4,14 @@ from PySide2.QtCore import Qt, QPoint, Signal
 from UI.bilidsetting import Ui_Form
 from BiliWorker.extra import checkProxy
 
+
 ############################################################################################
 # 高级设置窗口类
 class SettingWindow(QWidget, Ui_Form):
     _signal = Signal(dict)
+
     def __init__(self, ins_dict, parent=None):
-        super(SettingWindow,self).__init__(parent)
+        super(SettingWindow, self).__init__(parent)
         self.setupUi(self)
         self.Move = False
         self.ins_dict = ins_dict
@@ -23,7 +25,7 @@ class SettingWindow(QWidget, Ui_Form):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
-        self.m_Position = QPoint(0,0)
+        self.m_Position = QPoint(0, 0)
         # 添加阴影
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(30)
@@ -38,7 +40,8 @@ class SettingWindow(QWidget, Ui_Form):
         self.btn_wherecookie.clicked.connect(self.forHelp)
         self.btn_testProxy.clicked.connect(self.testProxy)
         self.btn_huseProxy.clicked.connect(self.ProxyHelp)
-    ####################### RW Part ##########################
+
+    # ###################### RW Part ##########################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -58,13 +61,13 @@ class SettingWindow(QWidget, Ui_Form):
 
     # 定义关闭事件
     def closeEvent(self, QCloseEvent):
-        self._signal.emit({"code":0})
+        self._signal.emit({"code": 0})
 
-    ####################### BS Part ##########################
+    # ###################### BS Part ##########################
     # 测试代理函数
     def testProxy(self):
         proxy_url = self.lineEdit.text()
-        proxy_temp = {'http': proxy_url,'https':proxy_url,}
+        proxy_temp = {'http': proxy_url, 'https': proxy_url, }
         self.ts = checkProxy(proxy_temp)
         self.lineEdit.setEnabled(False)
         self.btn_testProxy.setEnabled(False)
@@ -80,10 +83,10 @@ class SettingWindow(QWidget, Ui_Form):
         else:
             self.ins_dict["useProxy"] = False
         proxy_url = self.lineEdit.text()
-        self.ins_dict["Proxy"] = {'http': proxy_url,'https':proxy_url,}
+        self.ins_dict["Proxy"] = {'http': proxy_url, 'https': proxy_url, }
         self.ins_dict["dl_err"] = self.dl_err.value()
         self.ins_dict["chunk_size"] = self.chunk_size.value()
-        self._signal.emit({"code":1,"indict":self.ins_dict})
+        self._signal.emit({"code": 1, "indict": self.ins_dict})
         self.close()
 
     # 清空编辑框
@@ -98,7 +101,7 @@ class SettingWindow(QWidget, Ui_Form):
     def ProxyHelp(self):
         webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/07/bilid_GUI_help/#3-5-“僅限港澳台地區”视频下载")
 
-    ########################### 槽函数 ################################
+    # ########################## 槽函数 ################################
     # 代理地址测试线程槽函数
     def proxy_catch(self, in_dict):
         if in_dict["code"] == 1:

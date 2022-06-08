@@ -11,25 +11,28 @@ from pathlib import Path
 import requests as request
 
 
+# 将版本号转变为数字可比较类型
+def ver2num(inVer):
+    temp = inVer.replace("V", "").split(".")
+    temp = int(temp[0] + temp[1] + temp[2])
+    return temp
+
+
 ############################################################################################
 # 检查更新防阻滞线程类
 class checkLatest(QThread):
     _feedback = Signal(int)
+
     def __init__(self, inVer):
         super(checkLatest, self).__init__()
         self.lab_version = inVer
-
-    def ver2num(self,inVer):
-        temp = inVer.replace("V","").split(".")
-        temp = int(temp[0] + temp[1] + temp[2])
-        return temp
 
     def run(self):
         try:
             des = request.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json", timeout=5)
             res = des.json()["biliDownloader_GUI"]
-            latestVer = self.ver2num(res)
-            myVer = self.ver2num(self.lab_version)
+            latestVer = ver2num(res)
+            myVer = ver2num(self.lab_version)
             if latestVer <= myVer:
                 self._feedback.emit(0)
                 sleep(2)
@@ -49,40 +52,45 @@ class checkLatest(QThread):
 # 测试代理地址防阻滞线程类
 class checkProxy(QThread):
     _feedback = Signal(dict)
+
     def __init__(self, in_Proxy):
         super(checkProxy, self).__init__()
         self.use_Proxy = in_Proxy
         self.index_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/72.0.3626.121 Safari/537.36 "
         }
 
     def run(self):
         try:
-            temp = {"code":1}
+            temp = {"code": 1}
             des = request.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo",
                               headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
             res = json.loads(des.content.decode('utf-8'))["data"]
             temp["ip"] = res["addr"]
             temp["area"] = res["country"]
             self._feedback.emit(temp)
-        except Exception as e:
-            self._feedback.emit({"code":-1,"message":"测试失败"})
+        except Exception as err:
+            print('Check Proxy Address:', err)
+            self._feedback.emit({"code": -1, "message": "测试失败"})
 
 
 ##############################################################################
 # Bili交互视频处理总进程
 class biliWorker_interact(QThread):
-    #信号发射定义
+    # 信号发射定义
     business_info = Signal(str)
     rthread_status = Signal(dict)
     back_result = Signal(dict)
+
     # 初始化
     def __init__(self, args, model=0, parent=None):
         super(biliWorker_interact, self).__init__(parent)
         self.model = model
         self.index_url = args['Address']
         self.index_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/72.0.3626.121 Safari/537.36 "
         }
         self.re_playinfo = 'window.__playinfo__=([\s\S]*?)</script>'
         self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
@@ -176,7 +184,6 @@ class biliWorker_interact(QThread):
     #     self.business_info.emit("节点探查完毕，窗口加载中...")
     #     return self.iv_structure
 
-
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
@@ -226,7 +233,7 @@ class biliWorker_interact(QThread):
             des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
             res = des.json()
         except Exception as e:
-            print("Get Edges:",e)
+            print("Get Edges:", e)
             return 1, "获取节点失败（网络连接错误）"
         # print(res)
         if "edges" not in res["data"]:
@@ -261,10 +268,11 @@ class biliWorker_interact(QThread):
 
     # Get interactive video node list (Use recursion algorithm)
     def recursion_GET_List(self, inword):
-        temp = {}
-        temp["cid"] = self.now_interact["cid"]
-        temp["node_id"] = self.now_interact["node_id"]
-        temp["isChoose"] = False
+        temp = {
+            "cid": self.now_interact["cid"],
+            "node_id": self.now_interact["node_id"],
+            "isChoose": False
+        }
         if (self.now_deep <= self.recur_deep or self.unlimited_recur) and self.recur_run:
             temp["choices"] = {}
             make_API = "https://api.bilibili.com/x/stein/nodeinfo"
@@ -309,11 +317,11 @@ class biliWorker_interact(QThread):
             res = self.interact_preinfo()
             if res[0]:
                 self.back_result.emit({'code': -1, 'data': '获取初始信息失败'})
-            self.back_result.emit({'code':0,'data':res[1], 'nodelist':res[2]})
+            self.back_result.emit({'code': 0, 'data': res[1], 'nodelist': res[2]})
         elif self.model == 1:
             res = self.Get_Edge()
             if res[0]:
-                self.back_result.emit({'code':-1,'data':'获取节点信息失败'})
+                self.back_result.emit({'code': -1, 'data': '获取节点信息失败'})
             self.back_result.emit({'code': 1, 'nodelist': res[1]})
         elif self.model == 2:
             d = self.interact_nodeList()
@@ -322,9 +330,8 @@ class biliWorker_interact(QThread):
             else:
                 self.rthread_status.emit({'code': -1, 'data': '为探查到更多节点。'})
         else:
-            print("操作指令有误:",self.model)
-            self.back_result.emit({'code':-1,'data':'操作指令有误'})
-
+            print("操作指令有误:", self.model)
+            self.back_result.emit({'code': -1, 'data': '操作指令有误'})
 
 
 ##############################################################################
@@ -335,7 +342,8 @@ class BiliImgCache(QThread):
         super(BiliImgCache, self).__init__()
         # 初始化requests参数
         self.index_headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/72.0.3626.121 Safari/537.36 "
         }
         if req_dict["useCookie"]:
             self.index_headers["cookie"] = req_dict["cookie"]

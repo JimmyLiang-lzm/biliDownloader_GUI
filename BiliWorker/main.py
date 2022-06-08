@@ -21,6 +21,7 @@ class biliWorker(QThread):
     progr_bar = Signal(dict)
     is_finished = Signal(int)
     interact_info = Signal(dict)
+
     # 初始化
     def __init__(self, args, model=0):
         super(biliWorker, self).__init__()
@@ -63,7 +64,7 @@ class biliWorker(QThread):
         if args["useProxy"]:
             self.Proxy = args["Proxy"]
         else:
-            self.Proxy = {}
+            self.Proxy = None
 
     # 运行模式设置函数
     def model_set(self, innum):
@@ -93,7 +94,7 @@ class biliWorker(QThread):
     def name_replace(self, name):
         vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
         vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
-        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08','')
+        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08', '')
         return vn
 
     # Change /SS movie address
@@ -165,9 +166,8 @@ class biliWorker(QThread):
             # Return Data
             return 1, video_name, length, down_dic
         except Exception as e:
-            print("PreInfo:",e)
+            print("PreInfo:", e)
             return 0, "", "", {}
-
 
     def tmp_dffss(self, re_GET):
         temp_v = {}
@@ -201,7 +201,6 @@ class biliWorker(QThread):
         length = re_GET["data"]["dash"]["duration"]
         return length, down_dic
 
-
     # Search the list of Video download address.
     def search_videoList(self, index_url):
         try:
@@ -218,22 +217,21 @@ class biliWorker(QThread):
                     init_list["bvid"] = re_init["bvid"]
                     init_list["p"] = re_init["p"]
                     init_list["pages"] = re_init["videoData"]["pages"]
-                    #print(init_list)
+                    # print(init_list)
                     return 1, init_list
                 elif "mediaInfo" in re_init:
                     init_list["bvid"] = re_init["mediaInfo"]["media_id"]
                     init_list["p"] = re_init["epInfo"]["i"] + 1
                     init_list["pages"] = re_init["mediaInfo"]["episodes"]
-                    #print(init_list)
+                    # print(init_list)
                     return 2, init_list
                 else:
                     return 0, {}
             except Exception as e:
-                print("videoList:",e)
+                print("videoList:", e)
                 return 0, {}
         else:
             return 0, {}
-
 
     # Show preDownload Detail
     def show_preDetail(self):
@@ -245,39 +243,39 @@ class biliWorker(QThread):
             if temp[0] and preList[0] != 0:
                 if preList[0] == 1:
                     # Show video pages
-                    #self.business_info.emit("We Get!")
+                    # self.business_info.emit("We Get!")
                     self.business_info.emit('当前需要下载的BV号为：{}'.format(preList[1]["bvid"]))
                     self.business_info.emit('当前BV包含视频数量为{}个'.format(len(preList[1]["pages"])))
                     for sp in preList[1]["pages"]:
                         form_str = "{}-->{}".format(sp["page"], sp["part"])
                         if sp["page"] == preList[1]["p"]:
-                            self.media_list.emit([1,form_str])
+                            self.media_list.emit([1, form_str])
                         else:
-                            self.media_list.emit([0,form_str])
+                            self.media_list.emit([0, form_str])
                 elif preList[0] == 2:
                     # Show media pages
                     self.business_info.emit('当前需要下载的媒体号为：{}'.format(preList[1]["bvid"]))
                     self.business_info.emit('当前媒体包含视频数量为{}个'.format(len(preList[1]["pages"])))
-                    #self.business_info.emit('-----------具体分P视频名称与下载号-----------')
+                    # self.business_info.emit('-----------具体分P视频名称与下载号-----------')
                     i = 0
                     for sp in preList[1]["pages"]:
                         i += 1
                         form_str = "{}-->{}".format(i, sp["share_copy"])
                         if i == preList[1]["p"]:
-                            self.media_list.emit([1,form_str])
+                            self.media_list.emit([1, form_str])
                         else:
                             self.media_list.emit([0, form_str])
                 self.business_info.emit('--------------------我是分割线--------------------')
                 # Show Video Download Detail
                 self.business_info.emit('当前下载视频名称：{}'.format(temp[1]))
                 self.business_info.emit('当前下载视频长度： {} 秒'.format(temp[2]))
-                #print('当前可下载视频流：')
+                # print('当前可下载视频流：')
                 for i in range(len(temp[3]["video"])):
                     # print("{}-->视频画质：{}".format(i, temp[3]["video"][i][0]))
-                    self.vq_list.emit("{}.{}".format(i+1, temp[3]["video"][i][0]))
+                    self.vq_list.emit("{}.{}".format(i + 1, temp[3]["video"][i][0]))
                 for i in range(len(temp[3]["audio"])):
                     # print("{}-->音频编码：{}".format(i, temp[3]["audio"][i][0]))
-                    self.aq_list.emit("{}.{}".format(i+1, temp[3]["audio"][i][0]))
+                    self.aq_list.emit("{}.{}".format(i + 1, temp[3]["audio"][i][0]))
                 return 1
             else:
                 return 0
@@ -285,24 +283,25 @@ class biliWorker(QThread):
             print(e)
             return 0
 
-
     # Download Stream function
     def d_processor(self, url_list, output_dir, output_file, dest):
         for line in url_list:
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
                 # video stream length sniffing
-                video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5,10), proxies=self.Proxy)
+                video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5, 10),
+                                          proxies=self.Proxy)
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
-                self.business_info.emit("获取{}流范围为：{}".format(dest,vc_range))
-                self.business_info.emit('{}  文件大小：{} MB'.format(dest,round(float(vc_range) / 1024 / 1024), 4))
+                self.business_info.emit("获取{}流范围为：{}".format(dest, vc_range))
+                self.business_info.emit('{}  文件大小：{} MB'.format(dest, round(float(vc_range) / 1024 / 1024), 4))
                 # Get the full video stream
                 proc = {"Max": int(vc_range), "Now": 0, "finish": 0}
                 err = 0
-                while(err <= self.set_err):
+                while err <= self.set_err:
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
-                        m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10, proxies=self.Proxy)
+                        m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10,
+                                                 proxies=self.Proxy)
                         self.progr_bar.emit(proc)
                         if not os.path.exists(output_dir):
                             os.makedirs(output_dir)
@@ -310,13 +309,13 @@ class biliWorker(QThread):
                             for chunks in m4sv_bytes.iter_content(chunk_size=self.chunk_size):
                                 while self.pauseprocess:
                                     sleep(1.5)
-                                    if self.killprocess == True:
+                                    if self.killprocess:
                                         return -1
                                 if chunks:
                                     f.write(chunks)
                                     proc["Now"] += self.chunk_size
                                     self.progr_bar.emit(proc)
-                                if self.killprocess == True:
+                                if self.killprocess:
                                     m4sv_bytes.close()
                                     return -1
                         if proc["Now"] >= proc["Max"]:
@@ -325,9 +324,9 @@ class biliWorker(QThread):
                         else:
                             print("服务器断开连接，重新连接下载端口....")
                     except Exception as e:
-                        if re.findall('10054',str(e),re.S) == []:
+                        if not re.findall('10054', str(e), re.S):
                             err += 1
-                        print(e,err)
+                        print(e, err)
                 if err > self.set_err:
                     raise Exception('线路出错，切换线路。')
                 proc["finish"] = 1
@@ -336,7 +335,7 @@ class biliWorker(QThread):
                 return 0
             except Exception as e:
                 print(e)
-                self.business_info.emit("{}出错：{}".format(dest,e))
+                self.business_info.emit("{}出错：{}".format(dest, e))
                 # print(proc)
                 if os.path.exists(output_file):
                     os.remove(output_file)
@@ -453,21 +452,24 @@ class biliWorker(QThread):
     #                 os.remove(output_file)
     #     return 1
 
-
     # FFMPEG Synthesis Function
-    def ffmpeg_synthesis(self,input_v,input_a,output_add):
+    def ffmpeg_synthesis(self, input_v, input_a, output_add):
         if os.path.exists(output_add):
             self.business_info.emit("文件：{}\n已存在。".format(output_add))
             return -1
         ffcommand = ""
         if self.systemd == "win32":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand = '"' + ffpath + '\\ffmpeg.exe" -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+            ffcommand = '"' + ffpath + '\\ffmpeg.exe" -i "' + \
+                        input_v + '" -i "' + \
+                        input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "linux":
             ffcommand = 'ffmpeg -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         elif self.systemd == "darwin":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
-            ffcommand ='"' + ffpath + '/ffmpeg" -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+            ffcommand = '"' + ffpath + '/ffmpeg" -i "' + \
+                        input_v + '" -i "' + \
+                        input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
         else:
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
             return -2
@@ -488,15 +490,15 @@ class biliWorker(QThread):
             self.business_info.emit("视频合成失败：{}".format(e))
             self.subpON = False
 
-
     # Subprocess Progress of FFMPEG, RUN and Following Function
     def subp_GUIFollow(self, ffcommand):
         proc = {"Max": 100, "Now": 0, "finish": 2}
-        subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE, encoding=sys.getfilesystemencoding())
+        subp = subprocess.Popen(ffcommand, shell=True, stderr=subprocess.PIPE, stdin=subprocess.PIPE,
+                                encoding=sys.getfilesystemencoding())
         self.business_info.emit('FFMPEG正在执行合成指令')
         while True:
             status = subp.poll()
-            if status != None:
+            if status is not None:
                 if status != 0:
                     self.business_info.emit("FFMPEG运行出错，代码：{}".format(status))
                     proc["finish"] = 1
@@ -513,19 +515,18 @@ class biliWorker(QThread):
                 # print(line)
                 sf = re.findall('Duration: ([\s\S]*?),', str(line), re.S)
                 cf = re.findall('time=([\s\S]*?) bitrate=', str(line), re.S)
-                if sf != []:
+                if sf:
                     temp = sf[0]
                     temp = temp.split(".")[0].split(":")
                     num = int(temp[0]) * 3600 + int(temp[1]) * 60 + int(temp[2])
-                    #print("视频总长：", num)
+                    # print("视频总长：", num)
                     proc["Max"] = num
-                if cf != []:
+                if cf:
                     temp = cf[0].split(".")[0].split(":")
                     cnum = int(temp[0]) * 3600 + int(temp[1]) * 60 + int(temp[2])
-                    #print("当前进度", cnum)
+                    # print("当前进度", cnum)
                     proc["Now"] = cnum
                 self.progr_bar.emit(proc)
-
 
     # For Download Single Video
     def Download_single(self, index=""):
@@ -578,7 +579,6 @@ class biliWorker(QThread):
                 print(e)
         else:
             self.business_info.emit("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
-
 
     # For Download partition Video
     def Download_List(self):
@@ -634,7 +634,6 @@ class biliWorker(QThread):
             return 1, {}, {}
         return 0, self.now_interact
 
-
     # Interactive video download
     def requests_start(self, now_interact, iv_structure):
         self.now_interact = now_interact
@@ -642,14 +641,14 @@ class biliWorker(QThread):
         self.business_info.emit("下载交互视频完成。")
 
     # 设置预下载信息
-    def Set_Structure(self, now_interact,iv_structure):
+    def Set_Structure(self, now_interact, iv_structure):
         self.now_interact = now_interact
         self.iv_structure = iv_structure
 
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = request.get(url, headers=self.index_headers, stream=False,timeout=10, proxies=self.Proxy)
+            res = request.get(url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -689,7 +688,7 @@ class biliWorker(QThread):
             'cid': cid_num,
             'bvid': self.now_interact["bvid"],
             'qn': '116',
-            'type':'',
+            'type': '',
             'otype': 'json',
             'fourk': '1',
             'fnver': '0',
@@ -709,7 +708,6 @@ class biliWorker(QThread):
             return True, length, down_dic
         else:
             return False, "Get Download List Error."
-
 
     # Interactive video download processor (Use recursion algorithm)
     def recursion_for_Download(self, json_list, output_dir):
@@ -745,7 +743,7 @@ class biliWorker(QThread):
         # check1:音乐歌单页面检测；check2:单个音乐页面检测
         check1 = re.findall(r'/audio/am(\d+)', au_url, re.S)
         check2 = re.findall(r'/audio/au(\d+)', au_url, re.S)
-        if check1 != []:
+        if check1:
             # print(check1[0])
             temps = self.AuList_Maker(check1[0], 2)
             if temps[0]:
@@ -753,7 +751,7 @@ class biliWorker(QThread):
                 return 1, temps[1]
             else:
                 return 0, "Audio List Get Error."
-        elif check2 != []:
+        elif check2:
             # print(check2[0])
             temps = self.AuList_Maker(check2[0], 1)
             if temps[0]:
@@ -766,41 +764,41 @@ class biliWorker(QThread):
             return 0, {}
 
     def AuList_Maker(self, sid, modeNUM):
-        list_dict = {"audio":[],"total":0}
+        list_dict = {"audio": [], "total": 0}
         if modeNUM == 1:
             try:
                 makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=" + sid
                 res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                 des = res.content.decode('utf-8')
                 auinfo = json.loads(des)["data"]
-                temp = {}
-                temp["title"] = auinfo["title"]+"_"+auinfo["author"]
-                temp["sid"] = sid
-                temp["cover"] = auinfo["cover"]
-                temp["duration"] = auinfo["duration"]
-                temp["lyric"] = auinfo["lyric"]
+                temp = {
+                    "title": auinfo["title"] + "_" + auinfo["author"],
+                    "sid": sid, "cover": auinfo["cover"],
+                    "duration": auinfo["duration"],
+                    "lyric": auinfo["lyric"]
+                }
                 list_dict["audio"].append(temp)
                 list_dict["total"] = 1
             except Exception as e:
-                print("AuList_Maker_Single:",e)
+                print("AuList_Maker_Single:", e)
                 return 0, "AuList_Maker_Single:{}".format(e)
             return 1, list_dict
         elif modeNUM == 2:
             try:
                 pn = 1
                 while True:
-                    makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid="+sid+"&pn="+str(pn)+"&ps=30"
+                    makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid=" + sid + "&pn=" + str(
+                        pn) + "&ps=30"
                     res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
                     des = res.content.decode('utf-8')
                     mu_dic = json.loads(des)["data"]
                     for sp in mu_dic["data"]:
                         # print(sp)
-                        temp = {}
-                        temp["title"] = sp["title"] + "_" + sp["author"]
-                        temp["sid"] = str(sp["id"])
-                        temp["cover"] = sp["cover"]
-                        temp["duration"] = sp["duration"]
-                        temp["lyric"] = sp["lyric"]
+                        temp = {
+                            "title": sp["title"] + "_" + sp["author"],
+                            "sid": str(sp["id"]), "cover": sp["cover"],
+                            "duration": sp["duration"], "lyric": sp["lyric"]
+                        }
                         list_dict["audio"].append(temp)
                         list_dict["total"] += 1
                     if pn >= mu_dic["pageCount"]:
@@ -809,7 +807,7 @@ class biliWorker(QThread):
                         pn += 1
                         continue
             except Exception as e:
-                print("AuList_Maker_List:",e)
+                print("AuList_Maker_List:", e)
                 return 0, "AuList_Maker_List:{}".format(e)
             return 1, list_dict
         else:
@@ -832,15 +830,15 @@ class biliWorker(QThread):
         i = 0
         for sp in au_dic[1]["audio"]:
             i += 1
-            form_make = "{}-->{}".format(i,sp["title"])
-            self.media_list.emit([0,form_make])
+            form_make = "{}-->{}".format(i, sp["title"])
+            self.media_list.emit([0, form_make])
         self.vq_list.emit("无")
         self.aq_list.emit("最高音质")
         return 1
 
     # 获取单个音频下载地址
     def Audio_getDownloadList(self, sid):
-        make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid="+sid
+        make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid=" + sid
         res = request.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
         des = res.content.decode('utf-8')
         au_list = json.loads(des)["data"]["cdns"]
@@ -857,8 +855,7 @@ class biliWorker(QThread):
                 f.write(file)
         except Exception as e:
             self.business_info.emit("附带下载失败：{}".format(url))
-            print("附带下载失败：",e)
-
+            print("附带下载失败：", e)
 
     # 音乐下载函数
     def audio_downloader(self):
@@ -871,36 +868,36 @@ class biliWorker(QThread):
             return 0
         try:
             for index in self.d_list:
-                sp = temp_dic[1]["audio"][index-1]
+                sp = temp_dic[1]["audio"][index - 1]
                 output_dir = self.output + "/" + self.name_replace(sp["title"])
                 output_name = output_dir + "/" + self.name_replace(sp["title"])
                 self.business_info.emit("正在下载音乐：{}".format(sp["title"]))
                 if sp["cover"] != "":
-                    self.simple_downloader(sp["cover"],output_dir,output_name+"_封面.jpg")
+                    self.simple_downloader(sp["cover"], output_dir, output_name + "_封面.jpg")
                 if sp["lyric"] != "":
-                    self.simple_downloader(sp["lyric"],output_dir,output_name+"_歌词.lrc")
+                    self.simple_downloader(sp["lyric"], output_dir, output_name + "_歌词.lrc")
                 au_downlist = self.Audio_getDownloadList(sp["sid"])
                 self.second_headers["range"] = 'bytes=0-'
-                self.d_processor(au_downlist,output_dir,output_name+".mp3","下载音乐")
+                self.d_processor(au_downlist, output_dir, output_name + ".mp3", "下载音乐")
             self.business_info.emit("音乐下载进程结束！")
             return 1
         except Exception as e:
             self.business_info.emit("音频下载出错：{}".format(e))
-            print("音频下载出错：",e)
+            print("音频下载出错：", e)
             return 0
 
     ###################################################################
     # 运行线程
     def run(self):
-        #self.reloader()
+        # self.reloader()
         if self.run_model == 0:
             # 探查资源类型
-            self.interact_info.emit({"state":0})
+            self.interact_info.emit({"state": 0})
             d = self.interact_preinfo()
             r = self.show_preDetail()
             if r == 1:
                 if d[0] == 0:
-                    self.interact_info.emit({"state":1,"data":d[1]})
+                    self.interact_info.emit({"state": 1, "data": d[1]})
                 self.is_finished.emit(1)
             elif self.Audio_Show:
                 self.is_finished.emit(4)
@@ -908,7 +905,7 @@ class biliWorker(QThread):
                 self.is_finished.emit(0)
         elif self.run_model == 1:
             # 下载非交互视频
-            if self.d_list != []:
+            if self.d_list:
                 # print(1)
                 self.Download_List()
                 if self.killprocess:
@@ -931,7 +928,7 @@ class biliWorker(QThread):
             self.is_finished.emit(3)
         elif self.run_model == 4:
             # 音频列表下载
-            if self.d_list != []:
+            if self.d_list:
                 self.audio_downloader()
                 if self.killprocess:
                     self.business_info.emit("下载已终止")

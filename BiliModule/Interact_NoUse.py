@@ -7,10 +7,12 @@ from pyecharts import options as opts
 from pyecharts.charts import Tree
 from UI.biliInteractive_NoUse import Ui_Form
 
+
 ############################################################################################
 # 交互视频下载窗口类
 class InteractWindow(QWidget, Ui_Form):
     _Signal = Signal(dict)
+
     def __init__(self, full_iv, vname, parent=None):
         super(InteractWindow, self).__init__(parent)
         assert type(full_iv) is dict
@@ -33,7 +35,7 @@ class InteractWindow(QWidget, Ui_Form):
         effect.setColor(Qt.gray)
         self.setGraphicsEffect(effect)
         # 设置鼠标动作位置
-        self.m_Position = QPoint(0,0)
+        self.m_Position = QPoint(0, 0)
         # 连接器
         self.btnmin.clicked.connect(lambda: self.showMinimized())
         self.btn_adjsize.clicked.connect(self.re_show)
@@ -44,12 +46,11 @@ class InteractWindow(QWidget, Ui_Form):
         # 数据初始化
         self.full_json = full_iv
         self.chartdict = self.recursion_for_chart(full_iv)
-        self.info_Init(full_iv,self.treeWidget_4)
+        self.info_Init(full_iv, self.treeWidget_4)
         self.treeWidget_4.expandToDepth(2)
-        self.draw_chart("670","420",self.chartdict)
+        self.draw_chart("670", "420", self.chartdict)
 
-
-    ####################### RW Part #######################
+    # ###################### RW Part #######################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -72,7 +73,7 @@ class InteractWindow(QWidget, Ui_Form):
         # print(self.feedback_dict)
         self._Signal.emit(self.feedback_dict)
 
-    ########################## BS PART #############################
+    # ######################### BS PART #############################
     # 下载按钮->下载字典构建进程函数
     def download_process(self):
         n = self.treeWidget_4.topLevelItemCount()
@@ -85,7 +86,7 @@ class InteractWindow(QWidget, Ui_Form):
         self.close()
 
     # 属性选择框转下载字典递归函数
-    def download_list_make(self,tree_widget_obj):
+    def download_list_make(self, tree_widget_obj):
         temp = {}
         count = tree_widget_obj.childCount()
         if count == 0:
@@ -101,37 +102,37 @@ class InteractWindow(QWidget, Ui_Form):
     # Save origin node JSON File
     def save2json(self):
         init_path = indict["Output"] + "/" + self.ivideo_name + ".json"
-        directory = QFileDialog.getSaveFileName(None,"选择JSON保存路径",init_path,'JSON(*.json)')
+        directory = QFileDialog.getSaveFileName(None, "选择JSON保存路径", init_path, 'JSON(*.json)')
         if directory[0] != '':
-            with open(directory[0],'w') as f:
+            with open(directory[0], 'w') as f:
                 f.write(json.dumps(self.full_json, ensure_ascii=False))
 
     # Save node picture to HTML
     def save2html(self):
-        init_path = indict["Output"]+"/"+self.ivideo_name+".html"
-        directory = QFileDialog.getSaveFileName(None,'选择节点图保存路径',init_path,'HTML(*.html)')
+        init_path = indict["Output"] + "/" + self.ivideo_name + ".html"
+        directory = QFileDialog.getSaveFileName(None, '选择节点图保存路径', init_path, 'HTML(*.html)')
         if directory[0] != '':
             self.node_chart.set_global_opts(title_opts=opts.TitleOpts(
                 title=self.ivideo_name,
-                subtitle="Made By BiliDownloader"))\
+                subtitle="Made By BiliDownloader")) \
                 .render(directory[0])
 
     # Re-size node picture.
     def re_show(self):
         w = self.lineEdit_width.text()
         h = self.lineEdit_height.text()
-        self.draw_chart(w,h,self.chartdict)
+        self.draw_chart(w, h, self.chartdict)
 
     # File name conflict replace
     def name_replace(self, name):
         vn = name.replace(' ', '_').replace('\\', '').replace('/', '')
         vn = vn.replace('*', '').replace(':', '').replace('?', '').replace('<', '')
-        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08','')
+        vn = vn.replace('>', '').replace('\"', '').replace('|', '').replace('\x08', '')
         return vn
 
     # 显示节点图
     def show_chart(self):
-        dir_address = self.html_Path.replace("\\","/")+"/temp"
+        dir_address = self.html_Path.replace("\\", "/") + "/temp"
         if not os.path.exists(dir_address):
             os.makedirs(dir_address)
         self.node_chart.render(dir_address + "/node_temp.html")
@@ -139,16 +140,16 @@ class InteractWindow(QWidget, Ui_Form):
         webbrowser.open(access_url)
 
     # 跨系统平台节点文件路径生成函数
-    def url_maker(self,in_dir):
+    def url_maker(self, in_dir):
         if indict["sys"] == "win32":
             return "file:///" + in_dir
         else:
             return "file://" + in_dir
 
     # 节点图绘制程序
-    def draw_chart(self,width,height,indict):
+    def draw_chart(self, width, height, indict):
         self.node_chart = (
-            Tree(init_opts=opts.InitOpts(width=width+"px",height=height+"px"))
+            Tree(init_opts=opts.InitOpts(width=width + "px", height=height + "px"))
             .add(
                 "",
                 indict,
@@ -159,31 +160,31 @@ class InteractWindow(QWidget, Ui_Form):
         )
 
     # 初始数据字典转化为树形图递归函数
-    def info_Init(self,in_dict,root):
+    def info_Init(self, in_dict, root):
         for ch in in_dict:
             item = QTreeWidgetItem(root)
-            item.setText(0,ch)
-            item.setCheckState(0,Qt.Checked)
-            item.setText(1,in_dict[ch]["cid"])
-            item.addChild(self.info_Init(in_dict[ch]["choices"],item))
-
+            item.setText(0, ch)
+            item.setCheckState(0, Qt.Checked)
+            item.setText(1, in_dict[ch]["cid"])
+            item.addChild(self.info_Init(in_dict[ch]["choices"], item))
 
     # 初始数据字典转化图像专用JSON递归函数
-    def recursion_for_chart(self,in_json):
+    def recursion_for_chart(self, in_json):
         temp = []
         for ch in in_json:
-            stemp = {"name":"","children":[]}
-            stemp["name"] = ch
-            stemp["children"] = self.recursion_for_chart(in_json[ch]["choices"])
+            stemp = {
+                "name": ch,
+                "children": self.recursion_for_chart(in_json[ch]["choices"])
+            }
             temp.append(stemp)
         return temp
 
     # 自动选择
     def onTreeClicked(self, item, num):
         # 如果是顶部节点，只考虑Child：
-        if item.childCount() and not item.parent(): #判断是顶部节点，也就是根节点
-            if item.checkState(0) == Qt.Unchecked: #规定点击根节点只有两态切换，没有中间态
-                for i in range(item.childCount()): #遍历子节点进行状态切换
+        if item.childCount() and not item.parent():  # 判断是顶部节点，也就是根节点
+            if item.checkState(0) == Qt.Unchecked:  # 规定点击根节点只有两态切换，没有中间态
+                for i in range(item.childCount()):  # 遍历子节点进行状态切换
                     item.child(i).setCheckState(0, Qt.Unchecked)
             elif item.checkState(0) == Qt.Checked:
                 for i in range(item.childCount()):
@@ -191,22 +192,22 @@ class InteractWindow(QWidget, Ui_Form):
 
         # 如果是底部节点，只考虑Parent
         if item.parent() and not item.childCount():
-            parent_item = item.parent() #获得父节点
-            brother_item_num = parent_item.childCount() #获得兄弟节点的数目，包括自身在内
-            checked_num = 0 #设置计数器
-            for i in range(brother_item_num): #根据三态不同状态值进行数值累计
+            parent_item = item.parent()  # 获得父节点
+            brother_item_num = parent_item.childCount()  # 获得兄弟节点的数目，包括自身在内
+            checked_num = 0  # 设置计数器
+            for i in range(brother_item_num):  # 根据三态不同状态值进行数值累计
                 checked_num += parent_item.child(i).checkState(0)
-            if checked_num == 0: #最终结果进行比较，决定父节点的三态
+            if checked_num == 0:  # 最终结果进行比较，决定父节点的三态
                 parent_item.setCheckState(0, Qt.Unchecked)
-            elif checked_num/2 == brother_item_num:
+            elif checked_num / 2 == brother_item_num:
                 parent_item.setCheckState(0, Qt.Checked)
             else:
                 parent_item.setCheckState(0, Qt.PartiallyChecked)
 
         # 中间层需要全面考虑
         if item.parent() and item.childCount():
-            if item.checkState(0) == Qt.Unchecked: #规定点击根节点只有两态切换，没有中间态
-                for i in range(item.childCount()): #遍历子节点进行状态切换
+            if item.checkState(0) == Qt.Unchecked:  # 规定点击根节点只有两态切换，没有中间态
+                for i in range(item.childCount()):  # 遍历子节点进行状态切换
                     item.child(i).setCheckState(0, Qt.Unchecked)
             elif item.checkState(0) == Qt.Checked:
                 for i in range(item.childCount()):

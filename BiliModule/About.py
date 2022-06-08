@@ -5,6 +5,7 @@ from PySide2.QtCore import Qt, QPoint
 from UI.bilidabout import Ui_Form
 from BiliWorker.extra import checkLatest
 
+
 ############################################################################################
 # 关于窗口类
 class AboutWindow(QWidget, Ui_Form):
@@ -17,7 +18,7 @@ class AboutWindow(QWidget, Ui_Form):
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
         # 设置鼠标动作位置
-        self.m_Position = QPoint(0,0)
+        self.m_Position = QPoint(0, 0)
         # 添加阴影
         effect = QGraphicsDropShadowEffect(self)
         effect.setBlurRadius(30)
@@ -33,7 +34,7 @@ class AboutWindow(QWidget, Ui_Form):
         self.lab_version.setText(Release_INFO[0])
         self.label_6.setText(Release_INFO[1])
 
-    ####################### RW Part #######################
+    # ###################### RW Part #######################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -51,7 +52,7 @@ class AboutWindow(QWidget, Ui_Form):
     def mouseReleaseEvent(self, QMouseEvent):
         self.Move = False
 
-    ####################### BS Part #######################
+    # ###################### BS Part #######################
     # 访问作者网站按钮函数
     def accessWeb(self):
         webbrowser.open("https://jimmyliang-lzm.github.io/")
@@ -67,7 +68,7 @@ class AboutWindow(QWidget, Ui_Form):
     def callBUG(self):
         webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/issues")
 
-    ###### 槽函数 ######
+    # ##### 槽函数 ######
     def verShow(self, inum):
         if inum == -1:
             self.btn_latest.setEnabled(True)

@@ -8,6 +8,7 @@ from BiliWorker.extra import biliWorker_interact
 # 递归探查线程反馈主界面
 class RecurThreadWindow(QWidget, Ui_Form):
     _RSignal = Signal(dict)
+
     def __init__(self, mode: int, module: biliWorker_interact, st_node: str, deep: int = -1, parent=None):
         super(RecurThreadWindow, self).__init__(parent)
         self.setupUi(self)
@@ -36,7 +37,7 @@ class RecurThreadWindow(QWidget, Ui_Form):
         # 开始运行
         self.run_thread()
 
-    ####################### RW Part ##########################
+    # ###################### RW Part ##########################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -58,8 +59,7 @@ class RecurThreadWindow(QWidget, Ui_Form):
     def closeEvent(self, QCloseEvent):
         self._RSignal.emit(self.feedback)
 
-
-    ####################### BS Part ##########################
+    # ###################### BS Part ##########################
     # 开始运行线程
     def run_thread(self):
         self.rtmodule.change_method(2, cur_node_id=self.start_node, deep=self.search_deep)
@@ -67,12 +67,11 @@ class RecurThreadWindow(QWidget, Ui_Form):
         self.rtmodule.rthread_status.connect(self.RTSlot_status)
         self.rtmodule.start()
 
-
     # 停止递归
     def stop_thread(self):
         self.rtmodule.kill_rthread()
 
-    ####################### 槽函数 ############################
+    # ###################### 槽函数 ############################
     # 接收递归线程反馈字符
     def RTSlot_bsinfo(self, instr):
         self.plainTextEdit.setPlainText(instr)

@@ -2,7 +2,8 @@ import os, sys
 import json, webbrowser
 from pathlib import Path
 from PySide2.QtCore import Signal, Qt, QPoint, QSize
-from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, QLabel, QListWidgetItem, QFileDialog, QMessageBox
+from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect, QApplication, QTreeWidgetItem, QVBoxLayout, QCheckBox, \
+    QLabel, QListWidgetItem, QFileDialog, QMessageBox
 from PySide2.QtGui import QPixmap
 from pyecharts.charts import Tree
 from pyecharts import options as opts
@@ -18,6 +19,7 @@ from etc import DF_Path, Echart_CDN
 # 交互视频处理主界面
 class biliInteractMainWindow(QWidget, Ui_Form):
     _Signal = Signal(dict)
+
     def __init__(self, args, parent=None):
         super(biliInteractMainWindow, self).__init__(parent)
         self.feedback_dict = {}
@@ -57,8 +59,8 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.btn_next.clicked.connect(self.go_next_node)
         self.btn_back.clicked.connect(self.go_back_node)
         self.btn_refreash.clicked.connect(self.renew_show)
-        self.tw_nodelist.itemClicked['QTreeWidgetItem*','int'].connect(self.item_setCheck)
-        self.tw_nodelist.itemDoubleClicked['QTreeWidgetItem*','int'].connect(self.item_setNodePosition)
+        self.tw_nodelist.itemClicked['QTreeWidgetItem*', 'int'].connect(self.item_setCheck)
+        self.tw_nodelist.itemDoubleClicked['QTreeWidgetItem*', 'int'].connect(self.item_setNodePosition)
         self.btn_downCurChoose.clicked.connect(self.dl_current_node)
         self.btn_downALLChoose.clicked.connect(self.dl_all_chooses)
         self.btn_stRecu.clicked.connect(self.st_recursion)
@@ -69,10 +71,10 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.init_args = args
         self.info_init()
 
-
     # 初始化交互视频信息
     def info_init(self):
-        self.base_info = {"bvid": "", "session": "", "vname": "", "graph_version": "", "cid": "", "node_id": "", "curname":""}
+        self.base_info = {"bvid": "", "session": "", "vname": "", "graph_version": "", "cid": "", "node_id": "",
+                          "curname": ""}
         self.init_args['imgcache'] = self.cb_showimage.isChecked()
         self.init_args['cache_path'] = self.cache_Path
         # 初始化缓存系统
@@ -155,7 +157,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         layout_main.addWidget(layout_top)
         if self.cb_showimage.isChecked():
             layout_img = QLabel()
-            layout_img.setFixedSize(192,108)
+            layout_img.setFixedSize(192, 108)
             cache_img_path = self.cache_Path + "/temp/" + cid + "_node.jpg"
             if Path(cache_img_path).is_file():
                 img = QPixmap(cache_img_path).scaled(192, 108)
@@ -237,7 +239,6 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             # print(node_id)
         return 0
 
-
     # 回到上一节点
     def go_back_node(self):
         if len(self.current_path) <= 1:
@@ -246,7 +247,6 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.current_path.pop()
         self.renew_show()
         return 0
-
 
     # 设置Treedict的选中下载
     def item_setCheck(self, item, column):
@@ -258,7 +258,6 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             dict_status = True
         self.recursion_dict_update(self.treelist_dict, path, 'isChoose', dict_status)
 
-
     # 设置显示节点位置
     def item_setNodePosition(self, item, columu):
         tree_path = self.get_item_path(item)
@@ -269,7 +268,6 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.renew_show()
         return 0
 
-
     # 获取条目路径
     def get_item_path(self, item):
         tmp = []
@@ -279,13 +277,14 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         tmp.append(item.text(0))
         return tmp
 
-
     # 初始数据字典转化图像专用JSON递归函数
     def recursion_for_chart(self, in_json):
         temp = []
         for ch in in_json:
-            stemp = {"name": "", "children": []}
-            stemp["name"] = ch
+            stemp = {
+                "name": ch,
+                "children": []
+            }
             # print(in_json[ch])
             if "choices" in in_json[ch]:
                 stemp["children"] = self.recursion_for_chart(in_json[ch]["choices"])
@@ -296,7 +295,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
     def draw_chart(self, width, height, indict):
         self.node_chart = (
             Tree(init_opts=opts.InitOpts(page_title='Bili Node Explorer', width=width + "px", height=height + "px"))
-                .add(
+            .add(
                 "",
                 indict,
                 collapse_interval=2,
@@ -313,7 +312,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
 
     # 查看节点图
     def show_chart(self):
-        dir_address = self.cache_Path.replace("\\","/") + "/temp"
+        dir_address = self.cache_Path.replace("\\", "/") + "/temp"
         if not os.path.exists(dir_address):
             os.makedirs(dir_address)
         if not self.node_chart:
@@ -323,7 +322,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         webbrowser.open(access_url)
 
     # 访问URL制作
-    def url_maker(self,in_dir):
+    def url_maker(self, in_dir):
         if sys.platform == "win32":
             return "file:///" + in_dir
         else:
@@ -332,13 +331,13 @@ class biliInteractMainWindow(QWidget, Ui_Form):
     # 节点图保存为网页
     def save2html(self):
         init_path = self.init_args["Output"] + "/" + self.base_info["vname"] + ".html"
-        directory = QFileDialog.getSaveFileName(None,'选择节点图保存路径',init_path,'HTML(*.html)')
+        directory = QFileDialog.getSaveFileName(None, '选择节点图保存路径', init_path, 'HTML(*.html)')
         if not self.node_chart:
             self.re_show()
         if directory[0] != '':
             self.node_chart.set_global_opts(title_opts=opts.TitleOpts(
                 title=self.base_info["vname"],
-                subtitle="Made By BiliDownloader"))\
+                subtitle="Made By BiliDownloader")) \
                 .render(directory[0])
 
     # 导出节点JSON
@@ -346,9 +345,8 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         init_path = self.init_args["Output"] + "/" + self.base_info["vname"] + ".json"
         directory = QFileDialog.getSaveFileName(None, "选择JSON保存路径", init_path, 'JSON(*.json)')
         if directory[0] != '':
-            with open(directory[0],'w') as f:
+            with open(directory[0], 'w') as f:
                 f.write(json.dumps(self.full_json, ensure_ascii=False))
-
 
     # 下载当前节点处理函数
     def dl_current_node(self):
@@ -360,13 +358,11 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         self.feedback_dict['indic'][_cur].pop('choices')
         self.close()
 
-
     # 下载已选择节点
     def dl_all_chooses(self):
         self.feedback_dict['baseInfo'] = self.base_info
         self.feedback_dict['indic'] = self.treelist_dict
         self.close()
-
 
     # 开始递归探查
     def st_recursion(self):
@@ -377,10 +373,10 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             return 0
         if self.spinBox.value() < 0:
             recur_warning = QMessageBox.warning(self, '递归警告',
-                '当递归深度小于0时将探查直至所有节点结束！\n'
-                '1. 若该互动视频存在无限循环节点则会导致溢出；\n'
-                '2. 当互动视频节点分支较大时您将会等待很长时间。\n'
-                '请谨慎使用无限递归功能！继续请点击确认。', QMessageBox.Yes | QMessageBox.Cancel)
+                                                '当递归深度小于0时将探查直至所有节点结束！\n'
+                                                '1. 若该互动视频存在无限循环节点则会导致溢出；\n'
+                                                '2. 当互动视频节点分支较大时您将会等待很长时间。\n'
+                                                '请谨慎使用无限递归功能！继续请点击确认。', QMessageBox.Yes | QMessageBox.Cancel)
             if recur_warning == QMessageBox.Cancel:
                 # print('已经取消递归')
                 return -1
@@ -391,7 +387,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
         if self.cb_RSaCC.isChecked():
             mode = 2
             nodeID = self.lab_curNID.text()
-        self.RTWindow = RecurThreadWindow(mode , self.iv_init, nodeID, deep)
+        self.RTWindow = RecurThreadWindow(mode, self.iv_init, nodeID, deep)
         self.RTWindow._RSignal.connect(self.Recur_Slot_Handle)
         self.RTWindow.show()
         return 0
@@ -416,8 +412,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
                 indic[ch]['choices'] = self.treenode_select(indic[ch]['choices'], choose)
         return indic
 
-
-    ####################### RW Part #######################
+    # ###################### RW Part #######################
     # 鼠标点击事件产生
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -442,7 +437,7 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             if f.endswith('_node.jpg'):
                 os.remove(self.cache_Path + "/temp/" + f)
 
-    ####################### Slot function ##########################
+    # ###################### Slot function ##########################
     # 进程反馈信息处理主函数
     def Slot_Handle(self, indict):
         if indict['code'] == 0:
@@ -468,7 +463,8 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             # 修改字典
             if indict['nodelist']:
                 self.current_path.append(self.pre_load)
-                self.treelist_dict = self.recursion_dict_update(self.treelist_dict, self.current_path, 'choices', indict['nodelist'])
+                self.treelist_dict = self.recursion_dict_update(self.treelist_dict, self.current_path, 'choices',
+                                                                indict['nodelist'])
                 self.renew_show()
             else:
                 tmp = self.current_path.copy()
@@ -480,7 +476,6 @@ class biliInteractMainWindow(QWidget, Ui_Form):
             self.lab_curStatus.setText(indict['data'])
         else:
             pass
-
 
     # 递归线程接收槽函数
     def Recur_Slot_Handle(self, indic):
@@ -495,11 +490,11 @@ class biliInteractMainWindow(QWidget, Ui_Form):
 
 if __name__ == '__main__':
     args = {
-        'Address':'https://www.bilibili.com/video/BV1Kb4y1v79e',
-        'useProxy':False,
-        'Proxy':{},
-        'useCookie':False,
-        'cookie':'',
+        'Address': 'https://www.bilibili.com/video/BV1Kb4y1v79e',
+        'useProxy': False,
+        'Proxy': {},
+        'useCookie': False,
+        'cookie': '',
         'Output': 'G:/Cache',
     }
     app = QApplication(sys.argv)
