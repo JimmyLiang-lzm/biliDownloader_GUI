@@ -20,6 +20,12 @@ class SettingWindow(QWidget, Ui_Form):
         self.lineEdit.setText(ins_dict["Proxy"]["http"])
         self.dl_err.setValue(ins_dict["dl_err"])
         self.chunk_size.setValue(ins_dict["chunk_size"])
+        if self.ins_dict['ProxyAuth']['inuse']:
+            self.cb_useAuth.setChecked(True)
+            self.le_AuthUsr.setEnabled(True)
+            self.le_AuthPwd.setEnabled(True)
+        self.le_AuthUsr.setText(ins_dict['ProxyAuth']['usr'])
+        self.le_AuthPwd.setText(ins_dict['ProxyAuth']['pwd'])
         # 设置父窗口阻塞与窗口透明
         self.setWindowModality(Qt.ApplicationModal)
         self.setWindowFlags(Qt.FramelessWindowHint)
@@ -40,6 +46,7 @@ class SettingWindow(QWidget, Ui_Form):
         self.btn_wherecookie.clicked.connect(self.forHelp)
         self.btn_testProxy.clicked.connect(self.testProxy)
         self.btn_huseProxy.clicked.connect(self.ProxyHelp)
+        self.cb_useAuth.clicked.connect(self.inUseAuth)
 
     # ###################### RW Part ##########################
     # 鼠标点击事件产生
@@ -68,7 +75,13 @@ class SettingWindow(QWidget, Ui_Form):
     def testProxy(self):
         proxy_url = self.lineEdit.text()
         proxy_temp = {'http': proxy_url, 'https': proxy_url, }
-        self.ts = checkProxy(proxy_temp)
+        auth_tmp = None
+        if self.cb_useAuth:
+            auth_tmp = {
+                'usr': self.le_AuthUsr,
+                'pwd': self.le_AuthPwd
+            }
+        self.ts = checkProxy(proxy_temp, auth_tmp)
         self.lineEdit.setEnabled(False)
         self.btn_testProxy.setEnabled(False)
         self.btn_testProxy.setText("正在检测")
@@ -78,14 +91,14 @@ class SettingWindow(QWidget, Ui_Form):
     # 确定设置函数
     def setConfig(self):
         self.ins_dict["cookie"] = self.edit_cookies.toPlainText()
-        if self.cb_useProxy.isChecked():
-            self.ins_dict["useProxy"] = True
-        else:
-            self.ins_dict["useProxy"] = False
+        self.ins_dict["useProxy"] = self.cb_useProxy.isChecked()
         proxy_url = self.lineEdit.text()
         self.ins_dict["Proxy"] = {'http': proxy_url, 'https': proxy_url, }
         self.ins_dict["dl_err"] = self.dl_err.value()
         self.ins_dict["chunk_size"] = self.chunk_size.value()
+        self.ins_dict["ProxyAuth"]["inuse"] = self.cb_useAuth.isChecked()
+        self.ins_dict["ProxyAuth"]["usr"] = self.le_AuthUsr.text()
+        self.ins_dict["ProxyAuth"]["pwd"] = self.le_AuthPwd.text()
         self._signal.emit({"code": 1, "indict": self.ins_dict})
         self.close()
 
@@ -100,6 +113,15 @@ class SettingWindow(QWidget, Ui_Form):
     # 代理帮助按钮
     def ProxyHelp(self):
         webbrowser.open("https://jimmyliang-lzm.github.io/2021/10/07/bilid_GUI_help/#3-5-“僅限港澳台地區”视频下载")
+
+    # 使用代理检查框按下事件
+    def inUseAuth(self):
+        if self.cb_useAuth.isChecked():
+            self.le_AuthUsr.setEnabled(True)
+            self.le_AuthPwd.setEnabled(True)
+        else:
+            self.le_AuthUsr.setEnabled(False)
+            self.le_AuthPwd.setEnabled(False)
 
     # ########################## 槽函数 ################################
     # 代理地址测试线程槽函数

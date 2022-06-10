@@ -466,6 +466,9 @@ QLineEdit{
      </property>
     </widget>
     <widget class="QLineEdit" name="le_AuthUsr">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>90</x>
@@ -473,6 +476,9 @@ QLineEdit{
        <width>151</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <property name="placeholderText">
       <string>输入登录用户名</string>
@@ -505,6 +511,9 @@ QLineEdit{
      </property>
     </widget>
     <widget class="QLineEdit" name="le_AuthPwd">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="geometry">
       <rect>
        <x>300</x>
@@ -512,6 +521,12 @@ QLineEdit{
        <width>151</width>
        <height>31</height>
       </rect>
+     </property>
+     <property name="echoMode">
+      <enum>QLineEdit::Password</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
      <property name="placeholderText">
       <string>输入登录验证密码</string>

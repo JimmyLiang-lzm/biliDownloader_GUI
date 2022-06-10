@@ -73,6 +73,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     indict['dl_err'] = tempr.get('dl_err')
                 if tempr.get('chunk_size'):
                     indict['chunk_size'] = tempr.get('chunk_size')
+                if tempr.get('ProxyAuth'):
+                    indict['ProxyAuth']['inuse'] = tempr['ProxyAuth'].get('inuse', False)
+                    indict['ProxyAuth']['usr'] = tempr['ProxyAuth'].get('usr', '')
+                    indict['ProxyAuth']['pwd'] = tempr['ProxyAuth'].get('pwd', '')
         except:
             indict["Output"] = DF_Path
             indict["sys"] = sys.platform
@@ -116,7 +120,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 "useProxy": indict["useProxy"],
                 "Proxy": indict["Proxy"],
                 "dl_err": indict["dl_err"],
-                "chunk_size": indict["chunk_size"]
+                "chunk_size": indict["chunk_size"],
+                "ProxyAuth": indict["ProxyAuth"]
             }
             f.write(json.dumps(temp_dict, sort_keys=True, indent=4))
             f.close()

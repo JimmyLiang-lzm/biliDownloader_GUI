@@ -53,19 +53,28 @@ class checkLatest(QThread):
 class checkProxy(QThread):
     _feedback = Signal(dict)
 
-    def __init__(self, in_Proxy):
+    def __init__(self, in_Proxy, auth=None):
         super(checkProxy, self).__init__()
         self.use_Proxy = in_Proxy
         self.index_headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                           "Chrome/72.0.3626.121 Safari/537.36 "
         }
+        self.Auth = auth
+        if auth:
+            from requests.auth import HTTPProxyAuth
+            self.Auth = HTTPProxyAuth(auth.get('usr'), auth.get('pwd'))
 
     def run(self):
         try:
             temp = {"code": 1}
             des = request.get("https://api.live.bilibili.com/xlive/web-room/v1/index/getIpInfo",
-                              headers=self.index_headers, timeout=10, stream=False, proxies=self.use_Proxy)
+                              headers=self.index_headers,
+                              timeout=10,
+                              stream=False,
+                              proxies=self.use_Proxy,
+                              auth=self.Auth
+                              )
             res = json.loads(des.content.decode('utf-8'))["data"]
             temp["ip"] = res["addr"]
             temp["area"] = res["country"]
@@ -96,14 +105,17 @@ class biliWorker_interact(QThread):
         self.re_INITIAL_STATE = 'window.__INITIAL_STATE__=([\s\S]*?);\(function'
         if args["useCookie"]:
             self.index_headers["cookie"] = args["cookie"]
-            # self.second_headers["cookie"] = args["cookie"]
         else:
             self.index_headers["cookie"] = ""
-            # self.second_headers["cookie"] = ""
+        # 使用代理
+        self.Proxy = None
         if args["useProxy"]:
             self.Proxy = args["Proxy"]
-        else:
-            self.Proxy = {}
+        # 若使用代理验证
+        self.ProxyAuth = None
+        if args["ProxyAuth"]["inuse"]:
+            from requests.auth import HTTPProxyAuth
+            self.ProxyAuth = HTTPProxyAuth(args['ProxyAuth']['usr'], args['ProxyAuth']['pwd'])
         self.iscache = args['imgcache']
         self.cache_path = args['cache_path'] + "/temp"
         # 初始化缓存图片下载类
@@ -187,7 +199,14 @@ class biliWorker_interact(QThread):
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = request.get(url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                url,
+                headers=self.index_headers,
+                stream=False,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -211,7 +230,14 @@ class biliWorker_interact(QThread):
             'bvid': self.now_interact["bvid"],
         }
         try:
-            res = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                make_API,
+                headers=self.index_headers,
+                params=param,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             des = res.json()
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -230,7 +256,14 @@ class biliWorker_interact(QThread):
             'node_id': self.now_interact["node_id"],
         }
         try:
-            des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
+            des = request.get(
+                make_API,
+                headers=self.index_headers,
+                params=param,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             res = des.json()
         except Exception as e:
             print("Get Edges:", e)
@@ -282,7 +315,14 @@ class biliWorker_interact(QThread):
                 'node_id': self.now_interact["node_id"],
             }
             try:
-                des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
+                des = request.get(
+                    make_API,
+                    headers=self.index_headers,
+                    params=param,
+                    timeout=10,
+                    proxies=self.Proxy,
+                    auth=self.ProxyAuth
+                )
                 desp = des.json()
             except Exception as e:
                 self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
@@ -345,14 +385,18 @@ class BiliImgCache(QThread):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                           "Chrome/72.0.3626.121 Safari/537.36 "
         }
+        self.index_headers["cookie"] = ""
         if req_dict["useCookie"]:
             self.index_headers["cookie"] = req_dict["cookie"]
-        else:
-            self.index_headers["cookie"] = ""
+        # 使用代理
+        self.Proxy = None
         if req_dict["useProxy"]:
             self.Proxy = req_dict["Proxy"]
-        else:
-            self.Proxy = {}
+        # 若使用代理验证
+        self.ProxyAuth = None
+        if req_dict["ProxyAuth"]["inuse"]:
+            from requests.auth import HTTPProxyAuth
+            self.ProxyAuth = HTTPProxyAuth(req_dict['ProxyAuth']['usr'], req_dict['ProxyAuth']['pwd'])
         self.cache_path = req_dict['cache_path'] + "/temp"
         # 初始化递归字典
         self.recur_dict = {}
@@ -379,7 +423,13 @@ class BiliImgCache(QThread):
         if Path(output_file).is_file():
             return 0
         try:
-            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                url,
+                headers=self.index_headers,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             file = res.content
             with open(output_file, 'wb') as f:
                 f.write(file)

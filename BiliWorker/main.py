@@ -61,10 +61,16 @@ class biliWorker(QThread):
         else:
             self.index_headers["cookie"] = ""
             self.second_headers["cookie"] = ""
+        # 使用代理
+        self.Proxy = None
         if args["useProxy"]:
             self.Proxy = args["Proxy"]
-        else:
-            self.Proxy = None
+        # 代理验证
+        self.ProxyAuth = None
+        if args["ProxyAuth"]["inuse"]:
+            from requests.auth import HTTPProxyAuth
+            self.ProxyAuth = HTTPProxyAuth(args['ProxyAuth']['usr'], args['ProxyAuth']['pwd'])
+
 
     # 运行模式设置函数
     def model_set(self, innum):
@@ -104,7 +110,14 @@ class biliWorker(QThread):
         checking2 = re.findall('/play/ep', inurl.split("?")[0], re.S)
         try:
             if checking1 != []:
-                res = request.get(inurl, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                res = request.get(
+                    inurl,
+                    headers=self.index_headers,
+                    stream=False,
+                    timeout=10,
+                    proxies=self.Proxy,
+                    auth=self.ProxyAuth
+                )
                 dec = res.content.decode('utf-8')
                 INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
                 temp = json.loads(INITIAL_STATE[0])
@@ -123,7 +136,14 @@ class biliWorker(QThread):
         # Get Html Information
         index_url = self.ssADDRCheck(index_url)
         try:
-            res = request.get(index_url[1], headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                index_url[1],
+                headers=self.index_headers,
+                stream=False,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             dec = res.content.decode('utf-8')
         except:
             print("初始化信息获取失败。")
@@ -204,7 +224,14 @@ class biliWorker(QThread):
     # Search the list of Video download address.
     def search_videoList(self, index_url):
         try:
-            res = request.get(index_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                index_url,
+                headers=self.index_headers,
+                stream=False,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             dec = res.content.decode('utf-8')
         except:
             return 0, {}
@@ -289,8 +316,14 @@ class biliWorker(QThread):
             self.business_info.emit('使用线路：{}'.format(line.split("?")[0]))
             try:
                 # video stream length sniffing
-                video_bytes = request.get(line, headers=self.second_headers, stream=False, timeout=(5, 10),
-                                          proxies=self.Proxy)
+                video_bytes = request.get(
+                    line,
+                    headers=self.second_headers,
+                    stream=False,
+                    timeout=(5, 10),
+                    proxies=self.Proxy,
+                    auth=self.ProxyAuth
+                )
                 vc_range = video_bytes.headers['Content-Range'].split('/')[1]
                 self.business_info.emit("获取{}流范围为：{}".format(dest, vc_range))
                 self.business_info.emit('{}  文件大小：{} MB'.format(dest, round(float(vc_range) / 1024 / 1024), 4))
@@ -300,8 +333,14 @@ class biliWorker(QThread):
                 while err <= self.set_err:
                     try:
                         self.second_headers['range'] = 'bytes=' + str(proc["Now"]) + '-' + vc_range
-                        m4sv_bytes = request.get(line, headers=self.second_headers, stream=True, timeout=10,
-                                                 proxies=self.Proxy)
+                        m4sv_bytes = request.get(
+                            line,
+                            headers=self.second_headers,
+                            stream=True,
+                            timeout=10,
+                            proxies=self.Proxy,
+                            auth=self.ProxyAuth
+                        )
                         self.progr_bar.emit(proc)
                         if not os.path.exists(output_dir):
                             os.makedirs(output_dir)
@@ -648,7 +687,14 @@ class biliWorker(QThread):
     # Interactive video initial information
     def Get_Init_Info(self, url):
         try:
-            res = request.get(url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                url,
+                headers=self.index_headers,
+                stream=False,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             dec = res.content.decode('utf-8')
             playinfo = re.findall(self.re_playinfo, dec, re.S)
             INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
@@ -672,7 +718,14 @@ class biliWorker(QThread):
             'bvid': self.now_interact["bvid"],
         }
         try:
-            res = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                make_API,
+                headers=self.index_headers,
+                params=param,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             des = json.loads(res.content.decode('utf-8'))
             if "interaction" not in des["data"]:
                 raise Exception("非交互视频")
@@ -696,7 +749,14 @@ class biliWorker(QThread):
             'session': self.now_interact["session"]
         }
         try:
-            des = request.get(make_API, headers=self.index_headers, params=param, timeout=10, proxies=self.Proxy)
+            des = request.get(
+                make_API,
+                headers=self.index_headers,
+                params=param,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             playinfo = json.loads(des.content.decode('utf-8'))
         except Exception as e:
             return False, str(e)
@@ -768,7 +828,14 @@ class biliWorker(QThread):
         if modeNUM == 1:
             try:
                 makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid=" + sid
-                res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                res = request.get(
+                    makeURL,
+                    headers=self.index_headers,
+                    stream=False,
+                    timeout=10,
+                    proxies=self.Proxy,
+                    auth=self.ProxyAuth
+                )
                 des = res.content.decode('utf-8')
                 auinfo = json.loads(des)["data"]
                 temp = {
@@ -789,7 +856,14 @@ class biliWorker(QThread):
                 while True:
                     makeURL = "https://www.bilibili.com/audio/music-service-c/web/song/of-menu?sid=" + sid + "&pn=" + str(
                         pn) + "&ps=30"
-                    res = request.get(makeURL, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+                    res = request.get(
+                        makeURL,
+                        headers=self.index_headers,
+                        stream=False,
+                        timeout=10,
+                        proxies=self.Proxy,
+                        auth=self.ProxyAuth
+                    )
                     des = res.content.decode('utf-8')
                     mu_dic = json.loads(des)["data"]
                     for sp in mu_dic["data"]:
@@ -839,7 +913,14 @@ class biliWorker(QThread):
     # 获取单个音频下载地址
     def Audio_getDownloadList(self, sid):
         make_url = "https://www.bilibili.com/audio/music-service-c/web/url?sid=" + sid
-        res = request.get(make_url, headers=self.index_headers, stream=False, timeout=10, proxies=self.Proxy)
+        res = request.get(
+            make_url,
+            headers=self.index_headers,
+            stream=False,
+            timeout=10,
+            proxies=self.Proxy,
+            auth=self.ProxyAuth
+        )
         des = res.content.decode('utf-8')
         au_list = json.loads(des)["data"]["cdns"]
         return au_list
@@ -847,7 +928,13 @@ class biliWorker(QThread):
     # 附带资源下载
     def simple_downloader(self, url, output_dir, output_file):
         try:
-            res = request.get(url, headers=self.index_headers, timeout=10, proxies=self.Proxy)
+            res = request.get(
+                url,
+                headers=self.index_headers,
+                timeout=10,
+                proxies=self.Proxy,
+                auth=self.ProxyAuth
+            )
             file = res.content
             if not os.path.exists(output_dir):
                 os.makedirs(output_dir)

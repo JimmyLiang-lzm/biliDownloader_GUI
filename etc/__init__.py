@@ -1,7 +1,7 @@
 import os, sys
 
 # 发布版本信息
-Release_INFO = ["V1.6.20220605", "2022/06/05"]
+Release_INFO = ["V1.6.20220610", "2022/06/10"]
 
 # 保存个人信息模板初始化
 indict = {
@@ -21,6 +21,11 @@ indict = {
     "Proxy": {
         'http': '',
         'https': '',
+    },
+    "ProxyAuth": {
+        'inuse': False,
+        'usr': '',
+        'pwd': '',
     }
 }
 
