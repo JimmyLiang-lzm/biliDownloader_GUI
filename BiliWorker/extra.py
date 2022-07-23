@@ -23,13 +23,18 @@ def ver2num(inVer):
 class checkLatest(QThread):
     _feedback = Signal(int)
 
-    def __init__(self, inVer):
+    def __init__(self, inVer, proxy=None):
         super(checkLatest, self).__init__()
         self.lab_version = inVer
+        self.Proxy = proxy
 
     def run(self):
         try:
-            des = request.get("https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json", timeout=5)
+            des = request.get(
+                "https://jimmyliang-lzm.github.io/source_storage/biliDownloader_verCheck.json",
+                timeout=5,
+                proxies=self.Proxy
+            )
             res = des.json()["biliDownloader_GUI"]
             latestVer = ver2num(res)
             myVer = ver2num(self.lab_version)
