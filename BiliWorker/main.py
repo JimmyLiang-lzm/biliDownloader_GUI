@@ -217,6 +217,28 @@ class biliWorker(QThread):
                 for a in range(len(dic["backupUrl"])):
                     down_dic["audio"][i][1].append(dic["backupUrl"][a])
             i += 1
+        try:
+            for dic in re_GET["data"]["dash"]["dolby"]['audio']:
+                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                t = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
+                down_dic["audio"][i] = t
+                if dic.get('backupUrl') is list:
+                    for a in range(len(dic["backup_url"])):
+                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                i += 1
+        except:
+            pass
+        try:
+            # for dicc in re_GET["data"]["dash"]['flac']['audio']:
+            dic = re_GET["data"]["dash"]['flac']['audio']
+            au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+            down_dic["audio"][i] = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
+            if dic.get('backupUrl') is list:
+                for a in range(len(dic["backup_url"])):
+                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+            i += 1
+        except:
+            pass
         # Get Video Length
         length = re_GET["data"]["dash"]["duration"]
         return length, down_dic
