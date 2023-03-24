@@ -209,6 +209,28 @@ class biliWorker(QThread):
                 continue
         # List Audio Stream
         i = 0
+        try:
+            for dic in re_GET["data"]["dash"]["dolby"]['audio']:
+                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                t = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
+                down_dic["audio"][i] = t
+                if dic.get('backupUrl') is list:
+                    for a in range(len(dic["backup_url"])):
+                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                i += 1
+        except:
+            pass
+        try:
+            # for dicc in re_GET["data"]["dash"]['flac']['audio']:
+            dic = re_GET["data"]["dash"]['flac']['audio']
+            au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+            down_dic["audio"][i] = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
+            if dic.get('backupUrl') is list:
+                for a in range(len(dic["backup_url"])):
+                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
+            i += 1
+        except:
+            pass
         for dic in re_GET["data"]["dash"]["audio"]:
             au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
             down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
@@ -217,6 +239,7 @@ class biliWorker(QThread):
                 for a in range(len(dic["backupUrl"])):
                     down_dic["audio"][i][1].append(dic["backupUrl"][a])
             i += 1
+
         # Get Video Length
         length = re_GET["data"]["dash"]["duration"]
         return length, down_dic
@@ -501,14 +524,14 @@ class biliWorker(QThread):
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             ffcommand = '"' + ffpath + '\\ffmpeg.exe" -i "' + \
                         input_v + '" -i "' + \
-                        input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+                        input_a + '" -strict unofficial -strict -2 -brand mp42 -c copy -y "' + output_add + '"'
         elif self.systemd == "linux":
-            ffcommand = 'ffmpeg -i "' + input_v + '" -i "' + input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+            ffcommand = 'ffmpeg -i "' + input_v + '" -i "' + input_a + '" -strict unofficial -strict -2 -brand mp42 -c copy -y "' + output_add + '"'
         elif self.systemd == "darwin":
             ffpath = os.path.dirname(os.path.realpath(sys.argv[0]))
             ffcommand = '"' + ffpath + '/ffmpeg" -i "' + \
                         input_v + '" -i "' + \
-                        input_a + '" -c:v copy -c:a aac -strict experimental "' + output_add + '"'
+                        input_a + '" -strict unofficial -strict -2 -brand mp42 -c copy -y "' + output_add + '"'
         else:
             self.business_info.emit("未知操作系统：无法确定FFMpeg命令。")
             return -2
