@@ -208,10 +208,11 @@ class biliWorker(QThread):
             else:
                 continue
         # List Audio Stream
+        # 获取杜比音轨
         i = 0
         try:
             for dic in re_GET["data"]["dash"]["dolby"]['audio']:
-                au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                au_stream ="杜比音轨 " + dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
                 t = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
                 down_dic["audio"][i] = t
                 if dic.get('backupUrl') is list:
@@ -220,10 +221,11 @@ class biliWorker(QThread):
                 i += 1
         except:
             pass
+        # Hi-Res音轨
         try:
             # for dicc in re_GET["data"]["dash"]['flac']['audio']:
             dic = re_GET["data"]["dash"]['flac']['audio']
-            au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+            au_stream ="Hi-Res " + dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
             down_dic["audio"][i] = [au_stream, [dic["base_url"]], 'bytes=' + dic["segment_base"]["initialization"]]
             if dic.get('backupUrl') is list:
                 for a in range(len(dic["backup_url"])):
@@ -231,8 +233,9 @@ class biliWorker(QThread):
             i += 1
         except:
             pass
+        # 普通音轨
         for dic in re_GET["data"]["dash"]["audio"]:
-            au_stream = dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+            au_stream ="普通音轨 " + dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
             down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
                                     'bytes=' + dic["SegmentBase"]["Initialization"]]
             if dic.get('backupUrl') is list:
