@@ -234,14 +234,22 @@ class biliWorker(QThread):
         except:
             pass
         # 普通音轨
-        for dic in re_GET["data"]["dash"]["audio"]:
-            au_stream ="普通音轨 " + dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
-            down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
-                                    'bytes=' + dic["SegmentBase"]["Initialization"]]
-            if dic.get('backupUrl') is list:
-                for a in range(len(dic["backupUrl"])):
-                    down_dic["audio"][i][1].append(dic["backupUrl"][a])
-            i += 1
+        if type(re_GET["data"]["dash"]["audio"]) is list:
+            for dic in re_GET["data"]["dash"]["audio"]:
+                au_stream = "普通音轨 " + dic["codecs"] + "  音频带宽：" + str(dic["bandwidth"])
+                down_dic["audio"][i] = [au_stream, [dic["baseUrl"]],
+                                        'bytes=' + dic["SegmentBase"]["Initialization"]]
+                if dic.get('backupUrl') is list:
+                    for a in range(len(dic["backupUrl"])):
+                        down_dic["audio"][i][1].append(dic["backupUrl"][a])
+                i += 1
+        elif i == 0:
+            # 若不存在音轨，则虚拟一个空音轨下载地址
+            print('This media disable Sounds Track.')
+            au_stream = "无音轨"
+            down_dic["audio"][0] = [au_stream, [], '']
+        else:
+            pass
 
         # Get Video Length
         length = re_GET["data"]["dash"]["duration"]
@@ -814,11 +822,18 @@ class biliWorker(QThread):
                 _, _, down_dic = dic_return
                 self.second_headers["range"] = down_dic["video"][self.VQuality][2]
                 self.d_processor(down_dic["video"][self.VQuality][1], output, video_dir, "下载视频：" + chn)
-                self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
-                self.d_processor(down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
-                if self.synthesis:
+                # 增加是否有音轨判定，若无音轨则直接转换视频文件为MP4
+                has_au = True
+                if down_dic["audio"][self.AQuality][1]:
+                    self.second_headers['range'] = down_dic["audio"][self.AQuality][2]
+                    self.d_processor(down_dic["audio"][self.AQuality][1], output, audio_dir, "下载音频：" + chn)
+                else:
+                    has_au = False
+                if self.synthesis and has_au:
                     self.business_info.emit('正在启动ffmpeg......')
                     self.ffmpeg_synthesis(video_dir, audio_dir, output + '/' + chn + '.mp4')
+                else:
+                    os.rename(video_dir, output + '/' + chn + '.mp4')
             if "choices" in json_list[ch]:
                 self.recursion_for_Download(json_list[ch]["choices"], output)
         return 0
