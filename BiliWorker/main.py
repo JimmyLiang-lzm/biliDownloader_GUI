@@ -128,7 +128,7 @@ class biliWorker(QThread):
             else:
                 return 0, inurl
         except Exception as e:
-            print(e)
+            print("[EXCEPTION]BiliWorker.main.biliWorker.ssADDRCheck:", e)
             return 0, inurl
 
     # Searching Key Word
@@ -145,14 +145,14 @@ class biliWorker(QThread):
                 auth=self.ProxyAuth
             )
             dec = res.content.decode('utf-8')
-        except:
-            print("初始化信息获取失败。")
+        except Exception as e:
+            print("[EXCEPTION]BiliWorker.main.biliWorker.search_preinfo: Get Initialized Info Error -> ", e)
             return 0, "", "", {}
         # Use RE to find Download JSON Data
         playinfo = re.findall(self.re_playinfo, dec, re.S)
         INITIAL_STATE = re.findall(self.re_INITIAL_STATE, dec, re.S)
         if playinfo == [] or INITIAL_STATE == []:
-            print("Session等初始化信息获取失败。")
+            print("[ERROR]BiliWorker.main.biliWorker.search_preinfo: Get Session Initialized Info Failed!")
             return 0, "", "", {}
         # Bangumi Video
         re_init = json.loads(INITIAL_STATE[0])
@@ -186,7 +186,7 @@ class biliWorker(QThread):
             # Return Data
             return 1, video_name, length, down_dic
         except Exception as e:
-            print("PreInfo:", e)
+            print("[EXCEPTION]BiliWorker.main.biliWorker.search_preinfo:", e)
             return 0, "", "", {}
 
     def tmp_dffss(self, re_GET):
@@ -245,7 +245,7 @@ class biliWorker(QThread):
                 i += 1
         elif i == 0:
             # 若不存在音轨，则虚拟一个空音轨下载地址
-            print('This media disable Sounds Track.')
+            print("[INFO]BiliWorker.main.biliWorker.tmp_dffss: This media disable Sounds Track.")
             au_stream = "无音轨"
             down_dic["audio"][0] = [au_stream, [], '']
         else:
@@ -289,7 +289,7 @@ class biliWorker(QThread):
                 else:
                     return 0, {}
             except Exception as e:
-                print("videoList:", e)
+                print("[EXCEPTION]BiliWorker.main.biliWorker.search_videoList:", e)
                 return 0, {}
         else:
             return 0, {}
@@ -341,7 +341,7 @@ class biliWorker(QThread):
             else:
                 return 0
         except Exception as e:
-            print(e)
+            print("[EXCEPTION]BiliWorker.main.biliWorker.show_preDetail:", e)
             return 0
 
     # Download Stream function
@@ -395,11 +395,12 @@ class biliWorker(QThread):
                             m4sv_bytes.close()
                             break
                         else:
-                            print("服务器断开连接，重新连接下载端口....")
+                            print("[INFO]BiliWorker.main.biliWorker.d_processor: Server Break Connection, "
+                                  "Re-Connecting...")
                     except Exception as e:
                         if not re.findall('10054', str(e), re.S):
                             err += 1
-                        print(e, err)
+                        print("[EXCEPTION]BiliWorker.main.biliWorker.d_processor:", e, err)
                 if err > self.set_err:
                     raise Exception('线路出错，切换线路。')
                 proc["finish"] = 1
@@ -407,7 +408,7 @@ class biliWorker(QThread):
                 self.business_info.emit("{}成功！".format(dest))
                 return 0
             except Exception as e:
-                print(e)
+                print("[EXCEPTION]BiliWorker.main.biliWorker.d_processor:", e)
                 self.business_info.emit("{}出错：{}".format(dest, e))
                 # print(proc)
                 if os.path.exists(output_file):
@@ -649,7 +650,7 @@ class biliWorker(QThread):
                     # Synthesis processor
                     self.ffmpeg_synthesis(video_dir, audio_dir, sym_video_dir)
             except Exception as e:
-                print(e)
+                print("[EXCEPTION]BiliWorker.main.biliWorker.Download_single:", e)
         else:
             self.business_info.emit("下载失败：尚未找到源地址，请检查网站地址或充值大会员！")
 
@@ -817,7 +818,7 @@ class biliWorker(QThread):
                 # print(dic_return)
                 if not dic_return[0]:
                     self.business_info.emit("节点（{}）获取下载地址出错".format(ch))
-                    print(dic_return[1])
+                    print("[ERROR]BiliWorker.main.biliWorker.recursion_for_Download:", dic_return[1])
                     return -1
                 _, _, down_dic = dic_return
                 self.second_headers["range"] = down_dic["video"][self.VQuality][2]
@@ -861,7 +862,7 @@ class biliWorker(QThread):
             else:
                 return 0, "Audio Single Get Error."
         else:
-            print("Is NOT Music.")
+            print("[INFO]BiliWorker.main.biliWorker.search_AUPreinfo: Is NOT Music.")
             return 0, {}
 
     def AuList_Maker(self, sid, modeNUM):
@@ -888,7 +889,7 @@ class biliWorker(QThread):
                 list_dict["audio"].append(temp)
                 list_dict["total"] = 1
             except Exception as e:
-                print("AuList_Maker_Single:", e)
+                print("[EXCEPTION]BiliWorker.main.biliWorker.search_AUPreinfo:", e)
                 return 0, "AuList_Maker_Single:{}".format(e)
             return 1, list_dict
         elif modeNUM == 2:
@@ -922,7 +923,7 @@ class biliWorker(QThread):
                         pn += 1
                         continue
             except Exception as e:
-                print("AuList_Maker_List:", e)
+                print("[EXCEPTION]BiliWorker.main.biliWorker.AuList_Maker:", e)
                 return 0, "AuList_Maker_List:{}".format(e)
             return 1, list_dict
         else:
@@ -933,7 +934,7 @@ class biliWorker(QThread):
     def Audio_Show(self):
         au_dic = self.search_AUPreinfo(self.index_url)
         if au_dic[0] == 0:
-            print(au_dic[1])
+            print("[INFO]BiliWorker.main.biliWorker.Audio_Show:", au_dic[1])
             return 0
         if au_dic[0] == 1:
             self.business_info.emit('当前歌单包含音乐数量为{}个'.format(au_dic[1]["total"]))
@@ -982,8 +983,8 @@ class biliWorker(QThread):
             with open(output_file, 'wb') as f:
                 f.write(file)
         except Exception as e:
+            print("[EXCEPTION]BiliWorker.main.biliWorker.simple_downloader: Simple Download Failed -> ", e)
             self.business_info.emit("附带下载失败：{}".format(url))
-            print("附带下载失败：", e)
 
     # 音乐下载函数
     def audio_downloader(self):
@@ -1011,7 +1012,7 @@ class biliWorker(QThread):
             return 1
         except Exception as e:
             self.business_info.emit("音频下载出错：{}".format(e))
-            print("音频下载出错：", e)
+            print("[EXCEPTION]BiliWorker.main.biliWorker.audio_downloader: Audio Download Failed -> ", e)
             return 0
 
     ###################################################################

@@ -11,22 +11,40 @@ from pathlib import Path
 import requests as request
 
 
-# 将版本号转变为数字可比较类型
-def ver2num(inVer):
-    temp = inVer.replace("V", "").split(".")
-    temp = int(temp[0] + temp[1] + temp[2])
-    return temp
-
-
 ############################################################################################
 # 检查更新防阻滞线程类
-class checkLatest(QThread):
+class CheckLatest(QThread):
     _feedback = Signal(int)
 
-    def __init__(self, inVer, proxy=None):
-        super(checkLatest, self).__init__()
-        self.lab_version = inVer
+    def __init__(self, in_ver, proxy=None):
+        super(CheckLatest, self).__init__()
+        self.lab_version = in_ver
         self.Proxy = proxy
+
+    # 将版本号转变为数字可比较类型
+    # @staticmethod
+    # def ver2num(in_var):
+    #     temp = in_var.replace("V", "").split(".")
+    #     temp = int(temp[0] + temp[1] + temp[2])
+    #     return temp
+
+    # 最新版本检查
+    @staticmethod
+    def is_latest(my_ver: str, latest_ver: str) -> bool:
+        try:
+            my = my_ver.split(".")
+            server = latest_ver.split(".")
+            print("[INFO]BiliWorker.extra.CheckLatest.is_latest: My Version is {}, Latest Version is {}.".format(my, server))
+            if int(my[0]) < int(server[0]):
+                return False
+            if int(my[1]) < int(server[1]):
+                return False
+            if int(my[2]) < int(server[2]):
+                return False
+            return True
+        except Exception as e:
+            print("[EXCEPTION]BiliWorker.extra.CheckLatest.is_latest:", e)
+            return False
 
     def run(self):
         try:
@@ -35,19 +53,26 @@ class checkLatest(QThread):
                 timeout=5,
                 proxies=self.Proxy
             )
-            res = des.json()["biliDownloader_GUI"]
-            latestVer = ver2num(res)
-            myVer = ver2num(self.lab_version)
-            if latestVer <= myVer:
+            res = des.json()["BD_GUI_Ver"]
+            if self.is_latest(self.lab_version, res):
                 self._feedback.emit(0)
                 sleep(2)
                 self._feedback.emit(-1)
             else:
                 self._feedback.emit(1)
                 webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases/latest")
-                sleep(2)
+            # latestVer = ver2num(res)
+            # myVer = ver2num(self.lab_version)
+            # if latestVer <= myVer:
+            #     self._feedback.emit(0)
+            #     sleep(2)
+            #     self._feedback.emit(-1)
+            # else:
+            #     self._feedback.emit(1)
+            #     webbrowser.open("https://github.com/JimmyLiang-lzm/biliDownloader_GUI/releases/latest")
+            #     sleep(2)
         except Exception as e:
-            print(e)
+            print("[EXCEPTION]BiliWorker.extra.CheckLatest.run:", e)
             self._feedback.emit(2)
             sleep(2)
             self._feedback.emit(-1)
@@ -84,8 +109,8 @@ class checkProxy(QThread):
             temp["ip"] = res["addr"]
             temp["area"] = res["country"]
             self._feedback.emit(temp)
-        except Exception as err:
-            print('Check Proxy Address:', err)
+        except Exception as e:
+            print("[EXCEPTION]BiliWorker.extra.checkProxy.run:", e)
             self._feedback.emit({"code": -1, "message": "测试失败"})
 
 
@@ -147,7 +172,7 @@ class biliWorker_interact(QThread):
         t2 = self.isInteract()
         if t2[0]:
             return 1, {}, {}
-        print(self.now_interact)
+        print("[INFO]BiliWorker.extra.biliWorker_interact.interact_preinfo:", self.now_interact)
         t3 = self.Get_Edge()
         if t3[0]:
             return 1, {}, {}
@@ -271,7 +296,7 @@ class biliWorker_interact(QThread):
             )
             res = des.json()
         except Exception as e:
-            print("Get Edges:", e)
+            print("[EXCEPTION]BiliWorker.extra.biliWorker_interact.Get_Edge:", e)
             return 1, "获取节点失败（网络连接错误）"
         # print(res)
         if "edges" not in res["data"]:
@@ -331,7 +356,7 @@ class biliWorker_interact(QThread):
                 desp = des.json()
             except Exception as e:
                 self.business_info.emit("获取节点信息出现网络问题：节点提取可能不全")
-                print("Interactive Video Get List Error:", e)
+                print("[EXCEPTION]BiliWorker.extra.biliWorker_interact.recursion_GET_List:", e)
                 return temp
             if "edges" not in desp["data"]:
                 return temp
@@ -375,7 +400,7 @@ class biliWorker_interact(QThread):
             else:
                 self.rthread_status.emit({'code': -1, 'data': '为探查到更多节点。'})
         else:
-            print("操作指令有误:", self.model)
+            print("[INFO]BiliWorker.extra.biliWorker_interact.run: Operation Command Error", self.model)
             self.back_result.emit({'code': -1, 'data': '操作指令有误'})
 
 
@@ -388,9 +413,7 @@ class BiliImgCache(QThread):
         # 初始化requests参数
         self.index_headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/72.0.3626.121 Safari/537.36 "
-        }
-        self.index_headers["cookie"] = ""
+                          "Chrome/72.0.3626.121 Safari/537.36 ", "cookie": ""}
         if req_dict["useCookie"]:
             self.index_headers["cookie"] = req_dict["cookie"]
         # 使用代理
@@ -441,7 +464,7 @@ class BiliImgCache(QThread):
             return 0
         except Exception as e:
             self.business_info.emit("附带下载失败：{}".format(url))
-            print("附带下载失败：", e)
+            print("[EXCEPTION]BiliWorker.extra.BiliImgCache.img_cache:", e)
             return 1
 
     # 运行自动缓存系统

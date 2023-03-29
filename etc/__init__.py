@@ -1,7 +1,10 @@
 import os, sys
 
 # 发布版本信息
-Release_INFO = ["V1.7.20230327", "2023/03/26"]
+Release_INFO = ["1.7.2", "2023/03/30"]
+
+# Debug Info Structure
+# [Exception]BiliWorker.extra.CheckLatest.is_latest: My Version is {}, Latest Version is {}."
 
 # 保存个人信息模板初始化
 indict = {

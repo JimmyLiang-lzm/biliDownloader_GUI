@@ -83,7 +83,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.checkBox_sym.setChecked(True)
         # 部分显示初始化
         self.lineEdit_dir.setText(indict["Output"])
-        self.plainTextEdit.setPlainText("欢迎使用Bili Downloader {}\nRelease at {} ......"
+        self.plainTextEdit.setPlainText("欢迎使用Bili Downloader V{}\nRelease at {} ......"
                                         .format(Release_INFO[0], Release_INFO[1]))
         # 计时器初始化
         self.progressBarTimer = QTimer()

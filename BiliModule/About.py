@@ -3,7 +3,7 @@ from etc import *
 from PySide2.QtWidgets import QWidget, QGraphicsDropShadowEffect
 from PySide2.QtCore import Qt, QPoint
 from UI.bilidabout import Ui_Form
-from BiliWorker.extra import checkLatest
+from BiliWorker.extra import CheckLatest
 
 
 ############################################################################################
@@ -27,8 +27,8 @@ class AboutWindow(QWidget, Ui_Form):
         self.setGraphicsEffect(effect)
         # 连接器
         self.btnmin.clicked.connect(lambda: self.showMinimized())
-        self.btn_access.clicked.connect(self.accessWeb)
-        self.btn_latest.clicked.connect(self.checkLatest)
+        self.btn_access.clicked.connect(self.access_web)
+        self.btn_latest.clicked.connect(self.check_latest)
         self.btn_bugCall.clicked.connect(self.callBUG)
         # 初始化显示设置
         self.lab_version.setText(Release_INFO[0])
@@ -54,12 +54,13 @@ class AboutWindow(QWidget, Ui_Form):
 
     # ###################### BS Part #######################
     # 访问作者网站按钮函数
-    def accessWeb(self):
+    @staticmethod
+    def access_web():
         webbrowser.open("https://jimmyliang-lzm.github.io/")
 
     # 检查版本更新函数
-    def checkLatest(self):
-        self.cl = checkLatest(Release_INFO[0], indict.get('Proxy'))
+    def check_latest(self):
+        self.cl = CheckLatest(Release_INFO[0], indict.get('Proxy'))
         self.btn_latest.setEnabled(False)
         self.cl._feedback.connect(self.verShow)
         self.cl.start()
