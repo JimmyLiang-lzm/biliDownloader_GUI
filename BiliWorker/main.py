@@ -22,9 +22,18 @@ def cookie_str2dict(in_str: str) -> dict:
     # 将列表键值对转换为字典
     out_dict = {}
     for item in co_list:
-        tmp = item.split('=')
-        out_dict[tmp[0]] = tmp[1]
+        if item:
+            tmp = item.split('=')
+            out_dict[tmp[0]] = tmp[1]
     return out_dict
+
+
+# Cookie字典转文本函数
+def cookie_dict2str(in_dict: dict) -> str:
+    out_str = ""
+    for item in in_dict:
+        out_str = out_str + "".join([item, "=", in_dict[item], ";"])
+    return out_str
 
 
 ############################################################################################
