@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "BiliDownloader"
 !define PRODUCT_VERSION "1.7.2"
-!define PRODUCT_PUBLISHER "äºŒä»£æ­»ç¥ï¼ˆBç«™åŒåï¼‰"
+!define PRODUCT_PUBLISHER "¶ş´úËÀÉñ£¨BÕ¾Í¬Ãû£©"
 !define PRODUCT_WEB_SITE "https://zmtblog.xdkd.ltd"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\biliDownloader_GUI.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
@@ -455,12 +455,12 @@ SectionEnd
 
 Function un.onUninstSuccess
   HideWindow
-  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) ï¿½Ñ³É¹ï¿½ï¿½Ø´ï¿½ï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½ï¿½Æ³ï¿½ï¿½ï¿½"
+  MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) ÒÑ³É¹¦µØ´ÓÄãµÄ¼ÆËã»úÒÆ³ı¡£"
 FunctionEnd
 
 Function un.onInit
 !insertmacro MUI_UNGETLANGUAGE
-  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "ï¿½ï¿½È·ÊµÒªï¿½ï¿½È«ï¿½Æ³ï¿½ $(^Name) ï¿½ï¿½ï¿½ä¼°ï¿½ï¿½ï¿½Ğµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½" IDYES +2
+  MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "ÄãÈ·ÊµÒªÍêÈ«ÒÆ³ı $(^Name) £¬Æä¼°ËùÓĞµÄ×é¼ş£¿" IDYES +2
   Abort
 FunctionEnd
 
