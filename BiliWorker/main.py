@@ -10,32 +10,6 @@ from PySide2.QtCore import QThread, Signal
 import requests as request
 
 
-# Cookie文本转字典函数
-def cookie_str2dict(in_str: str) -> dict:
-    # 清洗掉cookie文本中的多余字符
-    del_char = [' ', '\r', '\n']
-    for c in del_char:
-        tmp = in_str.replace(c, '')
-        in_str = tmp
-    # 将文本转换为列表
-    co_list = in_str.split(';')
-    # 将列表键值对转换为字典
-    out_dict = {}
-    for item in co_list:
-        if item:
-            tmp = item.split('=')
-            out_dict[tmp[0]] = tmp[1]
-    return out_dict
-
-
-# Cookie字典转文本函数
-def cookie_dict2str(in_dict: dict) -> str:
-    out_str = ""
-    for item in in_dict:
-        out_str = out_str + "".join([item, "=", in_dict[item], ";"])
-    return out_str
-
-
 ############################################################################################
 # biliDownloader下载主工作线程
 class biliWorker(QThread):
