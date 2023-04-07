@@ -19,7 +19,7 @@
 * Merge the stream of video and audio, automatically.(Dolby Vision Video is supported)
 * 可获取并下载不同清晰度的音视频流，从360P到8K全部支持下载（包含杜比视界）
 * Can obtain and download audio and video streams of different definitions.(Include 360P to Dolby Vision)
-* 可下载付费番剧或高质量视频（需要大会员Cookie）
+* ~~可下载付费番剧或高质量视频（需要大会员Cookie）~~ B站已采用JS生成加密session的方式进行访问，相关JS解密工作正在开展（2023.4.7）
 * Paid series or high-quality videos can be downloaded (VIP Cookie required)
 * 可进行分P视频批量下载
 * Downloadable segmented video batches
